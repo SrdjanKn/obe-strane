@@ -230,7 +230,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
       <span class="date">${esc(day(D.generated))} · ažurirano u ${clock(D.generated)}</span>
       <form id="search" role="search"><label class="vh" for="q">Pretraga</label><input id="q" type="search" placeholder="Pretraži vesti…"><button class="btn dark" type="submit">Traži</button></form>
     </div></div>
-    <header class="wrap mast"><a href="#/">${mark(58, 5)}<span class="name">Obe strane</span></a>
+    <header class="wrap mast"><a href="#/">${mark(58, 5)}<span class="name"><i>obe strane</i></span></a>
       <div class="tag">Ista vest, dve strane. Sve što su objavili mediji u Srbiji, uporedo.</div></header>
     <div class="wrap">
       <nav class="sections" aria-label="Rubrike">
@@ -245,12 +245,12 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   }
   function compactHeader(sec) {
     return `<header class="compact-head"><div class="wrap">
-      <a class="logo" href="#/">${mark(30)}Obe strane</a>
+      <a class="logo" href="#/">${mark(30)}<i>obe strane</i></a>
       <nav aria-label="Rubrike">${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/slepe-tacke" style="color:var(--amber)">${EYE}Slepe tačke</a></nav>
       <a class="btn dark" href="#/">Naslovna</a></div></header>`;
   }
   const footer = () => `<footer><div class="wrap top">
-      <div style="flex:1 1 260px;min-width:0"><div class="logo">${mark(32)}Obe strane</div>
+      <div style="flex:1 1 260px;min-width:0"><div class="logo">${mark(32)}<i>obe strane</i></div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
       <div class="links"><b>O projektu</b><a href="#/izvori">Izvori i oznake</a><a href="#/slepe-tacke">Slepe tačke</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
