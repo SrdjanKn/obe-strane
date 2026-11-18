@@ -68,10 +68,15 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ph span{position:absolute;left:14px;bottom:12px;z-index:1;font:600 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#fff}
 .ph.has-img span{display:none}
-.lead{display:flex;flex-wrap:wrap;gap:28px;padding-top:28px}
-.lead-text{flex:1 1 300px;min-width:0}
-.lead-photo{flex:2 1 520px;min-width:0}
-.rail{flex:1 1 270px;min-width:0;border-left:1px solid var(--rule);padding-left:24px}
+.lead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr) minmax(0,1fr);grid-template-rows:auto auto 1fr;
+  grid-template-areas:"text photo rail" "text quotes rail" "side more rail";gap:24px 28px;padding-top:28px}
+.lead-text{grid-area:text;min-width:0}
+.lead-photo{grid-area:photo;min-width:0}
+.lead-quotes{grid-area:quotes;min-width:0}
+.lead-side{grid-area:side;min-width:0}
+.lead-more{grid-area:more;min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;align-content:start}
+.rail{grid-area:rail;min-width:0;border-left:1px solid var(--rule);padding-left:24px}
+.quotes2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:16px}
 .lead h1{margin:0 0 12px;font:400 38px/1.08 var(--head);letter-spacing:-.01em}
 .dek{margin:0 0 18px;font:400 17px/1.5 var(--serif);color:var(--ink2)}
 .quote{font:400 17px/1.3 var(--head)}
@@ -148,6 +153,10 @@ footer .mark b{background:var(--ink)}
 footer .links{display:flex;flex-direction:column;gap:10px;font:500 14px var(--sans)}
 footer .links b{color:#fff}
 footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px;font:400 12.5px var(--sans);color:#9a9aa0}
+@media (max-width:1080px){
+  .lead{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);grid-template-rows:auto;grid-template-areas:"photo photo" "text quotes" "side more" "rail rail"}
+  .rail{border-left:0;padding-left:0;border-top:3px solid var(--amber);padding-top:14px}
+}
 @media (max-width:900px){ .grid3{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:760px){
   .wrap{padding:0 16px} .col,.wide{padding:0 16px}
@@ -157,8 +166,9 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   nav.sections{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:20px;padding:10px 16px;margin:0 -16px}
   nav.sections .sep{display:none}
   .focus{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap}
-  .rail{border-left:0;padding-left:0;border-top:3px solid var(--amber);padding-top:14px}
-  .lead{padding-top:16px} .lead-photo{order:-1;margin:0 -16px} .lead h1{font-size:30px}
+  .lead{padding-top:0;grid-template-columns:minmax(0,1fr);grid-template-areas:"photo" "text" "quotes" "side" "more" "rail"}
+  .lead-photo{margin:0 -16px} .lead-photo .meta{padding:0 16px} .lead h1{font-size:30px}
+  .lead-more,.quotes2{grid-template-columns:minmax(0,1fr)}
   .grid3{grid-template-columns:1fr}
   .band .wrap{padding-top:32px;padding-bottom:36px}
   .news{padding:20px}
@@ -196,6 +206,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   const dot = k => `<i class="dot" style="background:${VAR[k]}"></i>`;
   const kick = (t, cls = "") => `<div class="kicker ${cls}">${t}</div>`;
   const link = s => `#/vest/${s.id}`;
+  const secKick = (s, extra) => kick([s.section ? esc(s.section) : "", extra].filter(Boolean).join(" · "));
   function photo(s, ratio = "3/2") {
     const tone = TONES[s.section] || TONES.Vesti;
     const img = s.image ? `<img src="${esc(safe(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : "";
@@ -252,14 +263,14 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
     </section>`;
 
   const railItem = s => `<a class="rail-item" href="${link(s)}"><div class="lab ${s.blindspot === "pro_government" ? "c-pg" : "c-cr"}">${bsLabel(s.blindspot)} · ${s.sources} medija</div><div class="hl">${esc(s.headline)}</div>${bar(s, 4)}</a>`;
-  const stripCard = s => `<a href="${link(s)}">${photo(s)}<div style="margin-top:12px">${kick(esc(s.section))}<div class="hl">${esc(s.headline)}</div>${bar(s)}${cov(s)}</div></a>`;
-  const listItem = (s, showSec) => `<a class="li" href="${link(s)}">${showSec ? kick(esc(s.section)) : ""}<div class="hl">${esc(s.headline)}</div>${bar(s, 4)}<div class="meta" style="margin-top:6px">${s.sources} medija · prvi: ${esc(src(s.broke).name)} u ${clock(s.first)}</div></a>`;
+  const stripCard = s => `<a href="${link(s)}">${photo(s)}<div style="margin-top:12px">${secKick(s)}<div class="hl">${esc(s.headline)}</div>${bar(s)}${cov(s)}</div></a>`;
+  const listItem = (s, showSec) => `<a class="li" href="${link(s)}">${showSec ? secKick(s) : ""}<div class="hl">${esc(s.headline)}</div>${bar(s, 4)}<div class="meta" style="margin-top:6px">${s.sources} medija · prvi: ${esc(src(s.broke).name)} u ${clock(s.first)}</div></a>`;
   function quotes(s) {
     const p = firstOf(s, "pro_government"), c = firstOf(s, "critical");
     const q = (i, cls) => i ? `<a class="${cls}" href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="quote">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${esc(src(i.source).name)} · ${clock(i.published)}</div></a>` : "";
     if (!p && !c) return "";
     return `<div class="meta" style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Kako su naslovili</div>
-      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px">${q(p, "q-pg")}${q(c, "q-cr")}</div>`;
+      <div class="quotes2">${q(p, "q-pg")}${q(c, "q-cr")}</div>`;
   }
 
   function home() {
@@ -268,7 +279,8 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
     const used = new Set();
     const take = (list, n) => list.filter(s => !used.has(s.id)).slice(0, n).map(s => (used.add(s.id), s));
     const [top] = take(S, 1);
-    const [second] = take(S, 1);
+    const sideList = take(S, 2);
+    const under = take(S, 2);
     const bs = S.filter(s => s.blindspot);
     const rail = [...bs.filter(s => s.blindspot === "pro_government").slice(0, 3), ...bs.filter(s => s.blindspot === "critical").slice(0, 3)].slice(0, 5);
     const strip = take(S, 4);
@@ -285,12 +297,14 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
     <main class="wrap">
       <section class="lead" aria-label="Glavna vest">
         <div class="lead-text">
-          <a href="${link(top)}">${kick(esc(top.section) + " · " + top.sources + " medija")}<h1 class="hl">${esc(top.headline)}</h1>${top.summary ? `<p class="dek">${esc(tidy(top.summary, 240))}</p>` : ""}</a>
-          ${quotes(top)}${bar(top, 8)}${cov(top)}
-          ${second ? `<a href="${link(second)}" style="display:block;margin-top:20px;padding-top:16px;border-top:1px solid var(--rule)">${kick(esc(second.section) + " · " + second.sources + " medija")}<div class="hl" style="font-size:21px;line-height:1.22">${esc(second.headline)}</div><div class="meta" style="margin-top:6px">${pct(second, "pro_government")}% provladini · ${pct(second, "critical")}% kritički</div></a>` : ""}
+          <a href="${link(top)}">${secKick(top, top.sources + " medija")}<h1 class="hl" style="${top.headline.length > 90 ? "font-size:32px" : ""}">${esc(top.headline)}</h1>${top.summary ? `<p class="dek">${esc(tidy(top.summary, 220))}</p>` : ""}</a>
+          ${bar(top, 8)}${cov(top)}
         </div>
+        <div class="lead-side">${sideList.map(x => listItem(x, true)).join("")}</div>
         <div class="lead-photo"><a href="${link(top)}">${photo(top, "16/10")}</a>
           <div class="meta" style="margin-top:8px">Fotografija: ${esc(src(top.broke).name)}, medij koji je prvi objavio vest.</div></div>
+        <div class="lead-quotes">${quotes(top)}</div>
+        <div class="lead-more">${under.map(x => listItem(x, true)).join("")}</div>
         <aside class="rail" aria-label="Slepe tačke">
           <div style="display:flex;align-items:center;color:var(--amber);font:700 13px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase">${EYE}Slepe tačke</div>
           <p style="margin:8px 0 4px;font:400 14px/1.45 var(--sans);color:var(--ink2)">Vesti koje je objavila samo jedna strana.</p>
