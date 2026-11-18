@@ -302,7 +302,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
         </div>
         <div class="lead-side">${sideList.map(x => listItem(x, true)).join("")}</div>
         <div class="lead-photo"><a href="${link(top)}">${photo(top, "16/10")}</a>
-          <div class="meta" style="margin-top:8px">Fotografija: ${esc(src(top.broke).name)}, medij koji je prvi objavio vest.</div></div>
+          ${top.image && top.image_source ? `<div class="meta" style="margin-top:8px">Fotografija: ${esc(src(top.image_source).name)}</div>` : ""}</div>
         <div class="lead-quotes">${quotes(top)}</div>
         <div class="lead-more">${under.map(x => listItem(x, true)).join("")}</div>
         <aside class="rail" aria-label="Slepe tačke">
@@ -366,7 +366,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
         <div class="byline"><div class="meta"><b style="color:var(--ink)">Priču prati ${s.sources} medija</b> · prvi objavio ${esc(src(s.broke).name)} u ${clock(s.first)} · poslednji članak u ${clock(its[its.length - 1].published)}</div>
           <button class="pill" id="share" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Podeli</span></button></div>
       </div>
-      ${s.image ? `<figure class="wide" style="margin:28px auto 0">${photo(s, "16/9")}<figcaption class="meta" style="margin-top:8px">Fotografija: ${esc(src(s.broke).name)}</figcaption></figure>` : ""}
+      ${s.image ? `<figure class="wide" style="margin:28px auto 0">${photo(s, "16/9")}${s.image_source ? `<figcaption class="meta" style="margin-top:8px">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
       <section id="pokrivenost" class="col" style="margin-top:36px" aria-label="Pokrivenost"><div class="covbox">
         <div><div class="kicker" style="color:var(--ink2)">Ko je objavio</div><div class="sent">${sentence}</div>${bar(s, 14)}${cov(s)}</div>
         <div>${ORDER.map(k => `<div class="row"><span>${dot(k)}${LAB[k]}</span><b>${s.split[k] || 0}</b></div>`).join("")}</div>

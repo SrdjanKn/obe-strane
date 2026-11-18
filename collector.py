@@ -553,13 +553,20 @@ def build_stories(hours=36, min_sources=2):
             len(sets[a["url"]] & o) / (len(sets[a["url"]] | o) or 1) for u, o in sets.items() if u != a["url"]))
         firsts = sorted(by_source.values(), key=lambda a: a["published"])
         summary = max((a["summary"] for a in by_source.values() if a["summary"]), key=len, default="")
-        image = lead["image"] or next((a["image"] for a in firsts if a["image"]), "")
+        img_from = lead if lead["image"] else next((a for a in firsts if a["image"]), None)
+        image = img_from["image"] if img_from else ""
+        last = max(a["published"] for a in items)
+        # ranking: number of outlets, halved for every 8 hours since the story last got a new article,
+        # so a big story from the morning gives way to fresh news that is still spreading
+        hours_quiet = max((datetime.now(timezone.utc) - last).total_seconds() / 3600, 0)
+        score = n * 0.5 ** (hours_quiet / 8)
         stories.append({"id": hashlib.sha1(firsts[0]["url"].encode()).hexdigest()[:10],
                         "headline": lead["title"], "summary": summary[:400], "image": image,
+                        "image_source": img_from["source"] if img_from else "", "score": score, "last": last,
                         "broke": firsts[0]["source"], "sources": n, "articles": len(items), "split": split,
                         "blindspot": blind, "items": sorted(by_source.values(), key=lambda a: a["camp"]),
                         "first": min(a["published"] for a in items)})
-    stories.sort(key=lambda s: (-s["sources"], s["first"]))
+    stories.sort(key=lambda s: (-s["score"], -s["sources"], s["first"]))
     return camps, stories, len(arts)
 
 
@@ -603,6 +610,7 @@ def export_site(hours=36):
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "stories": counts[s["id"]]} for s in sources],
         "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": s["image"],
+                     "image_source": s["image_source"], "last": iso(s["last"]), "score": round(s["score"], 2),
                      "section": section_of([a["url"] for a in s["items"]]),
                      "broke": s["broke"], "first": iso(s["first"]), "sources": s["sources"],
                      "split": dict(s["split"]), "blindspot": s["blindspot"] and
