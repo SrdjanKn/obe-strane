@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --pg:#b4472f; --cr:#24478f; --pub:#7d6aa8; --mix:#aaa59d;
+  --pg:#b4472f; --cr:#24478f; --pub:#7d6aa8; --mix:#aaa59d; --intl:#3f7f86;
   --ink:#121212; --ink2:#454549; --ink3:#5f5f66; --rule:#dcdcdc; --soft:#f6f6f4;
   --amber:#a14a07; --amber-bg:#fbf3ea; --amber-on-dark:#f0a35e;
   --head:"DM Serif Display", Georgia, serif;
@@ -185,9 +185,9 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   "use strict";
   let D = window.NEWS_DATA;
   const app = document.getElementById("app");
-  const ORDER = ["pro_government", "public", "mixed", "critical"];
-  const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)"};
-  const LAB = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Mešoviti"};
+  const ORDER = ["pro_government", "public", "mixed", "international", "critical"];
+  const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)", international: "var(--intl)"};
+  const LAB = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
   const SECTION_ORDER = ["Politika", "Društvo", "Hronika", "Ekonomija", "Svet", "Region", "Kultura"];
   const TONES = {Politika: "#7d8a96", Društvo: "#7a7166", Hronika: "#2f3846", Ekonomija: "#5f6f5c", Svet: "#5d7894", Region: "#6c6a86", Kultura: "#8a6f5c", Vesti: "#80858c"};
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
@@ -214,7 +214,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   }
   // Serbian number agreement: 1 provladin, 2-4 provladina, 5+ provladinih (11-14 -> many)
   const FORMS = {pro_government: ["provladin", "provladina", "provladinih"], critical: ["kritički", "kritička", "kritičkih"],
-                 public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], medij: ["medij", "medija", "medija"]};
+                 public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], international: ["međunarodni", "međunarodna", "međunarodnih"], medij: ["medij", "medija", "medija"], prica: ["priča", "priče", "priča"]};
   const form = (n, k) => { const f = FORMS[k], d = n % 10, h = n % 100; return n === 1 || (d === 1 && h !== 11) ? f[0] : (d >= 2 && d <= 4 && (h < 12 || h > 14)) ? f[1] : f[2]; };
   const tidy = (t, max) => {   // calm a SHOUTED first word, optionally shorten
     t = String(t || "").replace(/^([A-ZČĆŽŠĐ]{3,})(?=[\s,])/, w => w[0] + w.slice(1).toLowerCase());
@@ -351,7 +351,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
       ${list.length ? list.map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="t">${esc(i.title)}</div><div class="meta" style="margin-top:4px">${esc(src(i.source).name)} · ${clock(i.published)}</div></a>`).join("")
         : `<div class="none">Nijedan ${k === "critical" ? "kritički" : "provladin"} medij nije objavio ovu vest.</div>`}</div>`;
     const p = s.split.pro_government || 0, c = s.split.critical || 0;
-    const rest = ["public", "mixed"].filter(k => s.split[k]).map(k => `${s.split[k]} ${form(s.split[k], k)}`).join(" i ");
+    const rest = ["public", "mixed", "international"].filter(k => s.split[k]).map(k => `${s.split[k]} ${form(s.split[k], k)}`).join(" i ");
     const lead = p && c ? (Math.abs(p - c) <= 1 ? "Vest je ravnomerno pokrivena" : p > c ? "Vest više prate provladini mediji" : "Vest više prate kritički mediji") : "Vest prati samo jedna strana";
     const sentence = `${lead}: <b>${p}</b> ${form(p, "pro_government")} i <b>${c}</b> ${form(c, "critical")} ${form(c || p, "medij")}${rest ? `, uz ${rest}` : ""}.`;
     const more = D.stories.filter(x => x.section === s.section && x.id !== s.id).slice(0, 3);
@@ -411,15 +411,21 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
       <div class="two">${col("pro_government")}${col("critical")}</div></main>${footer()}`;
   }
   function sources() {
+    const row = s => `<div class="src-row"><div><a href="${esc(safe(s.home))}" target="_blank" rel="noopener" style="font-weight:600">${esc(s.name)}</a>${s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="count">${s.stories} ${form(s.stories, "prica")}</span></div>`;
+    const block = k => {
+      const list = D.sources.filter(s => s.camp === k).sort((a, b) => b.stories - a.stories);
+      if (!list.length) return "";
+      const groups = [...new Set(D.sources.filter(s => s.camp === k).map(s => s.group || ""))];   // order as in sources.json
+      const body = groups.length > 1
+        ? groups.map(g => `<div class="kicker" style="margin:18px 0 2px;color:var(--ink2)">${esc(g || "Ostali")}</div>${list.filter(s => (s.group || "") === g).map(row).join("")}`).join("")
+        : list.map(row).join("");
+      return `<section style="flex:1 1 400px;min-width:0"><div class="sec-head" style="margin-top:20px;border-top-color:${VAR[k]}"><h2 style="color:${VAR[k]}">${LAB[k]}</h2><span class="meta">${list.length}</span></div>${body}</section>`;
+    };
     return `${header("src")}<main class="wrap"><h1 class="page-h">Izvori i oznake</h1>
-      <p class="page-p">Pratimo ${D.sources.length} medija. Oznake su početne pretpostavke zasnovane na javnim analizama medijske scene (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i podložne su proveri.</p>
-      <div class="two">${ORDER.map(k => {
-        const list = D.sources.filter(s => s.camp === k).sort((a, b) => b.stories - a.stories);
-        return `<section style="flex:1 1 400px;min-width:0"><div class="sec-head" style="margin-top:20px;border-top-color:${VAR[k]}"><h2 style="color:${VAR[k]}">${LAB[k]}</h2><span class="meta">${list.length}</span></div>
-          ${list.map(s => `<div class="src-row"><div><a href="${esc(safe(s.home))}" target="_blank" rel="noopener" style="font-weight:600">${esc(s.name)}</a>${s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="count">${s.stories} priča</span></div>`).join("")}</section>`;
-      }).join("")}</div></main>${footer()}`;
+      <p class="page-p">Pratimo ${D.sources.length} medija. Oznake su početne procene zasnovane na javnim analizama medijske scene (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i podložne su proveri. Međunarodni mediji se prikazuju, ali se ne računaju ni na jednu stranu.</p>
+      <div class="two">${block("pro_government")}${block("critical")}</div>
+      <div class="two">${block("public")}${block("mixed")}${block("international")}</div></main>${footer()}`;
   }
-
   function render() {
     if (!D) { app.innerHTML = `<div class="wrap empty">Podaci se još prikupljaju.</div>`; return; }
     const [page, ...rest] = location.hash.replace(/^#\/?/, "").split("/");

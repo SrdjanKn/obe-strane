@@ -138,6 +138,9 @@ def scrape_homepage(home):
     data, final = fetch(home)
     page = data.decode("utf-8", "ignore")
     domain = urllib.parse.urlsplit(final).netloc.lower().removeprefix("www.")
+    # homes like bbc.com/serbian/lat or dw.com/sr: stay inside that language section
+    home_path = urllib.parse.urlsplit(home).path.rstrip("/")
+    section_prefix = home_path.rsplit("/", 1)[0] if home_path.count("/") > 1 else home_path
     items, seen = [], set()
     for m in re.finditer(r'<a\b[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', page, re.S | re.I):
         href, text = m.group(1), clean_title(strip_tags(m.group(2)))
@@ -146,6 +149,8 @@ def scrape_homepage(home):
         url = urllib.parse.urljoin(final, html.unescape(href))
         parts = urllib.parse.urlsplit(url)
         if not parts.netloc.lower().removeprefix("www.").endswith(domain):
+            continue
+        if section_prefix and not parts.path.startswith(section_prefix):
             continue
         path = parts.path.strip("/")
         if path.count("/") < 1 and not re.search(r"\d", path):   # skip section pages like /politika
@@ -338,7 +343,7 @@ def collect(verbose=True):
     known = dict(con.execute("SELECT source_id, feed_url FROM feeds").fetchall())
     now = datetime.now(timezone.utc).isoformat()
     total_new = 0
-    with ThreadPoolExecutor(max_workers=8) as ex:
+    with ThreadPoolExecutor(max_workers=16) as ex:
         results = list(ex.map(lambda s: collect_source(s, known.get(s["id"])), sources))
     names = {s["id"]: s["name"] for s in sources}
     # scraped homepage links have no date: fetch new ones for their real publish time (bounded per run)
@@ -595,7 +600,7 @@ def export_site(hours=36):
     data = {
         "generated": datetime.now(timezone.utc).isoformat(), "hours": hours, "articles": n_articles,
         "camps": camps,
-        "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"],
+        "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "stories": counts[s["id"]]} for s in sources],
         "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": s["image"],
                      "section": section_of([a["url"] for a in s["items"]]),
