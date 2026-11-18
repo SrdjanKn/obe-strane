@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "*/15 * * * *"     # every 15 minutes (GitHub may delay scheduled runs a few minutes)
   workflow_dispatch:            # "Run workflow" button for manual runs
+  push:
+    branches: [main]            # redeploy right away when the code or design changes
 
 permissions:
   contents: read

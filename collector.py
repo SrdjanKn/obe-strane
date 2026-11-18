@@ -560,6 +560,28 @@ def build_stories(hours=36, min_sources=2):
 
 SITE_DIR = HERE / "site"
 
+SECTIONS = [  # (section, URL path keywords) - first match wins
+    ("Hronika", ("hronika", "crna-hronika", "hronika-")),
+    ("Politika", ("politika", "politics")),
+    ("Ekonomija", ("ekonomija", "biznis", "novac", "privreda", "business", "economy")),
+    ("Svet", ("svet", "planeta", "world", "inostranstvo")),
+    ("Region", ("region", "regija", "ex-yu", "balkan")),
+    ("Kultura", ("kultura", "culture")),
+    ("Društvo", ("drustvo", "društvo", "srbija", "beograd", "novi-sad", "vojvodina", "gradovi", "vesti")),
+]
+
+
+def section_of(urls):
+    """Majority vote over the outlets' own URL sections ('/hronika/', '/politika/'...)."""
+    votes = Counter()
+    for u in urls:
+        path = urllib.parse.urlsplit(u).path.lower()
+        for name, keys in SECTIONS:
+            if any(f"/{k}" in path for k in keys):
+                votes[name] += 1
+                break
+    return votes.most_common(1)[0][0] if votes else "Vesti"
+
 
 def export_site(hours=36):
     """Write site/data.js for the website (a JS file, so the site also works opened straight from disk)."""
@@ -576,6 +598,7 @@ def export_site(hours=36):
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"],
                      "note": s.get("note", ""), "stories": counts[s["id"]]} for s in sources],
         "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": s["image"],
+                     "section": section_of([a["url"] for a in s["items"]]),
                      "broke": s["broke"], "first": iso(s["first"]), "sources": s["sources"],
                      "split": dict(s["split"]), "blindspot": s["blindspot"] and
                      ("pro_government" if s["blindspot"].endswith("pro-government outlets") else "critical"),
