@@ -141,6 +141,25 @@ ol.tl .when span{font-weight:500;color:var(--ink3)}
 ol.tl a{font:500 18px/1.38 var(--serif)}
 ol.tl a:hover{text-decoration:underline}
 .bs-note{background:var(--amber-bg);border-top:3px solid var(--amber);padding:16px 20px;margin-top:24px;font:400 16px/1.5 var(--serif)}
+.bs-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+.bs-tabs a,.chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border:1px solid var(--rule);border-radius:999px;font:600 14px var(--sans);color:var(--ink2);background:#fff}
+.bs-tabs a.on,.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.bs-tabs a b,.chip b{font-weight:500;opacity:.75}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.chip{min-height:34px;padding:0 13px;font-size:13px}
+.bs-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;margin-top:26px;padding-bottom:30px;border-bottom:1px solid var(--rule)}
+.bs-hero h2{margin:8px 0 12px;font:700 32px/1.15 var(--head)}
+.bs-label{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 6px;line-height:1.3 !important;font:700 11.5px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;padding:6px 9px;background:var(--amber-bg);color:var(--amber)}
+.bs-label .bs-side{font-weight:700}
+.bs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px 28px;margin-top:8px}
+.bs-card{display:block;min-width:0}
+.bs-card .hl{font-size:19px;line-height:1.28;margin:10px 0 10px}
+.who{font:500 12.5px/1.45 var(--sans);color:var(--ink3);margin-top:8px}
+.who b{color:var(--ink2);font-weight:600}
+.pub-list a{display:block;padding:11px 0;border-top:1px solid var(--rule)}
+.pub-list .t{font:600 16px/1.35 var(--head)}
+@media (max-width:1080px){.bs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.bs-hero,.bs-grid{grid-template-columns:minmax(0,1fr)} .bs-hero h2{font-size:26px}}
 .page-h{margin:28px 0 6px;font:700 38px/1.15 var(--head)}
 .page-p{margin:0 0 20px;max-width:720px;color:var(--ink2)}
 .src-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--rule);font:500 15px var(--sans)}
@@ -401,15 +420,51 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
     return `${header()}<main class="wrap"><h1 class="page-h">„${esc(q)}“</h1><p class="page-p">${list.length} priča.</p>
       <div class="grid3">${list.map(s => listItem(s, true)).join("")}</div></main>${footer()}`;
   }
-  function blindspots() {
-    const col = k => {
-      const list = D.stories.filter(s => s.blindspot === k);
-      return `<section style="flex:1 1 400px;min-width:0"><div class="sec-head" style="margin-top:20px"><h2 class="${k === "pro_government" ? "c-pg" : "c-cr"}">${bsLabel(k)} mediji</h2><span class="meta">${list.length}</span></div>
-        ${list.map(s => listItem(s, true)).join("") || `<p class="meta">Trenutno nema.</p>`}</section>`;
+  function blindspots(filter) {
+    const want = filter === "provladini" ? "pro_government" : filter === "kriticki" ? "critical" : "";
+    const sec = decodeURIComponent((location.hash.split("?r=")[1] || ""));
+    const all = D.stories.filter(s => s.blindspot);
+    const bySide = all.filter(s => !want || s.blindspot === want);
+    const list = bySide.filter(s => !sec || s.section === sec).slice().sort((a, b) => b.sources - a.sources || (b.score || 0) - (a.score || 0));
+    const loudOf = s => s.blindspot === "pro_government" ? "critical" : "pro_government";
+    const label = s => `<span class="bs-label">${EYE}Slepa tačka · <span class="bs-side" style="color:${VAR[s.blindspot]}">0% ${s.blindspot === "pro_government" ? "provladinih" : "kritičkih"}</span> · ${s.sources} ${form(s.sources, "medij")}</span>`;
+    const who = s => {
+      const names = [...new Set(s.items.filter(i => camp(i.source) === loudOf(s)).map(i => src(i.source).name))];
+      return `<div class="who">Objavili: <b>${esc(names.slice(0, 3).join(", "))}</b>${names.length > 3 ? ` i još ${names.length - 3}` : ""}</div>`;
     };
-    return `${header("bs")}<main class="wrap"><h1 class="page-h" style="display:flex;align-items:center;gap:10px"><span style="color:var(--amber);display:inline-flex">${EYE.replace('class="eye"', 'style="width:34px;height:34px"')}</span>Slepe tačke</h1>
-      <p class="page-p">Vesti koje su objavila najmanje tri medija, a jedna strana ih je potpuno prećutala. Računa se samo ako su mediji te strane u to vreme bili praćeni.</p>
-      <div class="two">${col("pro_government")}${col("critical")}</div></main>${footer()}`;
+    const covPct = s => `<div class="cov"><span class="pg"><b>${pct(s, "pro_government")}%</b> provladini</span><span class="cr"><b>${pct(s, "critical")}%</b> kritički</span></div>`;
+    const card = s => `<a class="bs-card" href="${link(s)}">${photo(s)}<div style="margin-top:12px">${label(s)}</div><div class="hl">${esc(s.headline)}</div>${bar(s)}${covPct(s)}${who(s)}</a>`;
+    const tab = (key, text, n) => `<a href="#/slepe-tacke${key ? "/" + key : ""}" class="${(filter || "") === key ? "on" : ""}">${text} <b>${n}</b></a>`;
+    const secs = SECTION_ORDER.filter(n => bySide.some(s => s.section === n));
+    const base = `#/slepe-tacke${filter ? "/" + filter : ""}`;
+    const chips = secs.length > 1 ? `<div class="chips"><a class="chip ${!sec ? "on" : ""}" href="${base}">Sve rubrike</a>${secs.map(n => `<a class="chip ${sec === n ? "on" : ""}" href="${base}?r=${encodeURIComponent(n)}">${n} <b>${bySide.filter(s => s.section === n).length}</b></a>`).join("")}</div>` : "";
+    const [hero, ...rest] = list;
+    const heroHtml = hero ? `<section class="bs-hero" aria-label="Najveća slepa tačka">
+        <a href="${link(hero)}">${photo(hero, "16/10")}</a>
+        <div>${label(hero)}<a href="${link(hero)}"><h2 class="hl">${esc(hero.headline)}</h2></a>
+          ${hero.summary ? `<p class="dek" style="font-size:16px">${esc(tidy(hero.summary, 200))}</p>` : ""}
+          ${bar(hero, 8)}${covPct(hero)}
+          <div class="pub-list" style="margin-top:16px"><div class="kicker" style="color:var(--ink2)">Ko je objavio</div>
+          ${hero.items.filter(i => camp(i.source) === loudOf(hero)).slice(0, 4).map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="meta">${dot(loudOf(hero))}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}</div>
+        </div></section>` : `<div class="empty">Trenutno nema slepih tačaka u ovom izboru.</div>`;
+    // near-blindspots: 6+ outlets, the quieter side has at most 15% and is not zero
+    const near = D.stories.filter(s => !s.blindspot && s.sources >= 6).map(s => {
+      const p = s.split.pro_government || 0, c = s.split.critical || 0;
+      const quiet = p < c ? "pro_government" : "critical", q = Math.min(p, c);
+      return {s, quiet, q, share: q / s.sources};
+    }).filter(x => x.q > 0 && x.share <= 0.15 && (!want || x.quiet === want) && (!sec || x.s.section === sec))
+      .sort((a, b) => a.share - b.share || b.s.sources - a.s.sources).slice(0, 6);
+    const nearCard = x => `<a class="bs-card" href="${link(x.s)}">${photo(x.s)}<div style="margin-top:12px"><span class="bs-label" style="background:#f3f1ec;color:var(--ink2)">Skoro slepa tačka · <span class="bs-side" style="color:${VAR[x.quiet]}">samo ${Math.round(100 * x.share)}% ${x.quiet === "pro_government" ? "provladinih" : "kritičkih"}</span></span></div><div class="hl">${esc(x.s.headline)}</div>${bar(x.s)}${covPct(x.s)}</a>`;
+    return `${header("bs")}<main class="wrap">
+      <h1 class="page-h" style="display:flex;align-items:center;gap:12px"><span style="color:var(--amber);display:inline-flex">${EYE.replace('class="eye"', 'style="width:36px;height:36px"')}</span>Slepe tačke</h1>
+      <p class="page-p">Vesti koje je objavilo više medija jedne strane, a nijedan medij druge. Računa se samo kada su mediji te strane u to vreme bili praćeni i objavljivali druge vesti.</p>
+      <nav class="bs-tabs" aria-label="Filter">${tab("", "Sve", all.length)}${tab("provladini", "Prećutali provladini", all.filter(s => s.blindspot === "pro_government").length)}${tab("kriticki", "Prećutali kritički", all.filter(s => s.blindspot === "critical").length)}</nav>
+      ${chips}
+      ${heroHtml}
+      ${rest.length ? `<div class="sec-head"><h2>${want ? (want === "pro_government" ? "Prećutali provladini mediji" : "Prećutali kritički mediji") : "Sve slepe tačke"}</h2><span class="meta">${list.length}</span></div><div class="bs-grid">${rest.map(card).join("")}</div>` : ""}
+      ${near.length ? `<div class="sec-head"><h2>Skoro slepe tačke</h2><span class="meta">jedna strana je jedva prisutna</span></div><div class="bs-grid">${near.map(nearCard).join("")}</div>` : ""}
+      ${newsletter()}
+    </main>${footer()}`;
   }
   function sources() {
     const row = s => `<div class="src-row"><div><a href="${esc(safe(s.home))}" target="_blank" rel="noopener" style="font-weight:600">${esc(s.name)}</a>${s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="count">${s.stories} ${form(s.stories, "prica")}</span></div>`;
@@ -429,9 +484,9 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   }
   function render() {
     if (!D) { app.innerHTML = `<div class="wrap empty">Podaci se još prikupljaju.</div>`; return; }
-    const [page, ...rest] = location.hash.replace(/^#\/?/, "").split("/");
+    const [page, ...rest] = location.hash.split("?")[0].replace(/^#\/?/, "").split("/");
     const arg = decodeURIComponent(rest.join("/"));
-    app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots()
+    app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
       : page === "izvori" ? sources() : page === "pretraga" ? search(arg) : home();
     const f = document.getElementById("search");
     if (f) f.addEventListener("submit", e => { e.preventDefault(); const v = document.getElementById("q").value.trim(); if (v) location.hash = "#/pretraga/" + encodeURIComponent(v); });
