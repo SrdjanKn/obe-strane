@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obe strane — ko šta izveštava</title>
+<style>
+:root{
+  --bg:#f6f5f2; --paper:#ffffff; --ink:#16161a; --ink-2:#55555d; --ink-3:#8b8b93; --line:#e6e4df;
+  --accent:#16161a; --warn:#b4530a; --warn-bg:#fdf3e8;
+  --serif: "Charter", "Iowan Old Style", "Georgia", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* header */
+header{position:sticky;top:0;z-index:10;background:rgba(246,245,242,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar-top{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:28px}
+.logo{display:flex;align-items:center;gap:9px;font:700 19px/1 var(--serif);letter-spacing:-.2px}
+.logo-mark{display:flex;width:26px;height:26px;border-radius:50%;overflow:hidden;transform:rotate(-20deg)}
+.logo-mark i{flex:1}
+nav{display:flex;gap:4px}
+nav a{padding:7px 12px;border-radius:8px;color:var(--ink-2);font-weight:500;font-size:14px}
+nav a:hover{background:#ebe9e4;color:var(--ink)}
+nav a.on{background:var(--ink);color:#fff}
+.search{margin-left:auto;position:relative}
+.search input{width:260px;padding:8px 12px 8px 32px;border:1px solid var(--line);border-radius:999px;background:var(--paper);font:inherit;font-size:14px;outline:none}
+.search input:focus{border-color:#bbb}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.updated{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+
+main{max-width:1240px;margin:0 auto;padding:24px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--ink-2);margin:0 0 18px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* layout */
+.home{display:grid;grid-template-columns:260px minmax(0,1fr) 320px;gap:28px;align-items:start}
+.col-title{font:700 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+aside .panel + .panel{margin-top:16px}
+.sticky{position:sticky;top:76px}
+
+/* coverage bar */
+.cov{display:flex;height:6px;border-radius:999px;overflow:hidden;background:#ecebe7;gap:2px}
+.cov i{display:block;height:100%}
+.cov.lg{height:12px}
+.cov-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:6px;gap:8px}
+.cov-labels b{font-weight:600}
+
+/* cards */
+.hero{display:block;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:16px;transition:box-shadow .15s}
+.hero:hover,.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.06)}
+.hero .img{aspect-ratio:16/8}
+.hero .body{padding:18px 20px 20px}
+.hero h2{font:700 28px/1.2 var(--serif);margin:6px 0 10px;letter-spacing:-.3px}
+.hero p{color:var(--ink-2);margin:0 0 16px}
+.img{background:linear-gradient(135deg,#e9e7e1,#d9d6ce);position:relative;overflow:hidden}
+.img img{width:100%;height:100%;object-fit:cover;display:block}
+.img .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 13px var(--sans);letter-spacing:.06em;color:#9c988e;text-transform:uppercase}
+.card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:box-shadow .15s}
+.card .img{border-radius:8px;aspect-ratio:4/3;width:150px}
+.card h3{font:700 18px/1.3 var(--serif);margin:4px 0 12px;letter-spacing:-.1px}
+.meta{font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.meta b{color:var(--ink-2);font-weight:600}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--warn-bg);color:var(--warn);text-transform:uppercase;letter-spacing:.03em}
+
+/* compact list */
+.mini{display:block;padding:11px 0;border-top:1px solid var(--line)}
+.mini:first-child{border-top:0;padding-top:0}
+.mini h4{font:600 14.5px/1.35 var(--serif);margin:0 0 7px}
+.mini:hover h4{text-decoration:underline}
+
+/* blindspot panel */
+.bs-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.bs-eye{width:34px;height:34px;border-radius:50%;background:var(--warn-bg);color:var(--warn);display:grid;place-items:center;flex:none;font-size:20px;line-height:1}
+.bs-head h3{margin:0;font:700 16px/1.2 var(--serif)}
+.bs-head p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2)}
+.bs-sub{font-size:12px;font-weight:700;margin:14px 0 4px;display:flex;align-items:center;gap:6px}
+
+/* story page */
+.story{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start}
+.back{display:inline-flex;gap:6px;align-items:center;color:var(--ink-2);font-size:14px;margin-bottom:14px}
+.back:hover{color:var(--ink)}
+.story h1{font:700 36px/1.15 var(--serif);letter-spacing:-.5px;margin:6px 0 12px}
+.story .lede{font-size:17px;color:var(--ink-2);margin:0 0 20px;max-width:720px}
+.story .img{border-radius:var(--r);aspect-ratio:16/8;margin-bottom:24px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.tabs button{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--paper);font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.tabs button i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.art{display:block;background:var(--paper);border:1px solid var(--line);border-left:4px solid;border-radius:10px;padding:13px 16px;margin-bottom:10px}
+.art:hover{box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.art .src{font-size:12.5px;font-weight:700;display:flex;gap:8px;align-items:center}
+.art .src span{font-weight:400;color:var(--ink-3)}
+.art h4{font:600 16.5px/1.35 var(--serif);margin:5px 0 4px}
+.art p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 28px}
+.compare .side{background:var(--paper);border:1px solid var(--line);border-top:4px solid;border-radius:10px;padding:14px 16px}
+.compare .side h5{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.compare .side a{display:block;font:600 15px/1.35 var(--serif);padding:8px 0;border-top:1px solid var(--line)}
+.compare .side a:first-of-type{border-top:0;padding-top:2px}
+.compare .side a small{display:block;font:500 12px var(--sans);color:var(--ink-3);margin-top:3px}
+.compare .empty{color:var(--ink-3);font-size:14px;font-style:italic;padding:6px 0}
+h2.sec{font:700 20px/1.2 var(--serif);margin:28px 0 6px}
+.stat{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.stat:first-of-type{border-top:0}
+.stat span{color:var(--ink-2)}
+.big-num{font:700 40px/1 var(--serif);margin:4px 0 2px}
+
+/* grids */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.page-h{font:700 32px/1.15 var(--serif);margin:0 0 6px;letter-spacing:-.4px}
+.page-p{color:var(--ink-2);margin:0 0 24px;max-width:720px}
+.src-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.src-row:first-of-type{border-top:0}
+.src-row .n{font-weight:600}
+.src-row small{display:block;color:var(--ink-3);font-size:12px}
+.pill{font-size:12px;color:var(--ink-2);background:#f0eee9;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.empty-state{padding:60px 20px;text-align:center;color:var(--ink-2)}
+footer{max-width:1240px;margin:20px auto 40px;padding:0 24px;font-size:12.5px;color:var(--ink-3)}
+
+@media (max-width:1080px){
+  .home{grid-template-columns:minmax(0,1fr) 300px}
+  .home .left{display:none}
+  .story{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .bar-top{flex-wrap:wrap;gap:10px 16px;padding:10px 16px}
+  .search{order:3;width:100%;margin:0}.search input{width:100%}
+  .updated{display:none}
+  main{padding:16px}
+  .home,.grid2,.compare{grid-template-columns:1fr}
+  .card .img{width:96px}
+  .hero h2{font-size:23px}.story h1{font-size:27px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar-top">
+    <a class="logo" href="#/"><span class="logo-mark" id="logoMark"></span>Obe strane</a>
+    <nav>
+      <a href="#/" data-nav="home">Naslovna</a>
+      <a href="#/blindspot" data-nav="blindspot">Slepe tačke</a>
+      <a href="#/izvori" data-nav="izvori">Izvori</a>
+    </nav>
+    <label class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Pretraži vesti…" autocomplete="off">
+    </label>
+    <span class="updated" id="updated"></span>
+  </div>
+</header>
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<script src="data.js"></script>
+<script>
+(() => {
+  "use strict";
+  let D = window.NEWS_DATA;
+  const app = document.getElementById("app");
+  const $q = document.getElementById("q");
+  const CAMP_ORDER = ["pro_government", "public", "mixed", "critical"];
+  const SHORT = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Ostali"};
+
+  // ---------- helpers
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "#";
+  const EYE = (n) => `<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>`;
+  const camp = id => D.camps[id] || {label: id, color: "#999"};
+  const src = id => D.sources.find(s => s.id === id) || {name: id, camp: "mixed"};
+  function ago(iso) {
+    const m = Math.round((Date.now() - new Date(iso)) / 60000);
+    if (m < 1) return "upravo";
+    if (m < 60) return `pre ${m} min`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `pre ${h} h`;
+    return new Date(iso).toLocaleDateString("sr-Latn-RS", {day: "numeric", month: "short"});
+  }
+  const clock = iso => new Date(iso).toLocaleTimeString("sr-Latn-RS", {hour: "2-digit", minute: "2-digit"});
+
+  function cov(split, total, big) {
+    const segs = CAMP_ORDER.filter(k => split[k]).map(k =>
+      `<i style="width:${100 * split[k] / total}%;background:${camp(k).color}" title="${esc(camp(k).label)}: ${split[k]}"></i>`).join("");
+    return `<div class="cov${big ? " lg" : ""}">${segs}</div>`;
+  }
+  function covLabels(split, total) {
+    const pg = split.pro_government || 0, cr = split.critical || 0, other = total - pg - cr;
+    return `<div class="cov-labels"><span style="color:${camp("pro_government").color}"><b>${Math.round(100*pg/total)}%</b> provladini</span>` +
+      (other ? `<span>${Math.round(100*other/total)}% ostali</span>` : "") +
+      `<span style="color:${camp("critical").color}"><b>${Math.round(100*cr/total)}%</b> kritički</span></div>`;
+  }
+  function img(url, label) {
+    const ph = `<span class="ph">${esc(label || "")}</span>`;
+    if (!url) return "";
+    return `<div class="img">${ph}<img src="${esc(safeUrl(url))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
+  }
+  const bsText = k => k === "pro_government" ? "Prećutali provladini mediji" : "Prećutali kritički mediji";
+  const bsTag = s => s.blindspot ? `<span class="tag">${EYE(12)} Slepa tačka</span>` : "";
+  const metaLine = s => `<div class="meta">${bsTag(s)}<b>${s.sources} izvora</b><span>·</span><span>${ago(s.first)}</span><span>·</span><span>prvi: ${esc(src(s.broke).name)}</span></div>`;
+
+  function filtered() {
+    const q = $q.value.trim().toLowerCase();
+    if (!q) return D.stories;
+    return D.stories.filter(s => (s.headline + " " + s.summary + " " + s.items.map(i => i.title).join(" ")).toLowerCase().includes(q));
+  }
+
+  // ---------- views
+  function home() {
+    const list = filtered();
+    if (!list.length) return `<div class="empty-state">Nema vesti za „${esc($q.value)}“.</div>`;
+    const [top, ...rest] = list;
+    const quick = list.slice(0, 8);
+    const bsPG = D.stories.filter(s => s.blindspot === "pro_government").slice(0, 4);
+    const bsCR = D.stories.filter(s => s.blindspot === "critical").slice(0, 4);
+    const mini = s => `<a class="mini" href="#/vest/${s.id}"><h4>${esc(s.headline)}</h4>${cov(s.split, s.sources)}</a>`;
+    return `${legend()}
+    <div class="home">
+      <aside class="left"><div class="sticky">
+        <div class="col-title">Ukratko danas</div>
+        <div class="panel">${quick.map(mini).join("")}</div>
+      </div></aside>
+      <section>
+        <div class="col-title">Najvažnije vesti</div>
+        <a class="hero" href="#/vest/${top.id}">
+          ${img(top.image, src(top.broke).name)}
+          <div class="body">${metaLine(top)}<h2>${esc(top.headline)}</h2>
+          ${top.summary ? `<p>${esc(top.summary)}</p>` : ""}
+          ${cov(top.split, top.sources, true)}${covLabels(top.split, top.sources)}</div>
+        </a>
+        ${rest.slice(0, 60).map(s => `
+          <a class="card" href="#/vest/${s.id}">
+            <div>${metaLine(s)}<h3>${esc(s.headline)}</h3>${cov(s.split, s.sources)}${covLabels(s.split, s.sources)}</div>
+            ${img(s.image, src(s.broke).name)}
+          </a>`).join("")}
+      </section>
+      <aside><div class="sticky">
+        <div class="panel">
+          <div class="bs-head"><div class="bs-eye">${EYE(17)}</div><div><h3>Slepe tačke</h3>
+            <p>Vesti koje izveštava samo jedna strana.</p></div></div>
+          <div class="bs-sub" style="color:${camp("pro_government").color}">● ${bsText("pro_government")}</div>
+          ${bsPG.map(mini).join("") || `<p class="meta">Trenutno nema.</p>`}
+          <div class="bs-sub" style="color:${camp("critical").color}">● ${bsText("critical")}</div>
+          ${bsCR.map(mini).join("") || `<p class="meta">Trenutno nema.</p>`}
+          <div style="margin-top:12px"><a href="#/blindspot" style="font-size:13px;font-weight:600">Sve slepe tačke →</a></div>
+        </div>
+        <div class="panel">
+          <div class="col-title" style="margin-bottom:6px">Pregled</div>
+          <div class="stat"><span>Praćenih izvora</span><b>${D.sources.length}</b></div>
+          <div class="stat"><span>Članaka (${D.hours} h)</span><b>${D.articles}</b></div>
+          <div class="stat"><span>Priča sa 2+ izvora</span><b>${D.stories.length}</b></div>
+          <div class="stat"><span>Slepih tačaka</span><b>${D.stories.filter(s => s.blindspot).length}</b></div>
+        </div>
+      </div></aside>
+    </div>`;
+  }
+
+  let storyTab = "all";
+  function story(id) {
+    const s = D.stories.find(x => x.id === id);
+    if (!s) return `<div class="empty-state">Ova vest više nije u izveštaju. <a href="#/"><b>Nazad na naslovnu</b></a></div>`;
+    const items = s.items.map(i => ({...i, camp: src(i.source).camp}));
+    const shown = storyTab === "all" ? items : items.filter(i => i.camp === storyTab);
+    const side = k => {
+      const its = items.filter(i => i.camp === k);
+      return `<div class="side" style="border-top-color:${camp(k).color}">
+        <h5 style="color:${camp(k).color}">${esc(camp(k).label)}</h5>
+        ${its.length ? its.map(i => `<a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener">${esc(i.title)}<small>${esc(src(i.source).name)} · ${clock(i.published)}</small></a>`).join("")
+          : `<div class="empty">Nije objavljeno ni u jednom mediju ove grupe.</div>`}
+      </div>`;
+    };
+    const tabs = [["all", "Svi", null], ...CAMP_ORDER.filter(k => s.split[k]).map(k => [k, `${SHORT[k]} (${s.split[k]})`, camp(k).color])];
+    return `<div class="story">
+      <article>
+        <a class="back" href="#/">← Sve vesti</a>
+        ${metaLine(s)}
+        <h1>${esc(s.headline)}</h1>
+        ${s.summary ? `<p class="lede">${esc(s.summary)}</p>` : ""}
+        ${s.image ? img(s.image) : ""}
+        <h2 class="sec">Kako su naslovili</h2>
+        <p class="meta" style="margin:0 0 12px">Isti događaj, naslovi iz dva tabora.</p>
+        <div class="compare">${side("pro_government")}${side("critical")}</div>
+        <h2 class="sec">Svi članci (${items.length})</h2>
+        <div class="tabs">${tabs.map(([k, l, c]) => `<button data-tab="${k}" class="${storyTab === k ? "on" : ""}">${c ? `<i style="background:${c}"></i>` : ""}${esc(l)}</button>`).join("")}</div>
+        ${shown.map(i => `<a class="art" href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener" style="border-left-color:${camp(i.camp).color}">
+            <div class="src" style="color:${camp(i.camp).color}">${esc(src(i.source).name)} <span>${clock(i.published)} · ${esc(camp(i.camp).label)}</span></div>
+            <h4>${esc(i.title)}</h4>${i.summary ? `<p>${esc(i.summary)}</p>` : ""}</a>`).join("")}
+      </article>
+      <aside><div class="sticky">
+        <div class="panel">
+          <div class="col-title">Pokrivenost</div>
+          <div class="big-num">${s.sources}</div><div class="meta" style="margin-bottom:14px">medija je objavilo ovu vest</div>
+          ${cov(s.split, s.sources, true)}${covLabels(s.split, s.sources)}
+          <div style="margin-top:14px">${CAMP_ORDER.map(k => `<div class="stat"><span style="display:flex;align-items:center;gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:${camp(k).color};display:inline-block"></i>${esc(camp(k).label)}</span><b>${s.split[k] || 0}</b></div>`).join("")}</div>
+        </div>
+        ${s.blindspot ? `<div class="panel" style="background:var(--warn-bg);border-color:#f3d9bd">
+          <div class="bs-head" style="margin:0"><div class="bs-eye" style="background:#fff">${EYE(17)}</div><div><h3>Slepa tačka</h3>
+          <p>${bsText(s.blindspot)}: ovu vest nije objavio nijedan medij iz te grupe.</p></div></div></div>` : ""}
+        <div class="panel">
+          <div class="col-title">Vremenska linija</div>
+          <div class="stat"><span>Prvi objavio</span><b>${esc(src(s.broke).name)}</b></div>
+          <div class="stat"><span>Vreme</span><b>${clock(s.first)}</b></div>
+          <div class="stat"><span>Poslednji članak</span><b>${clock(items[items.length - 1].published)}</b></div>
+        </div>
+      </div></aside>
+    </div>`;
+  }
+
+  function blindspot() {
+    const col = k => {
+      const list = filtered().filter(s => s.blindspot === k);
+      return `<section><div class="col-title" style="color:${camp(k).color}">● ${bsText(k)} (${list.length})</div>
+        ${list.map(s => `<a class="card" href="#/vest/${s.id}"><div>${metaLine(s)}<h3>${esc(s.headline)}</h3>${cov(s.split, s.sources)}${covLabels(s.split, s.sources)}</div>${img(s.image, src(s.broke).name)}</a>`).join("")
+          || `<div class="panel meta">Trenutno nema.</div>`}</section>`;
+    };
+    return `<h1 class="page-h">Slepe tačke</h1>
+      <p class="page-p">Vesti koje su objavila najmanje tri medija, a jedna strana ih je potpuno prećutala. Računa se samo kada su mediji te strane praćeni u to vreme.</p>
+      ${legend()}<div class="grid2">${col("pro_government")}${col("critical")}</div>`;
+  }
+
+  function sources() {
+    return `<h1 class="page-h">Izvori</h1>
+      <p class="page-p">Mediji koje pratimo i njihova početna oznaka. Oznake se zasnivaju na javno dostupnim analizama medija (CRTA, BIRN, Raskrikavanje) i mogu se menjati u <code>sources.json</code>.</p>
+      <div class="grid2">${CAMP_ORDER.map(k => {
+        const list = D.sources.filter(s => s.camp === k).sort((a, b) => b.stories - a.stories);
+        return `<div class="panel" style="border-top:4px solid ${camp(k).color}">
+          <div class="col-title" style="color:${camp(k).color}">${esc(camp(k).label)} · ${list.length}</div>
+          ${list.map(s => `<div class="src-row"><div><a class="n" href="${esc(safeUrl(s.home))}" target="_blank" rel="noopener">${esc(s.name)}</a>${s.note ? `<small>${esc(s.note)}</small>` : ""}</div>
+            <span class="pill">${s.stories} priča</span></div>`).join("")}
+        </div>`;
+      }).join("")}</div>`;
+  }
+
+  const legend = () => `<div class="legend">${CAMP_ORDER.map(k => `<span><i style="background:${camp(k).color}"></i>${esc(camp(k).label)}</span>`).join("")}</div>`;
+
+  // ---------- router
+  function render() {
+    if (!D) { app.innerHTML = `<div class="empty-state">Nema podataka. Pokreni <code>python3 collector.py run</code> pa osveži stranicu.</div>`; return; }
+    const h = location.hash.replace(/^#\/?/, "");
+    const [page, arg] = h.split("/");
+    document.querySelectorAll("nav a").forEach(a => a.classList.toggle("on",
+      a.dataset.nav === (page === "blindspot" ? "blindspot" : page === "izvori" ? "izvori" : page === "" ? "home" : "")));
+    app.innerHTML = page === "vest" ? story(arg) : page === "blindspot" ? blindspot() : page === "izvori" ? sources() : home();
+    document.getElementById("updated").textContent = "Ažurirano " + clock(D.generated);
+    document.getElementById("foot").innerHTML = `Prototip · ${D.sources.length} izvora · poslednjih ${D.hours} h · oznake medija su početne pretpostavke, ne presude.`;
+    document.getElementById("logoMark").innerHTML = CAMP_ORDER.map(k => `<i style="background:${camp(k).color}"></i>`).join("");
+  }
+  app.addEventListener("click", e => {
+    const b = e.target.closest("[data-tab]");
+    if (b) { storyTab = b.dataset.tab; render(); }
+  });
+  window.addEventListener("hashchange", () => { storyTab = "all"; render(); window.scrollTo(0, 0); });
+  $q.addEventListener("input", () => { if (/^#\/(vest|izvori)/.test(location.hash)) location.hash = "#/"; else render(); });
+
+  // reload fresh data every 5 minutes without losing the current page
+  setInterval(() => {
+    const s = document.createElement("script");
+    s.src = "data.js?t=" + Date.now();
+    s.onload = () => { D = window.NEWS_DATA; render(); s.remove(); };
+    document.body.appendChild(s);
+  }, 5 * 60 * 1000);
+
+  render();
+})();
+</script>
+</body>
+</html>

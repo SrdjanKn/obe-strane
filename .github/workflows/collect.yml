@@ -1,0 +1,59 @@
+name: Collect news and publish site
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"     # every 15 minutes (GitHub may delay scheduled runs a few minutes)
+  workflow_dispatch:            # "Run workflow" button for manual runs
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The article database lives in the Actions cache between runs (not in git).
+      - name: Restore article database
+        uses: actions/cache/restore@v4
+        with:
+          path: news.db
+          key: newsdb-${{ github.run_id }}
+          restore-keys: newsdb-
+
+      - name: Collect and build
+        run: python3 collector.py run
+
+      - name: Save article database
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: news.db
+          key: newsdb-${{ github.run_id }}
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: collect
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,7 @@
+news.db
+news.db-journal
+report.html
+check.txt
+site/data.js
+__pycache__/
+.DS_Store

@@ -1,0 +1,40 @@
+{
+  "_about": "Starting list of Serbian outlets. 'camp' is an editable starting label based on published media monitoring (CRTA, BIRN Media Ownership Monitor, Raskrikavanje, EU/OSCE reports). Treat it as a hypothesis to review, not a verdict. 'feed' is optional: if it is missing or broken, the collector auto-discovers the feed from the homepage.",
+  "camps": {
+    "pro_government": {"label": "Provladini", "color": "#d9534f"},
+    "critical":       {"label": "Kritički / nezavisni", "color": "#2e7dd7"},
+    "public":         {"label": "Javni servis / državni", "color": "#8e6bbf"},
+    "mixed":          {"label": "Mešoviti / neodređeni", "color": "#9a9a9a"}
+  },
+  "sources": [
+    {"id": "informer",   "name": "Informer",          "home": "https://informer.rs",          "feed": "https://informer.rs/rss",                 "camp": "pro_government"},
+    {"id": "kurir",      "name": "Kurir",             "home": "https://www.kurir.rs",         "feed": "https://www.kurir.rs/rss",                "camp": "pro_government", "note": "Owned by Telekom Srbija since 2025"},
+    {"id": "novosti",    "name": "Večernje novosti",  "home": "https://www.novosti.rs",       "feed": "https://www.novosti.rs/rss",              "camp": "pro_government"},
+    {"id": "alo",        "name": "Alo",               "home": "https://www.alo.rs",           "feed": "https://www.alo.rs/rss",                  "camp": "pro_government"},
+    {"id": "republika",  "name": "Republika / Srpski telegraf", "home": "https://www.republika.rs", "camp": "pro_government"},
+    {"id": "espreso",    "name": "Espreso",           "home": "https://www.espreso.co.rs",    "feed": "https://www.espreso.co.rs/rss",           "camp": "pro_government"},
+    {"id": "mondo",      "name": "Mondo",             "home": "https://mondo.rs",             "camp": "pro_government", "note": "Telekom Srbija group"},
+    {"id": "b92",        "name": "B92",               "home": "https://www.b92.net",          "camp": "pro_government"},
+    {"id": "telegraf",   "name": "Telegraf",          "home": "https://www.telegraf.rs",      "feed": "https://www.telegraf.rs/rss",             "camp": "mixed"},
+    {"id": "politika",   "name": "Politika",          "home": "https://www.politika.rs",      "feed": "https://www.politika.rs/rss/",            "camp": "mixed"},
+    {"id": "blic",       "name": "Blic",              "home": "https://www.blic.rs",          "feed": "https://www.blic.rs/rss/danasnje-vesti",  "camp": "mixed"},
+    {"id": "euronews",   "name": "Euronews Srbija",   "home": "https://www.euronews.rs",      "camp": "mixed"},
+    {"id": "nedeljnik",  "name": "Nedeljnik",         "home": "https://www.nedeljnik.rs",     "feed": "https://www.nedeljnik.rs/feed/",          "camp": "mixed"},
+    {"id": "rts",        "name": "RTS",               "home": "https://www.rts.rs",           "camp": "public"},
+    {"id": "rtv",        "name": "RTV (Vojvodina)",   "home": "https://www.rtv.rs",           "camp": "public"},
+    {"id": "tanjug",     "name": "Tanjug",            "home": "https://www.tanjug.rs",        "camp": "public"},
+    {"id": "n1",         "name": "N1",                "home": "https://n1info.rs",            "feed": "https://n1info.rs/feed/",                 "camp": "critical", "note": "Ownership changed Aug 2026 (Alpac Capital) - review"},
+    {"id": "nova",       "name": "Nova.rs",           "home": "https://nova.rs",              "feed": "https://nova.rs/feed/",                   "camp": "critical", "note": "Ownership changed Aug 2026 (Alpac Capital) - review"},
+    {"id": "danas",      "name": "Danas",             "home": "https://www.danas.rs",         "feed": "https://www.danas.rs/feed/",              "camp": "critical", "note": "Ownership changed Aug 2026 (Alpac Capital) - review"},
+    {"id": "radar",      "name": "Radar",             "home": "https://radar.nova.rs",        "feed": "https://radar.nova.rs/feed/",             "camp": "critical"},
+    {"id": "vreme",      "name": "Vreme",             "home": "https://www.vreme.com",        "feed": "https://www.vreme.com/feed/",             "camp": "critical"},
+    {"id": "nin",        "name": "NIN",               "home": "https://www.nin.rs",           "camp": "critical"},
+    {"id": "krik",       "name": "KRIK",              "home": "https://www.krik.rs",          "feed": "https://www.krik.rs/feed/",               "camp": "critical"},
+    {"id": "raskrik",    "name": "Raskrikavanje",     "home": "https://www.raskrikavanje.rs", "camp": "critical"},
+    {"id": "cenzolovka", "name": "Cenzolovka",        "home": "https://www.cenzolovka.rs",    "feed": "https://www.cenzolovka.rs/feed/",         "camp": "critical"},
+    {"id": "istinomer",  "name": "Istinomer",         "home": "https://www.istinomer.rs",     "feed": "https://www.istinomer.rs/feed/",          "camp": "critical"},
+    {"id": "insajder",   "name": "Insajder",          "home": "https://insajder.net",         "camp": "critical"},
+    {"id": "021",        "name": "021.rs (Novi Sad)", "home": "https://www.021.rs",           "camp": "mixed"},
+    {"id": "juzne",      "name": "Južne vesti",       "home": "https://www.juznevesti.com",   "camp": "critical"}
+  ]
+}
