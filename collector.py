@@ -649,7 +649,7 @@ AI_LABEL = {"pro_government": "PROVLADINI", "critical": "KRITIČKI", "public": "
 
 def ai_call(prompt):
     req = urllib.request.Request("https://api.anthropic.com/v1/messages", method="POST",
-                                 data=json.dumps({"model": AI_MODEL, "max_tokens": 900,
+                                 data=json.dumps({"model": AI_MODEL, "max_tokens": 4000,
                                                   "messages": [{"role": "user", "content": prompt}]}).encode(),
                                  headers={"x-api-key": os.environ["ANTHROPIC_API_KEY"],
                                           "anthropic-version": "2023-06-01", "content-type": "application/json"})
