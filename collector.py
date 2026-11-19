@@ -657,6 +657,8 @@ def ai_call(prompt):
         out = json.loads(r.read())
     text = "".join(b.get("text", "") for b in out.get("content", []) if b.get("type") == "text")
     m = re.search(r"\{.*\}", text, re.S)
+    if not m:
+        raise ValueError(f"no JSON in reply (stop={out.get('stop_reason')}, blocks={[b.get('type') for b in out.get('content', [])]}): {text[:300]!r}")
     body = json.loads(m.group(0))
     return {k: (str(body.get(k)).strip() if body.get(k) else None) for k in ("ukratko", "provladini", "kriticki", "razlika")}
 
@@ -666,7 +668,7 @@ def ai_summaries(con, stories, top=25, max_calls=15):
     a story is summarised again only when it has grown by 3+ outlets. Skipped without ANTHROPIC_API_KEY."""
     con.execute("CREATE TABLE IF NOT EXISTS ai(story_id TEXT PRIMARY KEY, n INTEGER, made TEXT, body TEXT)")
     cached = {sid: (n, json.loads(b)) for sid, n, b in con.execute("SELECT story_id, n, body FROM ai")}
-    calls = 0
+    calls = made = 0
     have_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
     for s in [s for s in stories if s["sources"] >= 3][:top]:
         old = cached.get(s["id"])
@@ -687,6 +689,7 @@ def ai_summaries(con, stories, top=25, max_calls=15):
             con.execute("INSERT OR REPLACE INTO ai VALUES (?,?,?,?)", (s["id"], s["sources"],
                         datetime.now(timezone.utc).isoformat(), json.dumps(body, ensure_ascii=False)))
             s["ai"] = body
+            made += 1
         except Exception as e:
             print(f"  AI summary failed for {s['id']}: {type(e).__name__}: {e}")
             if old:
@@ -694,7 +697,7 @@ def ai_summaries(con, stories, top=25, max_calls=15):
     con.execute("DELETE FROM ai WHERE made < ?", ((datetime.now(timezone.utc) - timedelta(days=3)).isoformat(),))
     con.commit()
     if calls:
-        print(f"  AI summaries: {calls} new")
+        print(f"  AI summaries: {made} new, {calls - made} failed")
 
 
 # ---------------------------------------------------------------- daily briefing
