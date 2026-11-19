@@ -84,6 +84,18 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .q-pg{display:block;border-left:3px solid var(--pg);padding-left:12px}
 .q-cr{display:block;border-left:3px solid var(--cr);padding-left:12px}
 .rail-item{display:block;padding:14px 0;border-top:1px solid var(--rule)}
+.bs-panel{background:var(--amber-bg);border-top:4px solid var(--amber);padding:16px 18px 18px;margin-bottom:6px}
+.bs-panel-head{display:flex;align-items:center;color:var(--amber);font:700 15px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.bs-panel-dek{margin:8px 0 0;font:400 14.5px/1.45 var(--sans);color:var(--ink2)}
+.bs-group h3{margin:20px 0 0;padding-bottom:7px;border-bottom:2px solid;font:700 11.5px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.bs-panel .rail-item{border-top:1px solid #ecdcc9;padding:12px 0 13px}
+.bs-panel .bs-group .rail-item:first-of-type{border-top:0}
+.bs-panel .rail-item .hl{margin-bottom:10px}
+.sil{display:flex;gap:4px;height:7px}
+.sil span{flex:1;border-radius:1px;box-sizing:border-box}
+.sil .gone{border:1.5px dashed;background:transparent}
+.sil-lab{display:flex;justify-content:space-between;margin-top:6px;font:600 12px/1 var(--sans)}
+.bs-panel .all{display:inline-block;margin-top:14px;font:700 14px var(--sans);color:var(--amber)}
 .rail-item .hl{font-size:17px;line-height:1.3;font-weight:600;margin-bottom:9px}
 .rail-item .lab{font:700 11px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:3px solid var(--ink);padding-top:10px;margin:44px 0 18px}
@@ -210,7 +222,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   .bal-row{grid-template-columns:minmax(0,1fr)} .bal-row .pp{text-align:left} .brief-item{grid-template-columns:minmax(0,1fr)} .brief-item .no{font-size:28px}}
 @media (max-width:1080px){
   .lead{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);grid-template-rows:auto;grid-template-areas:"photo photo" "text quotes" "side more" "rail rail"}
-  .rail{border-left:0;padding-left:0;border-top:3px solid var(--amber);padding-top:14px}
+  .rail{border-left:0;padding-left:0;border-top:0;padding-top:4px}
 }
 @media (max-width:900px){ .grid3{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:760px){
@@ -354,7 +366,14 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
       <form id="nl"><label>Vaša e-adresa<input type="email" required placeholder="ime@primer.rs"></label><button type="submit">Prijavi se</button></form>
     </section>`;
 
-  const railItem = s => `<a class="rail-item" href="${link(s)}"><div class="lab ${s.blindspot === "pro_government" ? "c-pg" : "c-cr"}">${bsLabel(s.blindspot)} · ${s.sources} medija</div><div class="hl">${esc(s.headline)}</div>${bar(s, 4)}</a>`;
+  // a blindspot shows the silence itself: one side full, the other an empty dashed outline (pro-government always left)
+  const silence = s => {
+    const quiet = s.blindspot, loud = quiet === "pro_government" ? "critical" : "pro_government", n = s.split[loud] || 0;
+    const half = k => k === quiet ? `<span class="gone" style="border-color:${VAR[k]}"></span>` : `<span style="background:${VAR[k]}"></span>`;
+    const lab = k => k === quiet ? `<span style="color:${VAR[k]}">0 ${k === "pro_government" ? "provladinih" : "kritičkih"}</span>` : `<span style="color:${VAR[k]}">${n} ${form(n, k)}</span>`;
+    return `<div class="sil">${half("pro_government")}${half("critical")}</div><div class="sil-lab">${lab("pro_government")}${lab("critical")}</div>`;
+  };
+  const railItem = s => `<a class="rail-item" href="${link(s)}"><div class="hl">${esc(s.headline)}</div>${silence(s)}</a>`;
   const stripCard = s => `<a href="${link(s)}">${photo(s)}<div style="margin-top:12px">${secKick(s)}<div class="hl">${esc(s.headline)}</div>${bar(s)}${cov(s)}</div></a>`;
   const listItem = (s, showSec) => `<a class="li" href="${link(s)}">${showSec ? secKick(s) : ""}<div class="hl">${esc(s.headline)}</div>${bar(s, 4)}<div class="meta" style="margin-top:6px">${s.sources} medija · prvi: ${esc(src(s.broke).name)} u ${clock(s.first)}</div></a>`;
   function quotes(s) {
@@ -377,7 +396,9 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
     const sideList = take(S, 2);
     const under = take(S, 2);
     const bs = S.filter(s => s.blindspot);
-    const rail = [...bs.filter(s => s.blindspot === "pro_government").slice(0, 3), ...bs.filter(s => s.blindspot === "critical").slice(0, 3)].slice(0, 5);
+    const quietPg = bs.filter(s => s.blindspot === "pro_government"), quietCr = bs.filter(s => s.blindspot === "critical");
+    const nPg = quietCr.length ? 3 : 5, nCr = quietPg.length ? 3 : 5;
+    const group = (list, n, k, title) => list.length ? `<div class="bs-group"><h3 style="color:${VAR[k]};border-color:${VAR[k]}">${title}</h3>${list.slice(0, n).map(railItem).join("")}</div>` : "";
     const strip = pick(4, 8);
     const bsDay = bs.slice().sort((a, b) => b.sources - a.sources)[0];
     const counts = SECTION_ORDER.map(n => [n, S.filter(s => s.section === n && !used.has(s.id)).length]).filter(x => x[1] >= 2).sort((a, b) => b[1] - a[1]);
@@ -401,10 +422,12 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
         <div class="lead-quotes">${quotes(top)}</div>
         <div class="lead-more">${under.map(x => listItem(x, true)).join("")}</div>
         <aside class="rail" aria-label="Slepe tačke">
-          <div style="display:flex;align-items:center;color:var(--amber);font:700 13px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase">${EYE}Slepe tačke</div>
-          <p style="margin:8px 0 4px;font:400 14px/1.45 var(--sans);color:var(--ink2)">Vesti koje je objavila samo jedna strana.</p>
-          ${rail.map(railItem).join("") || `<p class="meta">Trenutno nema slepih tačaka.</p>`}
-          <a href="#/slepe-tacke" style="display:inline-block;margin-top:12px;font:600 13.5px var(--sans);color:var(--amber)">Sve slepe tačke →</a>
+          <div class="bs-panel">
+            <a href="#/slepe-tacke" class="bs-panel-head">${EYE}Slepe tačke</a>
+            <p class="bs-panel-dek">Vesti koje je objavila samo jedna strana. Druga strana ih je prećutala.</p>
+            ${group(quietPg, nPg, "pro_government", "Provladini nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
+            ${bs.length ? `<a class="all" href="#/slepe-tacke">Sve slepe tačke (${bs.length}) →</a>` : `<p class="meta" style="margin-top:12px">Trenutno nema slepih tačaka.</p>`}
+          </div>
           ${D.briefing ? `<a href="#/brifing" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Jutarnji brifing</div><div class="hl">Obe strane u 5 minuta</div><div class="meta">${(D.briefing.stories || []).length} vesti · izdanje u ${clock(D.briefing.made)}</div></a>` : ""}
         </aside>
       </section>
