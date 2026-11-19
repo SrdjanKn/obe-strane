@@ -2,7 +2,8 @@ name: Collect news and publish site
 
 on:
   schedule:
-    - cron: "*/15 * * * *"     # every 15 minutes (GitHub may delay scheduled runs a few minutes)
+    # GitHub throttles busy schedules: */15 was only firing every ~5 hours. Odd minutes are served more reliably.
+    - cron: "7,37 * * * *"
   workflow_dispatch:            # "Run workflow" button for manual runs
   push:
     branches: [main]            # redeploy right away when the code or design changes
@@ -36,6 +37,8 @@ jobs:
           restore-keys: newsdb-
 
       - name: Collect and build
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # optional: AI summaries are skipped without it
         run: python3 collector.py run
 
       - name: Save article database

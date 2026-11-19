@@ -21,6 +21,7 @@ import hashlib
 import html
 import json
 import math
+import os
 import re
 import sqlite3
 import sys
@@ -278,7 +279,12 @@ def db():
 
 def load_sources():
     cfg = json.loads(SOURCES_PATH.read_text(encoding="utf-8"))
-    return cfg["camps"], cfg["sources"]
+    # "paused" outlets stay listed on the site but are not fetched (e.g. they block automated access)
+    return cfg["camps"], [s for s in cfg["sources"] if not s.get("paused")]
+
+
+def all_sources():
+    return json.loads(SOURCES_PATH.read_text(encoding="utf-8"))["sources"]
 
 
 def canonical_url(u):
@@ -595,26 +601,218 @@ def section_of(urls):
     return votes.most_common(1)[0][0] if votes else "Vesti"
 
 
+TOPICS = [  # (slug, name, regex on normalised Latin text without diacritics) - shown when 2+ stories match
+    ("izbori", "Izbori", r"\b(izbor|glasanj|glasac|birac|birack|cik\b|kampanj|kandidat)"),
+    ("protesti", "Protesti i studenti", r"\b(protest|student|blokad|zbor|plenum)"),
+    ("nadstresnica", "Nadstrešnica u Novom Sadu", r"\b(nadstresnic|kanop)"),
+    ("pravosudje", "Pravosuđe i istrage", r"\b(tuzilast|tuzilac|tuzioc|sudij|presud|uhapsen|hapsenj|optuznic|pritvor)"),
+    ("mediji", "Mediji", r"\b(rem\b|novinar|medij|cenzur)"),
+    ("kosovo", "Kosovo", r"\b(kosov|pristin|kurti|kfor)"),
+    ("eu", "Evropska unija", r"\b(evropsk\w* unij|eu\b|brisel|evropsk\w* komisij)"),
+    ("energetika", "NIS i energetika", r"\b(nis\b|naftn|gazprom|struj|energet|eps\b)"),
+    ("litijum", "Litijum i Jadar", r"\b(litijum|rio tinto|jadar)"),
+    ("ekspo", "Ekspo 2027", r"\b(ekspo|expo)"),
+    ("region", "Region", r"\b(hrvatsk|bih\b|bosn|crn\w* gor|republik\w* srpsk|dodik|zagreb|sarajev|podgoric)"),
+    ("rusija-ukrajina", "Rusija i Ukrajina", r"\b(ukrajin|rusij|rusk|putin|zelensk|moskv|kijev)"),
+    ("sad", "SAD i Tramp", r"\b(tramp|trump|vasington|bela kuca|amerik)"),
+    ("kina", "Kina", r"\b(kina\b|kine\b|kini\b|kinesk|peking)"),
+]
+
+
+def topics_of(story):
+    text = normalise(" ".join([story["headline"]] + [a["title"] for a in story["items"]]))
+    return [slug for slug, _, pat in TOPICS if re.search(pat, text)]
+
+
+# ---------------------------------------------------------------- AI summaries (optional)
+
+AI_MODEL = os.environ.get("OBE_AI_MODEL", "claude-haiku-5-5")
+AI_PROMPT = """You summarise Serbian news coverage for a media-comparison site. Below are headlines and intros
+of articles about ONE event, grouped by the outlet's camp (pro-government, critical, public broadcaster,
+in-between, international). Write in Serbian, Latin script.
+
+Return only JSON with these keys:
+"ukratko": 2-3 neutral sentences on what happened, using only facts the reports have in common.
+"provladini": 1-2 sentences on what pro-government outlets emphasise and how they frame it, or null if none.
+"kriticki": 1-2 sentences on what critical outlets emphasise and how they frame it, or null if none.
+"razlika": one sentence on the main difference in emphasis between the camps, or null if only one camp
+reported or there is no real difference.
+
+Rules: be strictly neutral; describe framing, never judge which side is right; attribute claims
+("provladini mediji navode..."); use only what is in the text below; no facts from elsewhere.
+
+ARTICLES:
+{articles}"""
+AI_LABEL = {"pro_government": "PROVLADINI", "critical": "KRITIČKI", "public": "JAVNI SERVIS",
+            "mixed": "IZMEĐU KATEGORIJA", "international": "MEĐUNARODNI"}
+
+
+def ai_call(prompt):
+    req = urllib.request.Request("https://api.anthropic.com/v1/messages", method="POST",
+                                 data=json.dumps({"model": AI_MODEL, "max_tokens": 900,
+                                                  "messages": [{"role": "user", "content": prompt}]}).encode(),
+                                 headers={"x-api-key": os.environ["ANTHROPIC_API_KEY"],
+                                          "anthropic-version": "2023-06-01", "content-type": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        out = json.loads(r.read())
+    text = "".join(b.get("text", "") for b in out.get("content", []) if b.get("type") == "text")
+    m = re.search(r"\{.*\}", text, re.S)
+    body = json.loads(m.group(0))
+    return {k: (str(body.get(k)).strip() if body.get(k) else None) for k in ("ukratko", "provladini", "kriticki", "razlika")}
+
+
+def ai_summaries(con, stories, top=25, max_calls=15):
+    """Neutral summary + how each camp framed the story, for the biggest stories. Cached in news.db;
+    a story is summarised again only when it has grown by 3+ outlets. Skipped without ANTHROPIC_API_KEY."""
+    con.execute("CREATE TABLE IF NOT EXISTS ai(story_id TEXT PRIMARY KEY, n INTEGER, made TEXT, body TEXT)")
+    cached = {sid: (n, json.loads(b)) for sid, n, b in con.execute("SELECT story_id, n, body FROM ai")}
+    calls = 0
+    have_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    for s in [s for s in stories if s["sources"] >= 3][:top]:
+        old = cached.get(s["id"])
+        if old and s["sources"] < old[0] + 3:
+            s["ai"] = old[1]
+            continue
+        if not have_key or calls >= max_calls:
+            if old:
+                s["ai"] = old[1]
+            continue
+        lines = [f"[{AI_LABEL.get(a['camp'], a['camp'])}] {a['name']}: {a['title']}"
+                 + (f" — {a['summary'][:280]}" if a["summary"] else "") for a in s["items"]]
+        try:
+            calls += 1
+            body = ai_call(AI_PROMPT.format(articles="\n".join(lines)))
+            if not body.get("ukratko"):
+                raise ValueError("empty summary")
+            con.execute("INSERT OR REPLACE INTO ai VALUES (?,?,?,?)", (s["id"], s["sources"],
+                        datetime.now(timezone.utc).isoformat(), json.dumps(body, ensure_ascii=False)))
+            s["ai"] = body
+        except Exception as e:
+            print(f"  AI summary failed for {s['id']}: {type(e).__name__}: {e}")
+            if old:
+                s["ai"] = old[1]
+    con.execute("DELETE FROM ai WHERE made < ?", ((datetime.now(timezone.utc) - timedelta(days=3)).isoformat(),))
+    con.commit()
+    if calls:
+        print(f"  AI summaries: {calls} new")
+
+
+# ---------------------------------------------------------------- daily briefing
+
+def belgrade_now():
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("Europe/Belgrade"))
+    except Exception:
+        return datetime.now(timezone(timedelta(hours=1)))
+
+
+def briefing(con, stories, n_articles):
+    """One fixed edition a day: frozen at the first run after 07:00 Belgrade time (or right away if none exists)."""
+    con.execute("CREATE TABLE IF NOT EXISTS briefings(day TEXT PRIMARY KEY, made TEXT, body TEXT)")
+    bg = belgrade_now()
+    today = bg.date().isoformat()
+    exists_today = con.execute("SELECT 1 FROM briefings WHERE day=?", (today,)).fetchone()
+    any_yet = con.execute("SELECT 1 FROM briefings LIMIT 1").fetchone()
+    if not exists_today and (bg.hour >= 7 or not any_yet):
+        cut = datetime.now(timezone.utc) - timedelta(hours=24)
+        recent = [s for s in stories if s["last"] >= cut]
+        pick = sorted(recent, key=lambda s: (-s["sources"], -s["score"]))[:8]
+        bs = sorted([s for s in recent if s["blindspot"] and s not in pick], key=lambda s: -s["sources"])[:2]
+
+        def entry(s):
+            first = lambda k: next(({"source": a["source"], "title": a["title"], "url": a["url"]}
+                                    for a in sorted(s["items"], key=lambda a: a["published"]) if a["camp"] == k), None)
+            return {"id": s["id"], "headline": s["headline"], "summary": s["summary"][:300], "image": s["image"],
+                    "section": section_of([a["url"] for a in s["items"]]), "sources": s["sources"],
+                    "split": dict(s["split"]), "blindspot": blind_key(s), "ai": s.get("ai"),
+                    "pg": first("pro_government"), "cr": first("critical")}
+        body = {"day": today, "made": datetime.now(timezone.utc).isoformat(), "articles": n_articles,
+                "stories": [entry(s) for s in pick], "blindspots": [entry(s) for s in bs]}
+        con.execute("INSERT OR REPLACE INTO briefings VALUES (?,?,?)",
+                    (today, body["made"], json.dumps(body, ensure_ascii=False)))
+        con.execute("DELETE FROM briefings WHERE day < ?", ((bg.date() - timedelta(days=14)).isoformat(),))
+        con.commit()
+        print(f"  Briefing for {today}: {len(pick)} stories")
+    row = con.execute("SELECT body FROM briefings ORDER BY day DESC LIMIT 1").fetchone()
+    days = [d for (d,) in con.execute("SELECT day FROM briefings ORDER BY day DESC LIMIT 7")]
+    return json.loads(row[0]) if row else None, days
+
+
+def blind_key(s):
+    return s["blindspot"] and ("pro_government" if s["blindspot"].endswith("pro-government outlets") else "critical")
+
+
+# ---------------------------------------------------------------- site export
+
 def export_site(hours=36):
     """Write site/data.js for the website (a JS file, so the site also works opened straight from disk)."""
     camps, stories, n_articles = build_stories(hours)
-    _, sources = load_sources()
-    counts = Counter()
+    sources = all_sources()
+    con = db()
+    ai_summaries(con, stories)
+    brief, brief_days = briefing(con, stories, n_articles)
+    now = datetime.now(timezone.utc)
+    iso = lambda d: d.astimezone(timezone.utc).isoformat()
+    for s in stories:
+        s["section"] = section_of([a["url"] for a in s["items"]])
+        s["topics"] = topics_of(s)
+
+    # per-outlet numbers for the outlet pages
+    counts, loud, secs = Counter(), Counter(), defaultdict(Counter)
     for s in stories:
         for a in s["items"]:
             counts[a["source"]] += 1
-    iso = lambda d: d.astimezone(timezone.utc).isoformat()
+            secs[a["source"]][s["section"]] += 1
+            if s["blindspot"]:
+                loud[a["source"]] += 1
+    since36 = (now - timedelta(hours=hours)).isoformat()
+    since7 = (now - timedelta(days=7)).isoformat()
+    n36 = dict(con.execute("SELECT source_id, COUNT(*) FROM articles WHERE published >= ? GROUP BY source_id", (since36,)))
+    n7 = dict(con.execute("SELECT source_id, COUNT(*) FROM articles WHERE published >= ? GROUP BY source_id", (since7,)))
+    recent = defaultdict(list)
+    for sid, title, url, pub in con.execute("SELECT source_id, title, url, published FROM articles WHERE published >= ? "
+                                            "ORDER BY published DESC", (since7,)):
+        if len(recent[sid]) < 8 and not skip_url(url):
+            recent[sid].append({"title": title, "url": url, "published": pub})
+    logos = {}
+    if (SITE_DIR / "logos").is_dir():
+        for f in (SITE_DIR / "logos").iterdir():
+            if f.suffix.lower() in (".png", ".svg", ".jpg", ".jpeg", ".webp"):
+                logos[f.stem] = f"logos/{f.name}"
+
+    # balance: how many outlet appearances of each camp we showed, against what we collected
+    shown, collected, outlets = Counter(), Counter(), Counter()
+    meta = {s["id"]: s for s in sources}
+    for s in stories:
+        shown.update(s["split"])
+    for sid, n in n36.items():
+        if sid in meta:
+            collected[meta[sid]["camp"]] += n
+    for s in sources:
+        if not s.get("paused"):
+            outlets[s["camp"]] += 1
+
+    topic_counts = Counter(t for s in stories for t in s["topics"])
     data = {
-        "generated": datetime.now(timezone.utc).isoformat(), "hours": hours, "articles": n_articles,
-        "camps": camps,
+        "generated": now.isoformat(), "hours": hours, "articles": n_articles,
+        "camps": camps, "ai_model": AI_MODEL,
+        "balance": {"shown": dict(shown), "collected": dict(collected), "outlets": dict(outlets)},
+        "topics": [{"slug": slug, "name": name, "stories": topic_counts[slug]} for slug, name, _ in TOPICS if topic_counts[slug]],
+        "briefing": brief, "briefing_days": brief_days,
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
-                     "note": s.get("note", ""), "stories": counts[s["id"]]} for s in sources],
+                     "note": s.get("note", ""), "owner": s.get("owner", ""), "owner_src": s.get("owner_src", ""),
+                     "public_money": s.get("public_money", ""), "public_money_src": s.get("public_money_src", ""),
+                     "paused": s.get("paused", ""), "logo": logos.get(s["id"], ""),
+                     "stories": counts[s["id"]], "blind_loud": loud[s["id"]],
+                     "a36": n36.get(s["id"], 0), "a7": n7.get(s["id"], 0),
+                     "sections": [k for k, _ in secs[s["id"]].most_common(3)], "recent": recent.get(s["id"], [])}
+                    for s in sources],
         "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": s["image"],
                      "image_source": s["image_source"], "last": iso(s["last"]), "score": round(s["score"], 2),
-                     "section": section_of([a["url"] for a in s["items"]]),
+                     "section": s["section"], "topics": s["topics"], "ai": s.get("ai"),
                      "broke": s["broke"], "first": iso(s["first"]), "sources": s["sources"],
-                     "split": dict(s["split"]), "blindspot": s["blindspot"] and
-                     ("pro_government" if s["blindspot"].endswith("pro-government outlets") else "critical"),
+                     "split": dict(s["split"]), "blindspot": blind_key(s),
                      "items": [{"source": a["source"], "title": a["title"], "url": a["url"], "summary": a["summary"][:280],
                                 "image": a["image"], "published": iso(a["published"])}
                                for a in sorted(s["items"], key=lambda a: a["published"])]}

@@ -173,6 +173,41 @@ footer .mark b{background:var(--ink)}
 footer .links{display:flex;flex-direction:column;gap:10px;font:500 14px var(--sans)}
 footer .links b{color:#fff}
 footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px;font:400 12.5px var(--sans);color:#9a9aa0}
+footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2px}
+.lg{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#ecebe7;color:var(--ink2);font-family:var(--sans);font-weight:700;letter-spacing:0;overflow:hidden;flex:none;vertical-align:-4px;margin-right:6px;line-height:1}
+.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+.ai{border-top:3px solid var(--ink);padding-top:14px}
+.ai-sum{margin:0 0 18px;font:400 20px/1.5 var(--serif)}
+.ai-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.ai-side{border-left:3px solid;padding:2px 0 2px 14px}
+.ai-side h3{margin:0 0 6px;font:700 12px/1.2 var(--sans);letter-spacing:.07em;text-transform:uppercase}
+.ai-side p{margin:0;font:400 16.5px/1.5 var(--serif)}
+.ai-diff{margin:18px 0 0;padding:12px 16px;background:var(--soft);font:400 16.5px/1.5 var(--serif)}
+.ai-note{margin:12px 0 0;font:400 12.5px/1.45 var(--sans);color:var(--ink3)}
+.ai-note a{text-decoration:underline}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:22px 0}
+.stats>div{background:#fff;padding:16px 18px}
+.stats b{display:block;font:700 30px/1 var(--head);margin-bottom:6px}
+.stats span{font:500 13px/1.35 var(--sans);color:var(--ink2)}
+.box{background:var(--soft);border-top:3px solid var(--ink);padding:18px 20px;margin:0 0 20px}
+.box h2{margin:0 0 8px;font:700 13px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.box p{margin:0 0 8px;font:400 17px/1.5 var(--serif)}
+.box .src-link{font:500 13px var(--sans);color:var(--ink2);text-decoration:underline}
+.prose{max-width:720px}
+.prose h2{margin:40px 0 10px;font:700 26px/1.2 var(--head)}
+.prose p,.prose li{font:400 18px/1.6 var(--serif);color:var(--ink)}
+.prose ol,.prose ul{padding-left:22px}
+.prose li{margin-bottom:8px}
+.bal-row{display:grid;grid-template-columns:180px minmax(0,1fr) 220px;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--rule);font:500 14px var(--sans)}
+.bal-row .pp{font:500 13px var(--sans);color:var(--ink2);text-align:right}
+.brief-head{text-align:center;padding:36px 0 22px;border-bottom:1px solid var(--rule)}
+.brief-head h1{margin:6px 0 8px;font:700 clamp(32px,5vw,48px)/1.1 var(--head)}
+.brief-item{display:grid;grid-template-columns:56px minmax(0,1fr);gap:8px 18px;padding:28px 0;border-bottom:1px solid var(--rule)}
+.brief-item .no{font:700 40px/1 var(--head);color:#c9c7c1}
+.brief-item h2{margin:6px 0 10px;font:700 25px/1.2 var(--head)}
+.brief-end{text-align:center;padding:40px 0 8px;font:italic 400 20px/1.5 var(--serif);color:var(--ink2)}
+@media (max-width:760px){.ai-two{grid-template-columns:minmax(0,1fr)} .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bal-row{grid-template-columns:minmax(0,1fr)} .bal-row .pp{text-align:left} .brief-item{grid-template-columns:minmax(0,1fr)} .brief-item .no{font-size:28px}}
 @media (max-width:1080px){
   .lead{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);grid-template-rows:auto;grid-template-areas:"photo photo" "text quotes" "side more" "rail rail"}
   .rail{border-left:0;padding-left:0;border-top:3px solid var(--amber);padding-top:14px}
@@ -243,6 +278,30 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   const firstOf = (s, k) => s.items.find(i => camp(i.source) === k);
   const bsLabel = k => k === "pro_government" ? "Prećutali provladini" : "Prećutali kritički";
   const secsWithNews = () => SECTION_ORDER.filter(n => D.stories.some(s => s.section === n));
+  const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (_) { return ""; } };
+  const initials = n => String(n).replace(/[^\p{L}\p{N} ]/gu, "").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  // outlet logo: our own file in site/logos/<id>.png if present, otherwise the site's icon; initials underneath as fallback
+  function logo(id, size = 18) {
+    const s = src(id), url = s.logo || (s.home ? `https://icons.duckduckgo.com/ip3/${host(s.home)}.ico` : "");
+    return `<span class="lg" style="width:${size}px;height:${size}px;font-size:${Math.max(8, Math.round(size * .4))}px" aria-hidden="true">${esc(initials(s.name))}${url ? `<img src="${esc(url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>`;
+  }
+  const outletLink = id => `<a href="#/izvor/${encodeURIComponent(id)}" style="text-decoration:underline;text-underline-offset:2px">${esc(src(id).name)}</a>`;
+  const out = (url, sid) => `href="${esc(safe(url))}" target="_blank" rel="noopener" data-s="${esc(sid)}"`;
+  const topicName = slug => ((D.topics || []).find(t => t.slug === slug) || {name: slug}).name;
+  const sumSplit = list => { const split = {}; list.forEach(s => Object.entries(s.split).forEach(([k, n]) => split[k] = (split[k] || 0) + n)); return {split, sources: Object.values(split).reduce((a, b) => a + b, 0)}; };
+  const share = (o, k) => o.sources ? Math.round(100 * (o.split[k] || 0) / o.sources) : 0;
+
+  // "Moja medijska ishrana": kept only in this browser (localStorage), never sent anywhere
+  const DIET = "obe-strane-ishrana";
+  const diet = () => { try { const d = JSON.parse(localStorage.getItem(DIET) || "{}"); return {reads: d.reads || [], views: d.views || []}; } catch (_) { return {reads: [], views: []}; } };
+  const saveDiet = d => { try { const cut = Date.now() - 60 * 864e5;
+    localStorage.setItem(DIET, JSON.stringify({reads: d.reads.filter(r => r.t > cut).slice(-600), views: d.views.filter(r => r.t > cut).slice(-600)})); } catch (_) {} };
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("a[data-s]");
+    if (!a) return;
+    const d = diet(); d.reads.push({s: a.dataset.s, c: camp(a.dataset.s), t: Date.now()}); saveDiet(d);
+  });
+  const balanceObj = () => { const sh = (D.balance && D.balance.shown) || {}; return {split: sh, sources: Object.values(sh).reduce((a, b) => a + b, 0)}; };
 
   function header(active) {
     return `
@@ -258,27 +317,40 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
         ${secsWithNews().map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" class="${active === n ? "on" : ""}">${n}</a>`).join("")}
         <span class="sep" aria-hidden="true"></span>
         <a href="#/slepe-tacke" class="amber ${active === "bs" ? "on" : ""}">${EYE}Slepe tačke</a>
+        <a href="#/brifing" class="${active === "brief" ? "on" : ""}">Brifing</a>
         <a href="#/izvori" class="${active === "src" ? "on" : ""}">Izvori</a>
       </nav>
-      ${active === "home" ? `<div class="focus"><b>U fokusu</b>${D.stories.slice(0, 6).map(s => `<a href="${link(s)}">${esc(s.headline.split(/[:,–]/)[0].split(" ").slice(0, 5).join(" "))}</a>`).join("")}</div>` : ""}
+      ${active === "home" || active === "topic" ? focusBar() : ""}
     </div>`;
+  }
+  function focusBar() {
+    const t = (D.topics || []).filter(x => x.stories >= 2).sort((a, b) => b.stories - a.stories).slice(0, 8);
+    if (!t.length) return `<div class="focus"><b>U fokusu</b>${D.stories.slice(0, 6).map(s => `<a href="${link(s)}">${esc(s.headline.split(/[:,–]/)[0].split(" ").slice(0, 5).join(" "))}</a>`).join("")}</div>`;
+    const cur = location.hash.startsWith("#/tema/") ? decodeURIComponent(location.hash.slice(7)) : "";
+    return `<div class="focus"><b>U fokusu</b>${t.map(x => `<a href="#/tema/${x.slug}" style="${x.slug === cur ? "font-weight:700;color:var(--ink)" : ""}">${esc(x.name)}</a>`).join("")}</div>`;
   }
   function compactHeader(sec) {
     return `<header class="compact-head"><div class="wrap">
       <a class="logo" href="#/">${mark(30)}<i>obe strane</i></a>
-      <nav aria-label="Rubrike">${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/slepe-tacke" style="color:var(--amber)">${EYE}Slepe tačke</a></nav>
+      <nav aria-label="Rubrike">${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/slepe-tacke" style="color:var(--amber)">${EYE}Slepe tačke</a><a href="#/brifing">Brifing</a></nav>
       <a class="btn dark" href="#/">Naslovna</a></div></header>`;
   }
   const footer = () => `<footer><div class="wrap top">
       <div style="flex:1 1 260px;min-width:0"><div class="logo">${mark(32)}<i>obe strane</i></div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/izvori">Izvori i oznake</a><a href="#/slepe-tacke">Slepe tačke</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
-    </div><div class="wrap bottom">Prototip · ${D.sources.length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne pretpostavke zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+    </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
+  function balanceLine() {
+    const b = balanceObj();
+    if (!b.sources) return "Prototip";
+    const o = 100 - share(b, "pro_government") - share(b, "critical");
+    return `<a href="#/o-nama/balans">Naš balans</a>: prikazali smo ${share(b, "pro_government")}% provladinih, ${share(b, "critical")}% kritičkih i ${o}% ostalih objava`;
+  }
   const newsletter = () => `<section class="news" aria-label="Bilten">
-      <div style="flex:1 1 360px;min-width:0">${kick(EYE + "Besplatan bilten · uskoro", "amber")}
-      <h2>Slepa tačka dana, u vašem inboksu</h2>
-      <p style="margin:0;color:var(--ink2)">Jedna vest koju je druga strana prećutala, i kako su je naslovili oni koji jesu.</p></div>
+      <div style="flex:1 1 360px;min-width:0">${kick(EYE + "Jutarnji brifing · e-poštom uskoro", "amber")}
+      <h2>Obe strane u 5 minuta</h2>
+      <p style="margin:0;color:var(--ink2)">Najvažnije vesti dana i kako ih je koja strana uokvirila, svako jutro u 7. <a href="#/brifing" style="text-decoration:underline">Pročitajte današnji brifing</a>.</p></div>
       <form id="nl"><label>Vaša e-adresa<input type="email" required placeholder="ime@primer.rs"></label><button type="submit">Prijavi se</button></form>
     </section>`;
 
@@ -287,7 +359,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
   const listItem = (s, showSec) => `<a class="li" href="${link(s)}">${showSec ? secKick(s) : ""}<div class="hl">${esc(s.headline)}</div>${bar(s, 4)}<div class="meta" style="margin-top:6px">${s.sources} medija · prvi: ${esc(src(s.broke).name)} u ${clock(s.first)}</div></a>`;
   function quotes(s) {
     const p = firstOf(s, "pro_government"), c = firstOf(s, "critical");
-    const q = (i, cls) => i ? `<a class="${cls}" href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="quote">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${esc(src(i.source).name)} · ${clock(i.published)}</div></a>` : "";
+    const q = (i, cls) => i ? `<a class="${cls}" href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="quote">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${esc(src(i.source).name)} · ${clock(i.published)}</div></a>` : "";
     if (!p && !c) return "";
     return `<div class="meta" style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">Kako su naslovili</div>
       <div class="quotes2">${q(p, "q-pg")}${q(c, "q-cr")}</div>`;
@@ -330,6 +402,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
           <p style="margin:8px 0 4px;font:400 14px/1.45 var(--sans);color:var(--ink2)">Vesti koje je objavila samo jedna strana.</p>
           ${rail.map(railItem).join("") || `<p class="meta">Trenutno nema slepih tačaka.</p>`}
           <a href="#/slepe-tacke" style="display:inline-block;margin-top:12px;font:600 13.5px var(--sans);color:var(--amber)">Sve slepe tačke →</a>
+          ${D.briefing ? `<a href="#/brifing" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Jutarnji brifing</div><div class="hl">Obe strane u 5 minuta</div><div class="meta">${(D.briefing.stories || []).length} vesti · izdanje u ${clock(D.briefing.made)}</div></a>` : ""}
         </aside>
       </section>
       ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2><a href="#/slepe-tacke">Slepe tačke →</a></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
@@ -358,17 +431,28 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
       </div>
       <div style="flex:1 1 380px;min-width:0">
         <div style="font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#b8b8bd;margin-bottom:6px">Ko je objavio</div>
-        ${items.map(i => `<a class="item" href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="src">${dot(loud)}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}
+        ${items.map(i => `<a class="item" href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="src">${dot(loud)}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}
       </div></div></section>`;
   }
 
+  function aiBox(s) {
+    const a = s.ai;
+    if (!a || !a.ukratko) return "";
+    const side = (k, text) => text && s.split[k] ? `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">Kako su uokvirili ${k === "pro_government" ? "provladini" : "kritički"}</h3><p>${esc(text)}</p></div>` : "";
+    return `<section id="ukratko" class="col" style="margin-top:36px" aria-label="Ukratko"><div class="ai">
+      <div class="kicker" style="color:var(--ink2)">Ukratko</div><p class="ai-sum">${esc(a.ukratko)}</p>
+      ${a.provladini || a.kriticki ? `<div class="ai-two">${side("pro_government", a.provladini)}${side("critical", a.kriticki)}</div>` : ""}
+      ${a.razlika ? `<p class="ai-diff"><b class="sans" style="font-size:14px">Glavna razlika:</b> ${esc(a.razlika)}</p>` : ""}
+      <p class="ai-note">Ovaj sažetak je automatski napisao AI model na osnovu naslova i uvoda članaka, bez sopstvene ocene. Može da sadrži greške: proverite u izvornim člancima ispod. <a href="#/o-nama/metodologija">Kako radimo</a></p>
+    </div></section>`;
+  }
   function story(id) {
     const s = D.stories.find(x => x.id === id);
     if (!s) return `${compactHeader()}<div class="wrap empty">Ova vest više nije u izboru poslednjih ${D.hours} sati. <a href="#/" style="text-decoration:underline">Nazad na naslovnu</a></div>${footer()}`;
     const its = s.items.map(i => ({...i, camp: camp(i.source)}));
     const pg = its.filter(i => i.camp === "pro_government"), cr = its.filter(i => i.camp === "critical");
     const side = (list, k, title) => `<div class="side" style="border-top-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${title} · ${list.length}</h3>
-      ${list.length ? list.map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="t">${esc(i.title)}</div><div class="meta" style="margin-top:4px">${esc(src(i.source).name)} · ${clock(i.published)}</div></a>`).join("")
+      ${list.length ? list.map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="t">${esc(i.title)}</div><div class="meta" style="margin-top:4px">${logo(i.source, 16)}${esc(src(i.source).name)} · ${clock(i.published)}</div></a>`).join("")
         : `<div class="none">Nijedan ${k === "critical" ? "kritički" : "provladin"} medij nije objavio ovu vest.</div>`}</div>`;
     const p = s.split.pro_government || 0, c = s.split.critical || 0;
     const rest = ["public", "mixed", "international"].filter(k => s.split[k]).map(k => `${s.split[k]} ${form(s.split[k], k)}`).join(" i ");
@@ -377,16 +461,18 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
     const more = D.stories.filter(x => x.section === s.section && x.id !== s.id).slice(0, 3);
     return `${compactHeader(s.section)}
     <div class="subnav"><div class="wrap"><b style="color:var(--ink)">${esc(s.section)} ›</b>
-      <button data-go="poredjenje">Kako su naslovili</button><button data-go="hronologija">Hronologija</button><button data-go="pokrivenost">Pokrivenost</button><a href="#/izvori">Izvori</a></div></div>
+      ${s.ai ? '<button data-go="ukratko">Ukratko</button>' : ""}<button data-go="poredjenje">Kako su naslovili</button><button data-go="hronologija">Hronologija</button><button data-go="pokrivenost">Pokrivenost</button><a href="#/izvori">Izvori</a></div></div>
     <article class="story">
       <div class="col" style="padding-top:40px">
         ${kick(esc(s.section) + (s.blindspot ? " · " + EYE + "Slepa tačka" : ""), s.blindspot ? "amber" : "")}
         <h1 class="hl">${esc(s.headline)}</h1>
         ${s.summary ? `<p class="dek" style="color:var(--ink2);margin:0 0 22px">${esc(tidy(s.summary))}</p>` : ""}
+        ${(s.topics || []).length ? `<div class="chips" style="margin:0 0 16px">${s.topics.map(t => `<a class="chip" href="#/tema/${t}">${esc(topicName(t))}</a>`).join("")}</div>` : ""}
         <div class="byline"><div class="meta"><b style="color:var(--ink)">Priču prati ${s.sources} medija</b> · prvi objavio ${esc(src(s.broke).name)} u ${clock(s.first)} · poslednji članak u ${clock(its[its.length - 1].published)}</div>
           <button class="pill" id="share" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Podeli</span></button></div>
       </div>
       ${s.image ? `<figure class="wide" style="margin:28px auto 0">${photo(s, "16/9")}${s.image_source ? `<figcaption class="meta" style="margin-top:8px">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
+      ${aiBox(s)}
       <section id="pokrivenost" class="col" style="margin-top:36px" aria-label="Pokrivenost"><div class="covbox">
         <div><div class="kicker" style="color:var(--ink2)">Ko je objavio</div><div class="sent">${sentence}</div>${bar(s, 14)}${cov(s)}</div>
         <div>${ORDER.map(k => `<div class="row"><span>${dot(k)}${LAB[k]}</span><b>${s.split[k] || 0}</b></div>`).join("")}</div>
@@ -400,7 +486,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
       <section id="hronologija" class="col" style="margin-top:48px" aria-label="Hronologija">
         <h2 class="h2">Hronologija</h2>
         <p style="margin:0 0 22px;color:var(--ink2)">Kako se vest širila kroz medije.</p>
-        <ol class="tl">${its.map(i => `<li><div class="when">${clock(i.published)} <span>· ${dot(i.camp)}${esc(src(i.source).name)} · ${LAB[i.camp]}</span></div><a href="${esc(safe(i.url))}" target="_blank" rel="noopener">${esc(i.title)}</a></li>`).join("")}</ol>
+        <ol class="tl">${its.map(i => `<li><div class="when">${clock(i.published)} <span>· ${logo(i.source, 15)}${outletLink(i.source)} · ${dot(i.camp)}${LAB[i.camp]}</span></div><a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}">${esc(i.title)}</a></li>`).join("")}</ol>
       </section>
     </article>
     <div class="col">${newsletter()}</div>
@@ -445,7 +531,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
           ${hero.summary ? `<p class="dek" style="font-size:16px">${esc(tidy(hero.summary, 200))}</p>` : ""}
           ${bar(hero, 8)}${covPct(hero)}
           <div class="pub-list" style="margin-top:16px"><div class="kicker" style="color:var(--ink2)">Ko je objavio</div>
-          ${hero.items.filter(i => camp(i.source) === loudOf(hero)).slice(0, 4).map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener"><div class="meta">${dot(loudOf(hero))}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}</div>
+          ${hero.items.filter(i => camp(i.source) === loudOf(hero)).slice(0, 4).map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="meta">${dot(loudOf(hero))}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}</div>
         </div></section>` : `<div class="empty">Trenutno nema slepih tačaka u ovom izboru.</div>`;
     // near-blindspots: 6+ outlets, the quieter side has at most 15% and is not zero
     const near = D.stories.filter(s => !s.blindspot && s.sources >= 6).map(s => {
@@ -467,7 +553,7 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
     </main>${footer()}`;
   }
   function sources() {
-    const row = s => `<div class="src-row"><div><a href="${esc(safe(s.home))}" target="_blank" rel="noopener" style="font-weight:600">${esc(s.name)}</a>${s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="count">${s.stories} ${form(s.stories, "prica")}</span></div>`;
+    const row = s => `<div class="src-row"><div><a href="#/izvor/${encodeURIComponent(s.id)}" style="font-weight:600">${logo(s.id, 18)}${esc(s.name)}</a>${s.paused ? `<small>Pauzirano: ${esc(s.paused)}</small>` : s.owner ? `<small>${esc(tidy(s.owner, 120))}</small>` : s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="count">${s.paused ? "pauzirano" : s.stories + " " + form(s.stories, "prica")}</span></div>`;
     const block = k => {
       const list = D.sources.filter(s => s.camp === k).sort((a, b) => b.stories - a.stories);
       if (!list.length) return "";
@@ -477,37 +563,191 @@ footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px
         : list.map(row).join("");
       return `<section style="flex:1 1 400px;min-width:0"><div class="sec-head" style="margin-top:20px;border-top-color:${VAR[k]}"><h2 style="color:${VAR[k]}">${LAB[k]}</h2><span class="meta">${list.length}</span></div>${body}</section>`;
     };
-    return `${header("src")}<main class="wrap"><h1 class="page-h">Izvori i oznake</h1>
-      <p class="page-p">Pratimo ${D.sources.length} medija. Oznake su početne procene zasnovane na javnim analizama medijske scene (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i podložne su proveri. Međunarodni mediji se prikazuju, ali se ne računaju ni na jednu stranu.</p>
+    return `${header("src")}<main class="wrap"><h1 class="page-h">Izvori i vlasništvo</h1>
+      <p class="page-p">Pratimo ${D.sources.filter(s => !s.paused).length} medija. Kliknite na medij za njegov profil: vlasnik, izvor podatka, broj vesti i priče u kojima se pojavljuje. Oznake su početne procene zasnovane na javnim analizama medijske scene (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i podložne su proveri. Međunarodni mediji se prikazuju, ali se ne računaju ni na jednu stranu.</p>
       <div class="two">${block("pro_government")}${block("critical")}</div>
       <div class="two">${block("public")}${block("mixed")}${block("international")}</div></main>${footer()}`;
   }
-  function render() {
+  // ---------------------------------------------------------------- O nama, metodologija, balans
+  function about() {
+    const b = D.balance || {};
+    const mk = o => ({split: o || {}, sources: Object.values(o || {}).reduce((a, x) => a + x, 0)});
+    const row = (label, o) => `<div class="bal-row"><span>${label}</span><div>${bar(o, 12)}</div><span class="pp"><span class="c-pg">${share(o, "pro_government")}% provladini</span> · <span class="c-cr">${share(o, "critical")}% kritički</span></span></div>`;
+    const shown = mk(b.shown), coll = mk(b.collected), outl = mk(b.outlets);
+    const op = outl.split.pro_government || 0, oc = outl.split.critical || 0;
+    const live = D.sources.filter(s => !s.paused).length;
+    const u = (href, t) => `<a href="${href}" style="text-decoration:underline">${t}</a>`;
+    return `${header("about")}<main class="wrap"><div class="prose">
+      <h1 class="page-h">O nama</h1>
+      <p class="dek" style="font-size:21px">Obe strane pokazuje kako mediji u Srbiji izveštavaju o istim događajima. Na jednom mestu vidite ko je vest objavio, kako ju je naslovio i šta je ko prećutao.</p>
+      <p>U Srbiji ista vest često izgleda potpuno drugačije, u zavisnosti od toga koji medij čitate. Provladini i kritički mediji biraju različite teme, reči i sagovornike, a neke događaje jedna strana uopšte ne objavi. Mi ne pišemo vesti i ne govorimo vam šta da mislite. Povezujemo članke o istom događaju, pokazujemo ih uporedo i uz svaki dajemo link na izvorni tekst.</p>
+      <p>Projekat je nezavisan, neprofitan i u fazi prototipa. Kod je javan na ${u("https://github.com/SrdjanKn/obe-strane\" target=\"_blank\" rel=\"noopener", "GitHubu")}, pa svako može da proveri kako radi.</p>
+      <h2 id="metodologija">Kako radimo</h2>
+      <ol>
+        <li><b>Prikupljanje.</b> Više puta dnevno čitamo RSS izvore i naslovne strane ${live} medija i čuvamo naslov, uvod, vreme objave i link. Sport, zabavu i lifestyle preskačemo.</li>
+        <li><b>Grupisanje u priče.</b> Program poredi reči u naslovima i uvodima, na ćirilici i latinici, i spaja članke o istom događaju objavljene u razmaku do 30 sati. Prikazujemo samo priče koje je objavilo najmanje dva medija. Naslov priče je onaj koji je najsličniji svim ostalima, bez obzira iz kog je tabora.</li>
+        <li><b>Oznake medija.</b> Svaki medij ima početnu oznaku: provladin, kritički, javni servis, između kategorija ili međunarodni. Oznake se zasnivaju na javnim analizama (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i na podacima o vlasništvu. To su pretpostavke koje proveravamo, a ne presude. Ceo spisak je na stranici ${u("#/izvori", "Izvori")}.</li>
+        <li><b>Slepe tačke.</b> Priča je slepa tačka kada ju je objavilo najmanje tri medija, od toga bar dva sa jedne strane, a nijedan sa druge. Računa se samo ako su mediji te druge strane u to vreme bili praćeni i objavljivali druge vesti, da kvar u prikupljanju ne bi izgledao kao prećutkivanje.</li>
+        <li><b>Redosled vesti.</b> Priča je viša što je više medija prati i što je svežija: njena težina se prepolovi za svakih osam sati bez novog članka.</li>
+        <li><b>AI sažeci.</b> Za najveće priče AI model (${esc(D.ai_model || "Claude")}) piše kratak neutralan sažetak i opis toga kako je koja strana uokvirila vest. Model dobija samo naslove i uvode članaka, uz uputstvo da ne ocenjuje ko je u pravu i da ne dodaje činjenice. Sažeci su uvek označeni i mogu da sadrže greške.</li>
+        <li><b>Vlasništvo.</b> Podatke o vlasnicima uzimamo iz javnih izvora (State Media Monitor, CRTA, BIRN, istraživanja medija) i uz svaki navodimo izvor. Poslednja provera: novembar 2026.</li>
+      </ol>
+      <h2 id="balans">Naš balans</h2>
+      <p>Proveravamo i sami sebe. Ovo su brojevi za poslednjih ${D.hours} sati i računaju se automatski pri svakom ažuriranju.</p>
+    </div>
+    <div style="max-width:900px">${row("Prikazano na sajtu", shown)}${row("Prikupljeni članci", coll)}${row("Mediji koje pratimo", outl)}</div>
+    <div class="prose">
+      <p>Pratimo ${op} ${form(op, "pro_government")} i ${oc} ${form(oc, "critical")} ${form(oc, "medij")}. Kritičkih medija je više, ali su mnogi manji i objavljuju ređe, pa je broj objava dve strane ujednačeniji od broja medija. U jednoj priči svaki medij se računa samo jednom, koliko god članaka da je objavio.</p>
+      <h2>Ograničenja</h2>
+      <ul><li>Program grupiše vesti po rečima, pa ponekad spoji dve različite vesti ili razdvoji istu.</li>
+        <li>Neki mediji blokiraju automatsko čitanje. Te blokade ne zaobilazimo: takve medije pauziramo dok ne dobijemo RSS ili dozvolu redakcije.</li>
+        <li>Manji mediji objavljuju malo vesti, pa se ređe pojavljuju u pričama.</li></ul>
+      <h2>Kontakt</h2>
+      <p>Primedbe na oznake, vlasništvo ili grupisanje vesti su dobrodošle. Pišite nam preko ${u("https://github.com/SrdjanKn/obe-strane/issues\" target=\"_blank\" rel=\"noopener", "GitHuba")}.</p>
+    </div></main>${footer()}`;
+  }
+
+  // ---------------------------------------------------------------- jutarnji brifing
+  function briefingPage() {
+    const B = D.briefing;
+    if (!B) return `${header("brief")}<div class="wrap empty">Prvi brifing stiže sutra u 7 ujutru.</div>${footer()}`;
+    const dateStr = new Date(B.day + "T12:00:00").toLocaleDateString("sr-Latn-RS", {weekday: "long", day: "numeric", month: "long"});
+    const live = id => D.stories.some(s => s.id === id);
+    const q = (i, cls) => i ? `<a class="${cls}" ${out(i.url, i.source)}><div class="quote" style="font-size:16px">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${logo(i.source, 14)}${esc(src(i.source).name)}</div></a>` : "";
+    const framing = s => [["pro_government", s.ai.provladini], ["critical", s.ai.kriticki]].filter(x => x[1] && s.split[x[0]]).map(([k, t]) =>
+      `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${k === "pro_government" ? "Provladini" : "Kritički"}</h3><p style="font-size:15.5px">${esc(t)}</p></div>`).join("");
+    const item = (s, n) => `<article class="brief-item"><div class="no">${n}</div><div>
+        ${kick([esc(s.section), s.sources + " " + form(s.sources, "medij"), s.blindspot ? EYE + bsLabel(s.blindspot) : ""].filter(Boolean).join(" · "), s.blindspot ? "amber" : "")}
+        ${live(s.id) ? `<a href="#/vest/${s.id}"><h2 class="hl">${esc(s.headline)}</h2></a>` : `<h2 class="hl">${esc(s.headline)}</h2>`}
+        ${s.ai && s.ai.ukratko ? `<p style="margin:0 0 14px">${esc(s.ai.ukratko)}</p>` : s.summary ? `<p style="margin:0 0 14px;color:var(--ink2)">${esc(tidy(s.summary, 240))}</p>` : ""}
+        ${s.ai && (s.ai.provladini || s.ai.kriticki) ? `<div class="ai-two" style="margin-bottom:14px">${framing(s)}</div>` : (s.pg || s.cr) ? `<div class="quotes2">${q(s.pg, "q-pg")}${q(s.cr, "q-cr")}</div>` : ""}
+        ${bar(s, 6)}${cov(s)}</div></article>`;
+    const list = B.stories || [], bs = B.blindspots || [];
+    const mins = Math.max(3, Math.round((list.length + bs.length) * 0.6));
+    const anyAi = list.some(s => s.ai);
+    return `${header("brief")}<main class="col" style="max-width:820px">
+      <div class="brief-head">${kick("Jutarnji brifing · " + esc(dateStr))}<h1>Obe strane u 5 minuta</h1>
+        <p class="meta" style="font-size:14px;max-width:560px;margin:0 auto">${list.length} najvažnijih vesti iz poslednja 24 sata i kako ih je koja strana prenela. Izdanje se pravi jednom dnevno, u 7 ujutru. Čitanje: oko ${mins} minuta.</p></div>
+      ${list.map((s, i) => item(s, i + 1)).join("")}
+      ${bs.length ? `<div class="sec-head" style="border-top-color:var(--amber)"><h2 style="color:var(--amber);display:flex;align-items:center">${EYE}Prećutano</h2><span class="meta">objavila samo jedna strana</span></div>${bs.map((s, i) => item(s, list.length + i + 1)).join("")}` : ""}
+      ${anyAi ? `<p class="ai-note" style="margin-top:20px">Sažetke i opise uokviravanja napisao je AI model na osnovu naslova i uvoda članaka. Mogu da sadrže greške. <a href="#/o-nama/metodologija">Kako radimo</a></p>` : ""}
+      <div class="brief-end">To je sve za danas. Sledeće izdanje je sutra u 7.<br><a href="#/" class="sans" style="font-size:15px;font-style:normal;text-decoration:underline">Vesti tokom dana su na naslovnoj</a></div>
+    </main>${footer()}`;
+  }
+
+  // ---------------------------------------------------------------- profil medija
+  const CAMP_WHY = {pro_government: "Prema javnim analizama medijske scene, ovaj medij uglavnom prenosi stavove vlasti i retko je kritikuje.",
+    critical: "Prema javnim analizama medijske scene, ovaj medij redovno kritički izveštava o vlasti.",
+    public: "Javni medijski servis, finansiran iz takse i budžeta. Ne računa se ni na jednu stranu.",
+    mixed: "Ne pripada jasno nijednoj strani: uređivački je hibridan, poslovni ili specijalizovan.",
+    international: "Međunarodni medij na srpskom jeziku. Prikazuje se, ali se ne računa ni na jednu stranu."};
+  function outletPage(id) {
+    const s = D.sources.find(x => x.id === id);
+    if (!s) return `${header("src")}<div class="wrap empty">Nepoznat medij. <a href="#/izvori" style="text-decoration:underline">Svi izvori</a></div>${footer()}`;
+    const mine = D.stories.filter(x => x.items.some(i => i.source === id));
+    const srcLink = u => u ? `<a class="src-link" href="${esc(safe(u))}" target="_blank" rel="noopener">Izvor: ${esc(host(u))}</a>` : "";
+    const date = iso => new Date(iso).toLocaleDateString("sr-Latn-RS", {day: "numeric", month: "long"});
+    return `${header("src")}<main class="wide">
+      <div style="padding-top:28px">${kick(`<a href="#/izvori">Izvori</a> › <span style="color:${VAR[s.camp]}">${LAB[s.camp]}</span>${s.group ? " · " + esc(s.group) : ""}`)}
+        <h1 class="page-h" style="display:flex;align-items:center;gap:14px;margin-top:6px">${logo(id, 44)}${esc(s.name)}</h1>
+        <a class="meta" href="${esc(safe(s.home))}" target="_blank" rel="noopener" style="text-decoration:underline">${esc(host(s.home))} ↗</a></div>
+      ${s.paused ? `<div class="bs-note"><b>Pauzirano.</b> ${esc(s.paused)}</div>` : ""}
+      <div class="stats"><div><b>${s.a36}</b><span>članaka u poslednjih ${D.hours} h</span></div><div><b>${s.a7}</b><span>članaka u 7 dana</span></div>
+        <div><b>${s.stories}</b><span>${form(s.stories, "prica")} sa 2+ medija</span></div><div><b>${s.blind_loud}</b><span>slepih tačaka u kojima je objavio vest</span></div></div>
+      <div class="two" style="gap:24px">
+        <section style="flex:1 1 380px;min-width:0"><div class="box"><h2>Vlasništvo</h2>
+          ${s.owner ? `<p>${esc(s.owner)}</p>${srcLink(s.owner_src)}` : `<p style="color:var(--ink2)">Podatke o vlasništvu još nismo proverili. Ako imate pouzdan izvor, <a href="https://github.com/SrdjanKn/obe-strane/issues" target="_blank" rel="noopener" style="text-decoration:underline">javite nam</a>.</p>`}
+          ${s.public_money ? `<p style="margin-top:14px"><b class="sans" style="font-size:14px">Javni novac:</b> ${esc(s.public_money)}</p>${srcLink(s.public_money_src)}` : ""}
+        </div></section>
+        <section style="flex:1 1 380px;min-width:0"><div class="box" style="border-top-color:${VAR[s.camp]}"><h2 style="color:${VAR[s.camp]}">Oznaka: ${LAB[s.camp]}</h2>
+          <p>${CAMP_WHY[s.camp] || ""} Oznaka je početna procena koju proveravamo.</p>${s.note ? `<p style="color:var(--ink2)">${esc(s.note)}</p>` : ""}
+          ${s.sections.length ? `<div class="meta" style="margin-top:10px">Najčešće rubrike</div><div class="chips">${s.sections.map(n => `<a class="chip" href="#/rubrika/${encodeURIComponent(n)}">${esc(n)}</a>`).join("")}</div>` : ""}
+        </div></section>
+      </div>
+      ${mine.length ? `<div class="sec-head"><h2>Priče u kojima se pojavljuje</h2><span class="meta">${mine.length}</span></div><div class="grid3">${mine.slice(0, 12).map(x => listItem(x, true)).join("")}</div>` : ""}
+      ${s.recent.length ? `<div class="sec-head"><h2>Najnoviji članci</h2><span class="meta">poslednjih 7 dana</span></div>${s.recent.map(r => `<a class="li" ${out(r.url, id)}><div class="meta">${date(r.published)} u ${clock(r.published)}</div><div class="hl" style="margin-top:4px">${esc(r.title)}</div></a>`).join("")}` : ""}
+    </main>${footer()}`;
+  }
+
+  // ---------------------------------------------------------------- teme
+  function topicPage(slug) {
+    const t = (D.topics || []).find(x => x.slug === slug);
+    const list = D.stories.filter(s => (s.topics || []).includes(slug));
+    if (!t || !list.length) return `${header("topic")}<div class="wrap empty">Trenutno nema vesti na ovu temu. <a href="#/" style="text-decoration:underline">Nazad na naslovnu</a></div>${footer()}`;
+    const agg = sumSplit(list), bs = list.filter(s => s.blindspot).length;
+    const p = agg.split.pro_government || 0, c = agg.split.critical || 0;
+    const who = p && c ? (Math.abs(p - c) <= Math.max(1, (p + c) * .1) ? "Obe strane podjednako prate ovu temu" : p > c ? "Ovu temu više prate provladini mediji" : "Ovu temu više prate kritički mediji") : "Ovu temu prati samo jedna strana";
+    const bsWord = bs === 1 ? "slepa tačka" : bs < 5 ? "slepe tačke" : "slepih tačaka";
+    return `${header("topic")}<main class="wrap">
+      <div style="padding-top:22px">${kick("Tema")}</div><h1 class="page-h" style="margin-top:0">${esc(t.name)}</h1>
+      <p class="page-p">${list.length} ${form(list.length, "prica")} u poslednjih ${D.hours} sati. ${who}: ${p} ${form(p, "pro_government")} i ${c} ${form(c, "critical")} ${form(c || p, "medij")}${bs ? `, uz ${bs} ${bsWord}` : ""}.</p>
+      <div style="max-width:720px">${bar(agg, 12)}<div class="cov"><span class="pg"><b>${share(agg, "pro_government")}%</b> provladini</span><span>${agg.sources} objava</span><span class="cr"><b>${share(agg, "critical")}%</b> kritički</span></div></div>
+      <div class="strip" style="margin-top:30px">${list.slice(0, 4).map(stripCard).join("")}</div>
+      ${list.length > 4 ? `<div class="grid3" style="margin-top:28px">${list.slice(4).map(s => listItem(s, true)).join("")}</div>` : ""}
+    </main>${footer()}`;
+  }
+
+  // ---------------------------------------------------------------- moja medijska ishrana
+  function dietPage() {
+    const d = diet(), cut = Date.now() - 30 * 864e5;
+    const reads = d.reads.filter(r => r.t > cut), views = d.views.filter(r => r.t > cut);
+    const split = {}; reads.forEach(r => split[r.c] = (split[r.c] || 0) + 1);
+    const o = {split, sources: reads.length};
+    const top = Object.entries(reads.reduce((m, r) => (m[r.s] = (m[r.s] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const p = share(o, "pro_government"), c = share(o, "critical");
+    const lean = Math.abs(p - c) <= 15 ? "Čitate obe strane približno podjednako." : p > c ? "Više čitate provladine medije." : "Više čitate kritičke medije.";
+    const weak = p > c ? "critical" : "pro_government";
+    const sugg = D.stories.filter(s => (s.split[weak] || 0) >= 1).slice(0, 6);
+    const bsViews = new Set(views.filter(v => v.bs).map(v => v.id)).size;
+    const n = reads.length, word = n % 10 === 1 && n % 100 !== 11 ? "otvorenog članka" : "otvorenih članaka";
+    const body = !n ? `<div class="box"><h2>Još nema podataka</h2><p>Kada otvorite članke iz priča (naslove koji vode na izvorne medije), ovde ćete videti sa koje strane najviše čitate.</p><a class="btn dark" href="#/">Na naslovnu</a></div>` : `
+      <div class="box"><h2>Šta čitate</h2><p style="font-size:20px">${lean} Od ${n} ${word}, ${p}% je iz provladinih, a ${c}% iz kritičkih medija.</p>${bar(o, 14)}
+        <div style="margin-top:12px">${ORDER.filter(k => split[k]).map(k => `<div class="src-row"><span>${dot(k)}${LAB[k]}</span><b>${split[k]}</b></div>`).join("")}</div></div>
+      <div class="two" style="gap:24px">
+        <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Najčešći izvori</h2>${top.map(([sid, k]) => `<div class="src-row"><a href="#/izvor/${encodeURIComponent(sid)}">${logo(sid, 18)}${esc(src(sid).name)}</a><span class="count">${k}</span></div>`).join("")}</div></section>
+        <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Slepe tačke</h2><p>Otvorili ste ${bsViews} ${bsViews === 1 ? "priču koja je slepa tačka" : "priča koje su slepe tačke"}.</p><a class="src-link" href="#/slepe-tacke">Šta je koja strana prećutala →</a></div></section>
+      </div>
+      ${sugg.length ? `<div class="sec-head"><h2>Proširite vidike</h2><span class="meta">kako su iste priče preneli ${weak === "critical" ? "kritički" : "provladini"} mediji</span></div><div class="grid3">${sugg.map(s => {
+        const i = s.items.find(x => camp(x.source) === weak);
+        return `<div class="li"><a href="${link(s)}"><div class="hl">${esc(s.headline)}</div></a>${i ? `<a ${out(i.url, i.source)} class="meta" style="display:block;margin-top:6px">${logo(i.source, 14)}${esc(src(i.source).name)}: „${esc(tidy(i.title, 90))}“ ↗</a>` : ""}</div>`;
+      }).join("")}</div>` : ""}
+      <p style="margin-top:28px"><button class="btn" id="diet-clear" type="button">Obriši moje podatke</button></p>`;
+    return `${header("diet")}<main class="wide"><h1 class="page-h">Moja medijska ishrana</h1>
+      <p class="page-p">Koje medije čitate preko Obe strane u poslednjih 30 dana. Podaci se čuvaju samo u ovom pregledaču i nigde se ne šalju.</p>${body}</main>${footer()}`;
+  }
+
+  function render(nav) {
     if (!D) { app.innerHTML = `<div class="wrap empty">Podaci se još prikupljaju.</div>`; return; }
     const [page, ...rest] = location.hash.split("?")[0].replace(/^#\/?/, "").split("/");
     const arg = decodeURIComponent(rest.join("/"));
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
-      : page === "izvori" ? sources() : page === "pretraga" ? search(arg) : home();
+      : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
+      : page === "o-nama" ? about() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
+      : page === "moja-ishrana" ? dietPage() : home();
+    if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const f = document.getElementById("search");
     if (f) f.addEventListener("submit", e => { e.preventDefault(); const v = document.getElementById("q").value.trim(); if (v) location.hash = "#/pretraga/" + encodeURIComponent(v); });
     const nl = document.getElementById("nl");
-    if (nl) nl.addEventListener("submit", e => { e.preventDefault(); nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala! Bilten kreće uskoro.</p>'; });
+    if (nl) nl.addEventListener("submit", e => { e.preventDefault(); nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala na interesovanju! Prijava e-poštom još nije uključena, pa adresu nismo sačuvali. Do tada je brifing svako jutro ovde.</p>'; });
+    const clr = document.getElementById("diet-clear");
+    if (clr) clr.addEventListener("click", () => { try { localStorage.removeItem(DIET); } catch (_) {} render(); });
     const sh = document.getElementById("share");
     if (sh) sh.addEventListener("click", async () => {
       try { if (navigator.share) await navigator.share({title: document.title, url: location.href}); else { await navigator.clipboard.writeText(location.href); sh.querySelector("span").textContent = "Link kopiran"; } } catch (_) {}
     });
     document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => { const t = document.getElementById(b.dataset.go); if (t) t.scrollIntoView({behavior: "smooth"}); }));
     const st = page === "vest" && D.stories.find(x => x.id === arg);
+    if (nav && st) { const d = diet(); d.views.push({id: st.id, bs: !!st.blindspot, t: Date.now()}); saveDiet(d); }
     document.title = st ? `${st.headline} — Obe strane` : "Obe strane — ista vest, dve strane";
   }
-  window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+  window.addEventListener("hashchange", () => { render(true); if (!/^#\/o-nama\/./.test(location.hash)) window.scrollTo(0, 0); });
   setInterval(() => {
     const s = document.createElement("script");
     s.src = "data.js?t=" + Date.now();
     s.onload = () => { const y = window.scrollY; D = window.NEWS_DATA; render(); window.scrollTo(0, y); s.remove(); };
     document.body.appendChild(s);
   }, 5 * 60 * 1000);
-  render();
+  render(true);
 })();
 </script>
 </body>

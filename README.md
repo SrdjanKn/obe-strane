@@ -81,3 +81,14 @@ Notes:
 - GitHub's servers are in the US. If an outlet blocks them, the Actions log shows that outlet as
   FAILED. The fallback is a small EU server (e.g. Hetzner, ~€4/month) running
   `python3 collector.py watch` and serving `site/` with any static web server.
+
+## AI summaries (optional)
+
+Add a repository secret `ANTHROPIC_API_KEY` (Settings → Secrets and variables → Actions) to turn on the
+"Ukratko" summaries and the camp framing on story pages and in the morning briefing. Only the ~25 biggest
+stories are summarised, and each one again only when 3+ new outlets join it. Without the key the site works
+the same, just without those boxes. Model: `OBE_AI_MODEL` (default `claude-haiku-5-5`).
+
+## Logos
+
+Drop `site/logos/<source id>.png` (or .svg/.jpg/.webp, square, 128px+) and push; it replaces the site icon.
