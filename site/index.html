@@ -105,6 +105,25 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .strip>a{flex:1 1 230px;min-width:0}
 .strip .hl{font-size:19px;line-height:1.28;margin:0 0 10px}
 .band{background:var(--ink);color:#fff;margin-top:44px}
+.bsday{background:var(--amber-bg);border-top:6px solid var(--amber);border-bottom:1px solid #ecdcc9;margin-top:48px}
+.bd-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;padding-top:40px;padding-bottom:48px}
+.bd-kick{display:flex;align-items:center;color:var(--amber);font:700 15px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:18px}
+.bd-h{margin:0 0 16px;font:700 clamp(28px,3.6vw,44px)/1.12 var(--head);color:var(--ink)}
+.bd-dek{margin:0 0 26px;font:400 19px/1.5 var(--serif);color:var(--ink2)}
+.bd-dek b{color:var(--ink);font-weight:600}
+.bd-meter{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:520px}
+.bd-num{font:700 54px/1 var(--head);margin-bottom:10px}
+.bd-bar{height:12px;border-radius:2px;box-sizing:border-box}
+.bd-bar.gone{border:2px dashed;background:transparent}
+.bd-lab{margin-top:8px;font:600 13px var(--sans);color:var(--ink2)}
+.bd-sub{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+.bd-ai{margin-top:28px;padding-top:18px;border-top:1px solid #e3cdb3}
+.bd-ai p{margin:0 0 12px;font:400 17px/1.5 var(--serif)}
+.bd-ai .bd-frame{border-left:3px solid;padding-left:12px}
+.bd-ai .bd-note{font:400 12px var(--sans);color:var(--ink3);margin:0}
+.bd-item{display:block;padding:12px 0;border-top:1px solid #e3cdb3}
+.bd-item .t{margin-top:5px;font:600 18px/1.3 var(--head);color:var(--ink)}
+@media (max-width:900px){.bd-grid{grid-template-columns:minmax(0,1fr);gap:28px;padding-top:28px;padding-bottom:32px}.bd-num{font-size:42px}}
 .band .wrap{padding-top:48px;padding-bottom:52px;display:flex;flex-wrap:wrap;gap:40px}
 .band h2{margin:0 0 16px;font:700 clamp(26px,3.4vw,38px)/1.15 var(--head);color:#fff}
 .band p{margin:0 0 26px;font:400 18px/1.55 var(--serif);color:#d0d0d4}
@@ -400,7 +419,8 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
     const nPg = quietCr.length ? 3 : 5, nCr = quietPg.length ? 3 : 5;
     const group = (list, n, k, title) => list.length ? `<div class="bs-group"><h3 style="color:${VAR[k]};border-color:${VAR[k]}">${title}</h3>${list.slice(0, n).map(railItem).join("")}</div>` : "";
     const strip = pick(4, 8);
-    const bsDay = bs.slice().sort((a, b) => b.sources - a.sources)[0];
+    const bsTop = bs.slice().sort((a, b) => b.sources - a.sources).slice(0, 3);
+    const bsDay = bsTop.find(s => s.image) || bsTop[0];   // the biggest one, preferring one with a sharp photo
     const counts = SECTION_ORDER.map(n => [n, S.filter(s => s.section === n && !used.has(s.id)).length]).filter(x => x[1] >= 2).sort((a, b) => b[1] - a[1]);
     const secBlocks = counts.slice(0, 2).map(([n]) => {
       const [l, ...rest] = take(S.filter(s => s.section === n), 4);
@@ -442,22 +462,27 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   }
   function bsBand(s) {
     const silent = s.blindspot, loud = silent === "pro_government" ? "critical" : "pro_government";
-    const n = s.split[loud] || 0;
-    const items = s.items.filter(i => camp(i.source) === loud).slice(0, 5);
-    const word = (k, x) => form(x, k);
-    return `<section class="band" aria-label="Slepa tačka dana"><div class="wrap">
-      <div style="flex:1 1 420px;min-width:0">
-        <div style="display:flex;align-items:center;color:var(--amber-on-dark);font:700 13px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:16px">${EYE}Slepa tačka dana</div>
-        <a href="${link(s)}"><h2>${esc(s.headline)}</h2></a>
-        <p>Ovu vest ${n === 1 ? "objavio je" : "objavilo je"} ${n} ${word(loud, n)} ${form(n, "medij")}. Nijedan ${silent === "critical" ? "kritički" : "provladin"} medij je nije preneo.</p>
-        <div style="display:flex;gap:40px">
-          <div><div class="num">${n}</div><div class="num-rule" style="background:${VAR[loud]}"></div><div class="sans" style="font-size:13px;color:#b8b8bd">${word(loud, n)}</div></div>
-          <div><div class="num">0</div><div class="num-rule" style="background:${VAR[silent]}"></div><div class="sans" style="font-size:13px;color:#b8b8bd">${word(silent, 0)}</div></div>
-        </div>
+    const n = s.split[loud] || 0, others = s.sources - n;
+    const items = s.items.filter(i => camp(i.source) === loud).slice(0, 4);
+    const sideWord = k => k === "pro_government" ? "provladin" : "kritički";
+    const ai = s.ai && s.ai.ukratko ? s.ai : null;
+    const loudFrame = ai && (loud === "pro_government" ? ai.provladini : ai.kriticki);
+    const big = k => k === silent
+      ? `<div class="bd-side"><div class="bd-num" style="color:${VAR[k]}">0</div><div class="bd-bar gone" style="border-color:${VAR[k]}"></div><div class="bd-lab">${form(0, k)} ${form(0, "medij")}</div></div>`
+      : `<div class="bd-side"><div class="bd-num" style="color:${VAR[k]}">${n}</div><div class="bd-bar" style="background:${VAR[k]}"></div><div class="bd-lab">${form(n, k)} ${form(n, "medij")}</div></div>`;
+    return `<section class="bsday" aria-label="Slepa tačka dana"><div class="wrap bd-grid">
+      <div class="bd-text">
+        <a href="#/slepe-tacke" class="bd-kick">${EYE}Slepa tačka dana</a>
+        <a href="${link(s)}"><h2 class="bd-h">${esc(s.headline)}</h2></a>
+        <p class="bd-dek">Ovu vest ${n === 1 ? "objavio je" : "objavilo je"} ${n} ${form(n, loud)} ${form(n, "medij")}${others ? ` (i još ${others} ${others === 1 ? "drugi" : "drugih"})` : ""}. <b>Nijedan ${sideWord(silent)} medij je nije preneo.</b></p>
+        <div class="bd-meter">${big("pro_government")}${big("critical")}</div>
+        ${ai ? `<div class="bd-ai"><div class="bd-sub">Ukratko</div><p>${esc(ai.ukratko)}</p>${loudFrame ? `<p class="bd-frame" style="border-left-color:${VAR[loud]}"><b style="color:${VAR[loud]}">Kako su je preneli ${loud === "pro_government" ? "provladini" : "kritički"}:</b> ${esc(loudFrame)}</p>` : ""}<p class="bd-note">Sažetak je napisao AI model na osnovu naslova i uvoda.</p></div>` : ""}
+        <a class="btn dark" href="${link(s)}" style="margin-top:22px">Cela priča</a>
       </div>
-      <div style="flex:1 1 380px;min-width:0">
-        <div style="font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#b8b8bd;margin-bottom:6px">Ko je objavio</div>
-        ${items.map(i => `<a class="item" href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="src">${dot(loud)}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}
+      <div class="bd-side-col">
+        ${s.image ? `<figure style="margin:0">${photo(s, "16/10")}${s.image_source ? `<figcaption class="meta" style="margin-top:7px">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
+        <div class="bd-sub" style="margin-top:${s.image ? 22 : 0}px">Ko je objavio</div>
+        ${items.map(i => `<a class="bd-item" ${out(i.url, i.source)}><div class="meta">${logo(i.source, 15)}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}
       </div></div></section>`;
   }
 
