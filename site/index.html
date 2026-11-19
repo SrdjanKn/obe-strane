@@ -313,7 +313,9 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   const initials = n => String(n).replace(/[^\p{L}\p{N} ]/gu, "").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
   // outlet logo: our own file in site/logos/<id>.png if present, otherwise the site's icon; initials underneath as fallback
   function logo(id, size = 18) {
-    const s = src(id), url = s.logo || (s.home ? `https://icons.duckduckgo.com/ip3/${host(s.home)}.ico` : "");
+    const s = src(id);
+    if (s.logo) return `<img class="lg" src="${esc(s.logo)}" alt="" aria-hidden="true" width="${size}" height="${size}" style="width:${size}px;height:${size}px;background:none;border-radius:${Math.max(3, Math.round(size * .1))}px">`;
+    const url = s.home ? `https://icons.duckduckgo.com/ip3/${host(s.home)}.ico` : "";
     return `<span class="lg" style="width:${size}px;height:${size}px;font-size:${Math.max(8, Math.round(size * .4))}px" aria-hidden="true">${esc(initials(s.name))}${url ? `<img src="${esc(url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>`;
   }
   const outletLink = id => `<a href="#/izvor/${encodeURIComponent(id)}" style="text-decoration:underline;text-underline-offset:2px">${esc(src(id).name)}</a>`;
