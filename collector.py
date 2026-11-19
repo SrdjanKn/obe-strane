@@ -671,7 +671,10 @@ def ai_summaries(con, stories, top=25, max_calls=15):
     calls = made = 0
     have_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
     for s in [s for s in stories if s["sources"] >= 3][:top]:
-        old = cached.get(s["id"])
+        # a story's id comes from its earliest article; if an even earlier one joins, the id changes,
+        # so also look for a summary cached under any of its articles
+        old = cached.get(s["id"]) or next((cached[k] for k in (hashlib.sha1(a["url"].encode()).hexdigest()[:10]
+                                                                for a in s["items"]) if k in cached), None)
         if old and s["sources"] < old[0] + 3:
             s["ai"] = old[1]
             continue
@@ -698,6 +701,8 @@ def ai_summaries(con, stories, top=25, max_calls=15):
     con.commit()
     if calls:
         print(f"  AI summaries: {made} new, {calls - made} failed")
+    for s in stories[:10]:
+        print(f"  {'AI' if s.get('ai') else '--'} {s['sources']:3d} {s['id']} {s['headline'][:70]}")
 
 
 # ---------------------------------------------------------------- daily briefing
