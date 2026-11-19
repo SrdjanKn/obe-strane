@@ -751,6 +751,100 @@ def blind_key(s):
     return s["blindspot"] and ("pro_government" if s["blindspot"].endswith("pro-government outlets") else "critical")
 
 
+# ---------------------------------------------------------------- cover image quality
+
+IMG_MIN_W, IMG_MIN_H, IMG_MAX_BLUR = 600, 330, 0.6
+WP_SIZE = re.compile(r"-\d{2,4}x\d{2,4}(?=\.(?:jpe?g|png|webp)\b)", re.I)
+
+
+def image_quality(url):
+    """(width, height, blur) of an image. blur compares edge detail before and after halving the resolution,
+    at the size the site shows it (900px): ~0.2-0.4 for a sharp photo, 0.85+ for a small or soft one that would
+    look blurry. It works the same for busy and plain photos."""
+    from PIL import Image, ImageFilter, ImageStat
+    import io
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "image/*"})
+    with urllib.request.urlopen(req, timeout=12) as r:
+        data = r.read(8_000_000)
+    im = Image.open(io.BytesIO(data))
+    w, h = im.size
+    g = im.convert("L")
+    g = g.resize((900, max(1, round(h * 900 / w))), Image.BICUBIC)
+    var = lambda x: ImageStat.Stat(x.filter(ImageFilter.FIND_EDGES)).var[0]
+    low = g.resize((450, max(1, g.height // 2)), Image.BILINEAR).resize(g.size, Image.BICUBIC)
+    return w, h, round(var(low) / max(var(g), 1e-6), 3)
+
+
+def good_image(q):
+    w, h, blur = q
+    return w >= IMG_MIN_W and h >= IMG_MIN_H and 0.9 <= w / h <= 2.4 and blur <= IMG_MAX_BLUR
+
+
+def choose_images(con, stories, top=120):
+    """Give each story the best sharp, large-enough photo among its articles' images. Feed thumbnails are
+    often tiny, so we also try the full-size WordPress original and, if needed, the articles' og:image.
+    Stories with no good photo get none: the site shows a clean placeholder instead of a blurry picture."""
+    try:
+        import PIL  # noqa: F401
+    except ImportError:
+        print("  Pillow missing: image quality check skipped")
+        return
+    con.execute("CREATE TABLE IF NOT EXISTS img_q(url TEXT PRIMARY KEY, w INTEGER, h INTEGER, blur REAL, checked TEXT)")
+    con.execute("CREATE TABLE IF NOT EXISTS og_img(url TEXT PRIMARY KEY, img TEXT)")
+    known = {u: (w, h, b) for u, w, h, b in con.execute("SELECT url, w, h, blur FROM img_q")}
+    now = datetime.now(timezone.utc).isoformat()
+
+    def measure(urls):
+        new = [u for u in dict.fromkeys(urls) if u and u not in known]
+        with ThreadPoolExecutor(max_workers=16) as ex:
+            for u, q in zip(new, ex.map(lambda u: _try(image_quality, u), new)):
+                known[u] = q or (0, 0, 1.0)
+                con.execute("INSERT OR REPLACE INTO img_q VALUES (?,?,?,?,?)", (u, *known[u], now))
+
+    def cands(s):
+        out = []
+        for a in s["items"]:
+            if a["image"]:
+                full = WP_SIZE.sub("", a["image"])
+                out += [(full, a["source"])] if full != a["image"] else []
+                out.append((a["image"], a["source"]))
+        return out
+
+    shown = stories[:top]
+    measure([u for s in shown for u, _ in cands(s)])
+    # stories still without a good photo: look at the og:image of up to 3 of their articles
+    og = dict(con.execute("SELECT url, img FROM og_img"))
+    need = [a for s in shown if not any(good_image(known[u]) for u, _ in cands(s))
+            for a in s["items"][:3] if a["url"] not in og]
+    with ThreadPoolExecutor(max_workers=16) as ex:
+        for a, res in zip(need, ex.map(lambda a: _try(enrich_article, a["url"]), need)):
+            og[a["url"]] = (res[2] if res else "") or ""
+            con.execute("INSERT OR REPLACE INTO og_img VALUES (?,?)", (a["url"], og[a["url"]]))
+    measure([og.get(a["url"]) for s in shown for a in s["items"][:3]])
+
+    kept = 0
+    for i, s in enumerate(stories):
+        s["image"], s["image_source"] = "", ""
+        if i >= top:
+            continue
+        pool = cands(s) + [(og[a["url"]], a["source"]) for a in s["items"][:3] if og.get(a["url"])]
+        good = [(u, src) for u, src in pool if good_image(known.get(u, (0, 0, 1)))]
+        if good:   # biggest sharp one wins
+            u, src = max(good, key=lambda x: (min(known[x[0]][0], 1600), -known[x[0]][2]))
+            s["image"], s["image_source"] = u, src
+            kept += 1
+    con.execute("DELETE FROM img_q WHERE checked < ?", ((datetime.now(timezone.utc) - timedelta(days=3)).isoformat(),))
+    con.commit()
+    print(f"  Cover photos: {kept} of {min(top, len(stories))} stories have a sharp photo")
+
+
+def _try(fn, arg):
+    try:
+        return fn(arg)
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------- site export
 
 def export_site(hours=36):
@@ -758,6 +852,7 @@ def export_site(hours=36):
     camps, stories, n_articles = build_stories(hours)
     sources = all_sources()
     con = db()
+    choose_images(con, stories)
     ai_summaries(con, stories)
     brief, brief_days = briefing(con, stories, n_articles)
     now = datetime.now(timezone.utc)

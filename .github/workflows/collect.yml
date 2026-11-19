@@ -39,7 +39,9 @@ jobs:
       - name: Collect and build
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # optional: AI summaries are skipped without it
-        run: python3 collector.py run
+        run: |
+          pip install --quiet pillow   # for the cover-photo quality check
+          python3 collector.py run
 
       - name: Save article database
         uses: actions/cache/save@v4

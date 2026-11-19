@@ -370,12 +370,15 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
     if (!S.length) return `${header("home")}<div class="wrap empty">Još nema dovoljno podataka. Sledeće prikupljanje je za najviše 15 minuta.</div>${footer()}`;
     const used = new Set();
     const take = (list, n) => list.filter(s => !used.has(s.id)).slice(0, n).map(s => (used.add(s.id), s));
-    const [top] = take(S, 1);
+    // stories with a sharp photo go first where a photo is shown big (lead, photo strip)
+    const pick = (n, win) => { const pool = S.filter(s => !used.has(s.id)).slice(0, win);
+      const sel = [...pool.filter(s => s.image), ...pool.filter(s => !s.image)].slice(0, n); sel.forEach(s => used.add(s.id)); return sel; };
+    const [top] = pick(1, 3);
     const sideList = take(S, 2);
     const under = take(S, 2);
     const bs = S.filter(s => s.blindspot);
     const rail = [...bs.filter(s => s.blindspot === "pro_government").slice(0, 3), ...bs.filter(s => s.blindspot === "critical").slice(0, 3)].slice(0, 5);
-    const strip = take(S, 4);
+    const strip = pick(4, 8);
     const bsDay = bs.slice().sort((a, b) => b.sources - a.sources)[0];
     const counts = SECTION_ORDER.map(n => [n, S.filter(s => s.section === n && !used.has(s.id)).length]).filter(x => x[1] >= 2).sort((a, b) => b[1] - a[1]);
     const secBlocks = counts.slice(0, 2).map(([n]) => {
