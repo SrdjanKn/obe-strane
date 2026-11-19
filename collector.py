@@ -835,7 +835,14 @@ def choose_images(con, stories, top=120):
             kept += 1
     con.execute("DELETE FROM img_q WHERE checked < ?", ((datetime.now(timezone.utc) - timedelta(days=3)).isoformat(),))
     con.commit()
-    print(f"  Cover photos: {kept} of {min(top, len(stories))} stories have a sharp photo")
+    used = [known[u] for s in shown for u, _ in cands(s) + [(og.get(a["url"]), "") for a in s["items"][:3]] if u in known]
+    small = sum(1 for w, h, b in used if w and (w < IMG_MIN_W or h < IMG_MIN_H))
+    soft = sum(1 for w, h, b in used if w >= IMG_MIN_W and h >= IMG_MIN_H and b > IMG_MAX_BLUR)
+    print(f"  Cover photos: {kept} of {min(top, len(stories))} stories have a sharp photo "
+          f"(rejected {small} too small, {soft} too blurry, {sum(1 for q in used if not q[0])} unreadable, of {len(used)} checked)")
+    for s in shown[:8]:
+        q = known.get(s["image"])
+        print(f"    {s['headline'][:50]:50s} {s['image_source'] or '-':12s} {q}")
 
 
 def _try(fn, arg):
