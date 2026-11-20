@@ -261,6 +261,72 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   .compact-head .logo{font-size:24px}
   .story .dek{font-size:18px}
 }
+/* ---------- Home layout: cards | lead photo with headline inside | Slepe tačke list ---------- */
+.lv{padding-top:26px}
+.lv-top{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 28px;align-items:start}
+.lv-left{grid-column:1/4;grid-row:1;min-width:0}
+.lv-hero{grid-column:4/10;grid-row:1;min-width:0}
+.lv-right{grid-column:10/13;grid-row:1;min-width:0}
+.lv-card{display:block}
+.lv-card .ph{margin-bottom:12px}
+.lv-card .hl{font-size:21px;line-height:1.22;margin:0 0 8px}
+.lv-left .lv-card+.lv-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--rule)}
+.lv-left .lv-card+.li{margin-top:22px}
+.lv-under .cov+.kicker,.lv-under .cov+div{margin-top:18px}
+.lv-dek{margin:0 0 10px;font:400 16px/1.45 var(--serif);color:var(--ink2)}
+.lv-over{position:relative;display:block;color:#fff;overflow:hidden;background:var(--ink)}
+.lv-over .ph span{display:none}
+.lv-over::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(18,18,18,0) 30%,rgba(18,18,18,.55) 55%,rgba(18,18,18,.92));pointer-events:none}
+.lv-over-txt{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:0 32px 28px;text-align:center}
+.lv-over .kicker{color:#fff;opacity:.9}
+.lv-over h1,.lv-over h2,.lv-over h3{margin:0 auto;max-width:18ch;font:700 46px/1.06 var(--head);letter-spacing:-.015em;color:#fff;text-wrap:balance}
+.lv-over .long{font-size:36px;max-width:22ch}
+.lv-over h3{font-size:30px;max-width:20ch}
+.lv-over-meta{margin-top:12px;font:500 13px/1.4 var(--sans);color:#fff;opacity:.85}
+.lv-over:hover h2,.lv-over:hover h3{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+.lv-under{margin-top:16px}
+.lv-under .quotes2{margin-top:14px}
+.lv-right .bs-panel .rail-item{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:12px;align-items:start}
+.lv-right .bs-panel .rail-item.no-pic{grid-template-columns:minmax(0,1fr)}
+.lv-right .rail-item .ph{aspect-ratio:1/1!important}
+.lv-right .rail-item .ph span{display:none}
+.lv-row{display:grid;grid-template-columns:minmax(0,1fr) 104px;gap:16px;padding:16px 0;border-top:1px solid var(--rule)}
+.lv-row.no-pic{grid-template-columns:minmax(0,1fr)}
+.lv-row .hl{font-size:19px;line-height:1.25;margin:0 0 8px}
+.lv-row .ph{aspect-ratio:1/1!important}
+.lv-row .ph span{display:none}
+.lv-list .lv-row:first-child{border-top:0;padding-top:0}
+.lv-pair{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 28px;align-items:start}
+.lv-pair>.c4{grid-column:1/5;min-width:0}
+.lv-pair>.c8{grid-column:5/13;min-width:0}
+.lv-pair>.c12{grid-column:1/-1;min-width:0}
+.lv-sec-p{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,3fr);gap:0 28px;align-items:start}
+.lv-sec-p .lv-card+.lv-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--rule)}
+.lv-sec-k{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px;align-items:start}
+.lv-sec-k>.lv-over{grid-column:1/5;grid-row:1/3}
+.lv-sec-k>.lv-wide{grid-column:5/13}
+.lv-sec-k>.lv-trio{grid-column:5/13;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 28px}
+.lv-wide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
+.lv-wide .hl{font-size:26px;line-height:1.18;margin:0 0 10px}
+@media (max-width:1080px){
+  .lv-left{grid-column:1/5}.lv-hero{grid-column:5/13}.lv-right{grid-column:1/-1;grid-row:2;margin-top:36px}
+  .lv-over h2{font-size:38px}.lv-over .long{font-size:30px}
+  .lv-pair>.c4,.lv-pair>.c8{grid-column:1/-1}
+}
+@media (max-width:760px){
+  .lv{padding-top:12px}
+  .lv-top,.lv-pair,.lv-sec-k,.lv-sec-p{display:block}
+  .lv-hero{margin:0 -16px}.lv-under{padding:0 16px}
+  .lv-left{margin-top:30px}
+  .lv-over-txt{padding:0 18px 20px}
+  .lv-over h2,.lv-over .long{font-size:29px;max-width:none}.lv-over h3{font-size:25px;max-width:none}
+  .lv-over .ph{aspect-ratio:4/5!important}
+  .lv-sec-p>.lv-over{margin-bottom:22px}
+  .lv-sec-k>*+*{margin-top:24px}
+  .lv-wide{grid-template-columns:minmax(0,1fr);gap:12px}.lv-wide .hl{font-size:21px}
+  .lv-trio{display:block!important}.lv-trio .lv-card+.lv-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--rule)}
+  .lv-row{grid-template-columns:minmax(0,1fr) 88px}
+}
 </style>
 </head>
 <body>
@@ -405,45 +471,62 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
       <div class="quotes2">${q(p, "q-pg")}${q(c, "q-cr")}</div>`;
   }
 
+  // home layout blocks, in the live site's style
+  const lvMeta = s => `<div class="meta">${s.sources} medija · prvi: ${esc(src(s.broke).name)} u ${clock(s.first)}</div>`;
+  const lvDek = (s, n = 120) => s.summary ? `<p class="lv-dek">${esc(tidy(s.summary, n))}</p>` : "";
+  const lvCard = (s, ratio = "3/2") => `<a class="lv-card" href="${link(s)}">${photo(s, ratio)}${secKick(s)}<div class="hl">${esc(s.headline)}</div>${lvDek(s)}${bar(s, 4)}<div style="margin-top:6px">${lvMeta(s)}</div></a>`;
+  const lvRow = s => `<a class="lv-row${s.image ? "" : " no-pic"}" href="${link(s)}"><div>${secKick(s)}<div class="hl">${esc(s.headline)}</div>${bar(s, 4)}<div style="margin-top:6px">${lvMeta(s)}</div></div>${s.image ? photo(s, "1/1") : ""}</a>`;
+  const lvBs = s => `<a class="rail-item${s.image ? "" : " no-pic"}" href="${link(s)}"><div><div class="hl">${esc(s.headline)}</div>${silence(s)}</div>${s.image ? photo(s, "1/1") : ""}</a>`;
+  const lvOver = (s, ratio, tag) => `<a class="lv-over" href="${link(s)}">${photo(s, ratio)}<div class="lv-over-txt">${secKick(s, s.sources + " medija")}<${tag}${tag === "h2" && s.headline.length > 80 ? ' class="long"' : ""}>${esc(s.headline)}</${tag}><div class="lv-over-meta">Prvi je objavio ${esc(src(s.broke).name)} u ${clock(s.first)}</div></div></a>`;
+  const lvHead = (title, href, label) => `<div class="sec-head"><h2>${title}</h2>${href ? `<a href="${href}">${label} →</a>` : ""}</div>`;
+
   function home() {
     const S = D.stories;
     if (!S.length) return `${header("home")}<div class="wrap empty">Još nema dovoljno podataka. Sledeće prikupljanje je za najviše 15 minuta.</div>${footer()}`;
     const used = new Set();
     const take = (list, n) => list.filter(s => !used.has(s.id)).slice(0, n).map(s => (used.add(s.id), s));
-    // stories with a sharp photo go first where a photo is shown big (lead, photo strip)
+    // stories with a sharp photo go first where a photo is shown big
     const pick = (n, win) => { const pool = S.filter(s => !used.has(s.id)).slice(0, win);
       const sel = [...pool.filter(s => s.image), ...pool.filter(s => !s.image)].slice(0, n); sel.forEach(s => used.add(s.id)); return sel; };
     const [top] = pick(1, 3);
-    const sideList = take(S, 2);
+    const sideList = pick(2, 6);
     const under = take(S, 2);
     const bs = S.filter(s => s.blindspot);
     const quietPg = bs.filter(s => s.blindspot === "pro_government"), quietCr = bs.filter(s => s.blindspot === "critical");
     const nPg = quietCr.length ? 3 : 5, nCr = quietPg.length ? 3 : 5;
-    const group = (list, n, k, title) => list.length ? `<div class="bs-group"><h3 style="color:${VAR[k]};border-color:${VAR[k]}">${title}</h3>${list.slice(0, n).map(railItem).join("")}</div>` : "";
-    const strip = pick(4, 8);
+    const group = (list, n, k, title) => list.length ? `<div class="bs-group"><h3 style="color:${VAR[k]};border-color:${VAR[k]}">${title}</h3>${list.slice(0, n).map(lvBs).join("")}</div>` : "";
+    const strip = take(S, 4);
     const bsTop = bs.slice().sort((a, b) => b.sources - a.sources).slice(0, 3);
-    const bsDay = bsTop.find(s => s.image) || bsTop[0];   // the biggest one, preferring one with a sharp photo
+    const bsDay = bsTop.find(s => s.image) || bsTop[0];
     const counts = SECTION_ORDER.map(n => [n, S.filter(s => s.section === n && !used.has(s.id)).length]).filter(x => x[1] >= 2).sort((a, b) => b[1] - a[1]);
-    const secBlocks = counts.slice(0, 2).map(([n]) => {
-      const [l, ...rest] = take(S.filter(s => s.section === n), 4);
-      return `<section aria-label="${n}"><div class="sec-head"><h2>${n}</h2><a href="#/rubrika/${encodeURIComponent(n)}">Sve vesti →</a></div>
-        <a class="sec-lead" href="${link(l)}"><div>${photo(l, "4/3")}</div><div>${kick(l.sources + " medija")}<div class="hl">${esc(l.headline)}</div>${bar(l)}${cov(l)}</div></a>
-        ${rest.map(s => listItem(s)).join("")}</section>`;
-    }).join("");
+    const secLink = n => `#/rubrika/${encodeURIComponent(n)}`;
+    const secP = n => { const sel = S.filter(s => s.section === n && !used.has(s.id));
+      const lead = [...sel.filter(s => s.image), ...sel][0]; used.add(lead.id); const rest = take(sel, 2);
+      return `<section aria-label="${esc(n)}">${lvHead(esc(n), secLink(n), "Sve vesti")}<div class="lv-sec-p">${lvOver(lead, "4/5", "h3")}<div>${rest.map(x => lvCard(x)).join("")}</div></div></section>`; };
+    const secK = n => { const sel = S.filter(s => s.section === n && !used.has(s.id));
+      const lead = [...sel.filter(s => s.image), ...sel][0]; used.add(lead.id); const [w, ...trio] = take(sel, 4);
+      return `<section aria-label="${esc(n)}">${lvHead(esc(n), secLink(n), "Sve vesti")}<div class="lv-sec-k">${lvOver(lead, "3/4", "h3")}
+        ${w ? `<a class="lv-wide" href="${link(w)}">${photo(w, "16/9")}<div>${secKick(w)}<div class="hl">${esc(w.headline)}</div>${lvDek(w)}${bar(w, 4)}<div style="margin-top:6px">${lvMeta(w)}</div></div></a>` : ""}
+        ${trio.length ? `<div class="lv-trio">${trio.map(x => lvCard(x, "16/10")).join("")}</div>` : ""}</div></section>`; };
+    const sec1 = counts[0] ? secP(counts[0][0]) : "";
+    const n2 = counts.slice(1).find(([n]) => S.filter(s => s.section === n && !used.has(s.id)).length >= 2);
+    const sec2 = n2 ? secK(n2[0]) : "";
     const more = take(S, 18);
     return `${header("home")}
-    <main class="wrap">
-      <section class="lead" aria-label="Glavna vest">
-        <div class="lead-text">
-          <a href="${link(top)}">${secKick(top, top.sources + " medija")}<h1 class="hl" style="${top.headline.length > 90 ? "font-size:29px" : ""}">${esc(top.headline)}</h1>${top.summary ? `<p class="dek">${esc(tidy(top.summary, 220))}</p>` : ""}</a>
-          ${bar(top, 8)}${cov(top)}
+    <main class="wrap lv">
+      <h1 class="vh">Obe strane: ista vest, dve strane</h1>
+      <section class="lv-top" aria-label="Glavne vesti">
+        <div class="lv-hero">
+          ${lvOver(top, "4/5", "h2")}
+          <div class="lv-under">
+            ${top.image && top.image_source ? `<div class="meta" style="margin-bottom:8px">Fotografija: ${esc(src(top.image_source).name)}</div>` : ""}
+            ${top.summary ? `<p class="dek">${esc(tidy(top.summary, 220))}</p>` : ""}
+            ${bar(top, 8)}${cov(top)}
+            ${quotes(top)}
+          </div>
         </div>
-        <div class="lead-side">${sideList.map(x => listItem(x, true)).join("")}</div>
-        <div class="lead-photo"><a href="${link(top)}">${photo(top, "16/10")}</a>
-          ${top.image && top.image_source ? `<div class="meta" style="margin-top:8px">Fotografija: ${esc(src(top.image_source).name)}</div>` : ""}</div>
-        <div class="lead-quotes">${quotes(top)}</div>
-        <div class="lead-more">${under.map(x => listItem(x, true)).join("")}</div>
-        <aside class="rail" aria-label="Slepe tačke">
+        <div class="lv-left">${sideList.map(x => lvCard(x)).join("")}${under.map(x => listItem(x, true)).join("")}</div>
+        <aside class="lv-right rail" aria-label="Slepe tačke">
           <div class="bs-panel">
             <a href="#/slepe-tacke" class="bs-panel-head">${EYE}Slepe tačke</a>
             <p class="bs-panel-dek">Vesti koje je objavila samo jedna strana. Druga strana ih je prećutala.</p>
@@ -453,11 +536,14 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
           ${D.briefing ? `<a href="#/brifing" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Jutarnji brifing</div><div class="hl">Obe strane u 5 minuta</div><div class="meta">${(D.briefing.stories || []).length} vesti · izdanje u ${clock(D.briefing.made)}</div></a>` : ""}
         </aside>
       </section>
-      ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2><a href="#/slepe-tacke">Slepe tačke →</a></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
+      <div class="lv-pair">
+        ${strip.length ? `<section class="${sec1 ? "c4" : "c12"}" aria-label="Najvažnije danas">${lvHead("Najvažnije danas")}<div class="lv-list">${strip.map(lvRow).join("")}</div></section>` : ""}
+        ${sec1 ? `<div class="${strip.length ? "c8" : "c12"}">${sec1}</div>` : ""}
+      </div>
     </main>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
-      <div class="two">${secBlocks}</div>
+      ${sec2}
       ${more.length ? `<section aria-label="Još vesti"><div class="sec-head"><h2>Još vesti</h2><span class="meta">${S.length} priča sa 2+ medija</span></div><div class="grid3">${more.map(s => listItem(s, true)).join("")}</div></section>` : ""}
       ${newsletter()}
     </div>${footer()}`;
