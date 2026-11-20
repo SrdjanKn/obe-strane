@@ -29,6 +29,7 @@ a:hover .hl,a.hl:hover{text-decoration:underline;text-decoration-thickness:1.5px
 :focus-visible{outline:2px solid var(--cr);outline-offset:3px;border-radius:2px}
 button,input{font:inherit;color:inherit}
 img{display:block;max-width:100%}
+p,li,small,.dek{text-wrap:pretty}
 .wrap{--pad:32px;max-width:var(--w);margin:0 auto;padding:0 var(--pad)}
 .col{max-width:720px;margin:0 auto;padding:0 24px}
 .wide{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -153,6 +154,19 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .bb-more{font-size:15.5px;line-height:1.55;margin:0 0 22px;color:var(--ink2)}
 .bb-more a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .bb-more a:hover{text-decoration-color:var(--ink)}
+.bb-more{max-width:62ch}
+.bb-nl{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+.bb-nl label{display:flex;flex-direction:column;gap:8px;font:600 var(--s1)/1.3 var(--sans);color:var(--ink2)}
+.bb-nl label>span{display:flex;flex-wrap:wrap;gap:10px}
+.bb-nl input{flex:1 1 220px;max-width:340px;height:44px;padding:0 14px;border:1.5px solid var(--ink);border-radius:4px;background:#fff;font:400 16px var(--sans);color:var(--ink)}
+.bb-nl .btn{min-height:44px}
+.sec-one>section{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);grid-template-rows:auto auto 1fr;gap:0 var(--g)}
+.sec-one .sec-head{grid-column:1/-1}
+.sec-one .sec-lead{display:contents}
+.sec-one .sec-lead>div:first-child{grid-column:1;grid-row:2/4}
+.sec-one .sec-lead>div:last-child{grid-column:2;grid-row:2;padding-bottom:6px}
+.sec-one .sec-lead .hl{font-size:var(--s4)}
+.sec-one .sec-rest{grid-column:2;grid-row:3}
 
 /* sections */
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:56px 0 20px}
@@ -277,9 +291,18 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 /* generic pages */
 .page-h{margin:36px 0 8px;font:700 var(--s6)/1.1 var(--head);letter-spacing:-.02em}
 .page-p{margin:0 0 24px;max-width:68ch;color:var(--ink2);font-size:18px}
-.src-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);font:400 16px var(--sans)}
+.src-group{margin-top:44px}
+.src-head{display:flex;align-items:baseline;gap:14px;padding-bottom:10px;border-bottom:2px solid var(--c)}
+.src-head h2{margin:0;font:700 var(--s4)/1.1 var(--head);letter-spacing:-.012em;color:var(--c)}
+.src-head span{font:400 15px var(--sans);color:var(--ink2);font-variant-numeric:tabular-nums}
+.src-sub{margin:22px 0 0;padding-bottom:6px;font:600 var(--s1)/1.3 var(--sans);color:var(--ink2)}
+.src-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:4px 20px;padding:12px 0 13px;border-top:1px solid var(--line);font:400 16px var(--sans)}
+.src-head + .src-row{border-top:0}
 .src-row a{font-weight:600}
-.src-row small{display:block;color:var(--ink2);font-size:var(--s1);font-weight:400;margin-top:2px}
+.src-name{font:600 17px/1.3 var(--sans);color:var(--ink)}
+.src-row small{display:block;max-width:62ch;margin-top:3px;color:var(--ink2);font:400 15px/1.45 var(--sans);text-wrap:pretty}
+.src-n{padding-top:1px;font:600 15px/1.3 var(--sans);color:var(--ink);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.src-n.zero{color:var(--ink2);font-weight:400}
 .count{font:600 var(--s1) var(--sans);color:var(--ink);background:var(--beton);border-radius:999px;padding:3px 11px;white-space:nowrap}
 .empty{padding:72px 0;text-align:center;color:var(--ink2)}
 .lg{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:var(--beton);color:var(--ink2);font-family:var(--sans);font-weight:700;letter-spacing:0;overflow:hidden;flex:none;vertical-align:-4px;margin-right:7px;line-height:1}
@@ -303,7 +326,7 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 /* outlet profile, about, diet */
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--g);margin:26px 0}
 .stats>div{background:var(--beton);border-radius:6px;padding:16px 18px}
-.stats b{display:block;font:700 var(--s6)/1 var(--head);margin-bottom:8px}
+.stats b{display:block;font:700 var(--s6)/1 var(--head);margin-bottom:8px;font-variant-numeric:lining-nums tabular-nums}
 .stats span{font:400 15px/1.35 var(--sans);color:var(--ink2)}
 .box{background:var(--beton);border-radius:6px;padding:20px 22px;margin:0 0 20px}
 .box h2{margin:0 0 10px;font:700 var(--s3)/1.15 var(--head)}
@@ -341,6 +364,7 @@ footer .links{display:flex;flex-direction:column;gap:10px;font:400 16px var(--sa
 footer .links b{font-weight:700}
 footer .links a:hover{text-decoration:underline;text-underline-offset:3px}
 footer .bottom{position:relative;padding-top:16px;padding-bottom:26px;font:400 var(--s1)/1.5 var(--sans);color:var(--ink2)}
+footer .fine{margin:0;max-width:66ch}
 footer .bottom::before{content:"";position:absolute;top:0;left:var(--pad,32px);right:var(--pad,32px);border-top:1px solid var(--line)}
 footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
 
@@ -373,6 +397,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   .lead-photo{margin:0 -16px} .lead-photo .ph{border-radius:0} .lead-photo .meta{padding:0 16px}
   .lead h1{font-size:30px}
   .lead-more,.strip,.grid3,.bs-grid,.sec-lead{grid-template-columns:minmax(0,1fr)}
+  .sec-one>section{display:block} .sec-one .sec-lead{display:grid}
   .quotes2{grid-template-columns:minmax(0,1fr);row-gap:14px} .quotes2::before{display:none}
   .q-pg{text-align:left;padding:0 0 0 12px;border-left:3px solid var(--pg)} .q-cr{padding:0 0 0 12px;border-left:3px solid var(--cr)}
   .sec-head{margin-top:44px} .sec-head h2{font-size:var(--s4)}
@@ -515,7 +540,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
       <p class="foot-about">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
       <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
-    </div><div class="wrap bottom">${balanceLine()}. Pratimo ${D.sources.filter(s => !s.paused).length} medija; prikaz pokriva poslednjih ${D.hours} sati i ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
+    </div><div class="wrap bottom"><p class="fine">${balanceLine()}. Pratimo ${D.sources.filter(s => !s.paused).length} medija; prikaz pokriva poslednjih ${D.hours} sati i ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</p></div></footer>`;
   function balanceLine() {
     const b = balanceObj();
     if (!b.sources) return "Prototip";
@@ -570,8 +595,9 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
       const [l, ...rest] = take(S.filter(s => s.section === n), 4);
       return `<section aria-label="${n}"><div class="sec-head"><h2>${n}</h2><a href="#/rubrika/${encodeURIComponent(n)}">Sve vesti iz rubrike</a></div>
         <a class="sec-lead" href="${link(l)}"><div>${photo(l, "4/3")}</div><div>${kick(l.sources + " medija")}<div class="hl">${esc(l.headline)}</div>${bar(l)}${cov(l)}</div></a>
-        ${rest.map(s => listItem(s)).join("")}</section>`;
+        <div class="sec-rest">${rest.map(s => listItem(s)).join("")}</div></section>`;
     }).join("");
+    const secCount = Math.min(2, counts.length);
     const more = take(S, 18);
     return `${header("home")}
     <main class="wrap">
@@ -595,15 +621,15 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
         </aside>
       </section>
     </main>
-    ${D.briefing ? briefBand(D.briefing) : ""}
+    ${D.briefing ? briefBand(D.briefing, true) : ""}
     <div class="wrap">
-      ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2><a href="#/slepe-tacke">Sve slepe tačke</a></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
+      ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
     </div>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
-      <div class="two">${secBlocks}</div>
-      ${more.length ? `<section aria-label="Još vesti"><div class="sec-head"><h2>Još vesti</h2><span class="meta">${S.length} priča sa 2+ medija</span></div><div class="grid3">${more.map(s => listItem(s, true)).join("")}</div></section>` : ""}
-      ${newsletter()}
+      <div class="${secCount === 1 ? "sec-one" : "two"}">${secBlocks}</div>
+      ${more.length ? `<section aria-label="Još vesti"><div class="sec-head"><h2>Još vesti</h2></div><div class="grid3">${more.map(s => listItem(s, true)).join("")}</div></section>` : ""}
+      ${D.briefing ? "" : newsletter()}
     </div>${footer()}`;
   }
   function bsBand(s) {
@@ -753,20 +779,19 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
     </main>${footer()}`;
   }
   function sources() {
-    const row = s => `<div class="src-row"><div><a href="#/izvor/${encodeURIComponent(s.id)}" style="font-weight:600">${logo(s.id, 18)}${esc(s.name)}</a>${s.paused ? `<small>Pauzirano: ${esc(s.paused)}</small>` : s.owner ? `<small>${esc(tidy(s.owner, 120))}</small>` : s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="count">${s.paused ? "pauzirano" : s.stories + " " + form(s.stories, "prica")}</span></div>`;
+    const row = s => `<div class="src-row"><div><a class="src-name" href="#/izvor/${encodeURIComponent(s.id)}">${logo(s.id, 18)}${esc(s.name)}</a>${s.paused ? `<small>Pauzirano: ${esc(s.paused)}</small>` : s.owner ? `<small>${esc(s.owner)}</small>` : s.note ? `<small>${esc(s.note)}</small>` : ""}</div><span class="src-n${s.stories ? "" : " zero"}">${s.paused ? "pauzirano" : s.stories + " " + form(s.stories, "prica")}</span></div>`;
     const block = k => {
       const list = D.sources.filter(s => s.camp === k).sort((a, b) => b.stories - a.stories);
       if (!list.length) return "";
       const groups = [...new Set(D.sources.filter(s => s.camp === k).map(s => s.group || ""))];   // order as in sources.json
       const body = groups.length > 1
-        ? groups.map(g => `<div class="kicker" style="margin:18px 0 2px;color:var(--ink2)">${esc(g || "Ostali")}</div>${list.filter(s => (s.group || "") === g).map(row).join("")}`).join("")
+        ? groups.map(g => `<h3 class="src-sub">${esc(g || "Ostali")}</h3>${list.filter(s => (s.group || "") === g).map(row).join("")}`).join("")
         : list.map(row).join("");
-      return `<section style="flex:1 1 400px;min-width:0"><div class="sec-head" style="margin-top:20px;border-top-color:${VAR[k]}"><h2 style="color:${VAR[k]}">${LAB[k]}</h2><span class="meta">${list.length}</span></div>${body}</section>`;
+      return `<section class="src-group" style="--c:${VAR[k]}"><div class="src-head"><h2>${LAB[k]}</h2><span>${list.length} ${form(list.length, "medij")}</span></div>${body}</section>`;
     };
     return `${header("src")}<main class="wrap"><h1 class="page-h">Izvori i vlasništvo</h1>
       <p class="page-p">Pratimo ${D.sources.filter(s => !s.paused).length} medija. Kliknite na medij za njegov profil: vlasnik, izvor podatka, broj vesti i priče u kojima se pojavljuje. Oznake su početne procene zasnovane na javnim analizama medijske scene (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i podložne su proveri. Međunarodni mediji se prikazuju, ali se ne računaju ni na jednu stranu.</p>
-      <div class="two">${block("pro_government")}${block("critical")}</div>
-      <div class="two">${block("public")}${block("mixed")}${block("international")}</div></main>${footer()}`;
+      <div class="two src-cols"><div>${block("pro_government")}${block("public")}${block("international")}</div><div>${block("critical")}${block("mixed")}</div></div></main>${footer()}`;
   }
   // ---------------------------------------------------------------- O nama, metodologija, balans
   function about() {
@@ -809,7 +834,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
 
   // ---------------------------------------------------------------- jutarnji brifing
   const briefMins = B => Math.max(3, Math.round(((B.stories || []).length + (B.blindspots || []).length) * 0.6));
-  function briefBand(B) {
+  function briefBand(B, withForm) {
     const list = B.stories || [];
     if (!list.length) return "";
     const live = id => D.stories.find(s => s.id === id);
@@ -830,6 +855,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
         ${lede ? `<p class="bb-lede">${esc(lede)}</p>` : ""}
         ${others.length ? `<p class="bb-more">Takođe u brifingu: ${others.join("; ")}${n > 4 ? `; i još ${n - 4}` : ""}.</p>` : ""}
         <a class="btn dark" href="#/brifing">Pročitaj brifing</a>
+        ${withForm ? `<form id="nl" class="bb-nl"><label>Brifing e-poštom, uskoro<span><input type="email" required placeholder="ime@primer.rs"><button type="submit" class="btn">Prijavi se</button></span></label></form>` : ""}
       </div></div></section>`;
   }
   function briefingPage() {
@@ -928,7 +954,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
       <div class="box"><h2>Šta čitate</h2><p style="font-size:20px">${lean} Od ${n} ${word}, ${p}% je iz provladinih, a ${c}% iz kritičkih medija.</p>${bar(o, 14)}
         <div style="margin-top:12px">${ORDER.filter(k => split[k]).map(k => `<div class="src-row"><span>${dot(k)}${LAB[k]}</span><b>${split[k]}</b></div>`).join("")}</div></div>
       <div class="two" style="gap:24px">
-        <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Najčešći izvori</h2>${top.map(([sid, k]) => `<div class="src-row"><a href="#/izvor/${encodeURIComponent(sid)}">${logo(sid, 18)}${esc(src(sid).name)}</a><span class="count">${k}</span></div>`).join("")}</div></section>
+        <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Najčešći izvori</h2>${top.map(([sid, k]) => `<div class="src-row"><a href="#/izvor/${encodeURIComponent(sid)}">${logo(sid, 18)}${esc(src(sid).name)}</a><span class="src-n">${k}</span></div>`).join("")}</div></section>
         <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Slepe tačke</h2><p>Otvorili ste ${bsViews} ${bsViews === 1 ? "priču koja je slepa tačka" : "priča koje su slepe tačke"}.</p><a class="src-link" href="#/slepe-tacke">Pogledajte šta je koja strana prećutala</a></div></section>
       </div>
       ${sugg.length ? `<div class="sec-head"><h2>Proširite vidike</h2><span class="meta">kako su iste priče preneli ${weak === "critical" ? "kritički" : "provladini"} mediji</span></div><div class="grid3">${sugg.map(s => {
