@@ -329,11 +329,13 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 .ai-note a{text-decoration:underline}
 
 /* outlet profile, about, diet */
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--g);margin:26px 0}
-.stats>div{background:var(--beton);border-radius:6px;padding:16px 18px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:28px 0 36px;padding:18px 0;border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.stats>div{padding:2px 20px;border-left:1px solid var(--line)}
+.stats>div:first-child{padding-left:0;border-left:0}
 .stats b{display:block;font:700 var(--s6)/1 var(--head);margin-bottom:8px;font-variant-numeric:lining-nums tabular-nums}
 .stats span{font:400 15px/1.35 var(--sans);color:var(--ink2)}
-.box{background:var(--beton);border-radius:6px;padding:20px 22px;margin:0 0 20px}
+.box{border-top:2px solid var(--ink);padding:16px 0 0;margin:0 0 28px}
+.box.key{background:var(--beton);border-top:0;border-radius:6px;padding:20px 22px}
 .box h2{margin:0 0 10px;font:700 var(--s3)/1.15 var(--head)}
 .box p{margin:0 0 8px;font:400 17px/1.55 var(--serif)}
 .box .src-link{font:600 var(--s1) var(--sans);color:var(--ink);text-decoration:underline;text-underline-offset:3px}
@@ -417,7 +419,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   ol.tl li.l .tl-body,ol.tl li.r .tl-body,ol.tl li.c .tl-body{grid-column:1;grid-row:2;text-align:left;padding:6px 0 0;max-width:none;justify-self:stretch;background:none}
   .ai{padding:20px} .ai-two{grid-template-columns:minmax(0,1fr);row-gap:16px} .ai-two::before{display:none}
   .ai-side,.ai-side:first-child{text-align:left;padding:0 0 0 12px;border-left:3px solid var(--c,var(--ink))!important}
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px} .stats>div:nth-child(odd){padding-left:0;border-left:0}
   .bal-row>span:first-child,.bal-row>div,.bal-row .pp{grid-column:1/-1} .bal-row{row-gap:8px}
   .brief-item{grid-template-columns:minmax(0,1fr)} .brief-item .no{font-size:var(--s4)}
   .page-h{font-size:var(--s5)}
@@ -956,7 +958,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
     const bsViews = new Set(views.filter(v => v.bs).map(v => v.id)).size;
     const n = reads.length, word = n % 10 === 1 && n % 100 !== 11 ? "otvorenog članka" : "otvorenih članaka";
     const body = !n ? `<div class="box"><h2>Još nema podataka</h2><p>Kada otvorite članke iz priča (naslove koji vode na izvorne medije), ovde ćete videti sa koje strane najviše čitate.</p><a class="btn dark" href="#/">Na naslovnu</a></div>` : `
-      <div class="box"><h2>Šta čitate</h2><p style="font-size:20px">${lean} Od ${n} ${word}, ${p}% je iz provladinih, a ${c}% iz kritičkih medija.</p>${bar(o, 14)}
+      <div class="box key"><h2>Šta čitate</h2><p style="font-size:var(--s3)">${lean} Od ${n} ${word}, ${p}% je iz provladinih, a ${c}% iz kritičkih medija.</p>${bar(o, 14)}
         <div style="margin-top:12px">${ORDER.filter(k => split[k]).map(k => `<div class="src-row"><span>${dot(k)}${LAB[k]}</span><b>${split[k]}</b></div>`).join("")}</div></div>
       <div class="two" style="gap:24px">
         <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Najčešći izvori</h2>${top.map(([sid, k]) => `<div class="src-row"><a href="#/izvor/${encodeURIComponent(sid)}">${logo(sid, 18)}${esc(src(sid).name)}</a><span class="src-n">${k}</span></div>`).join("")}</div></section>
