@@ -134,14 +134,14 @@ def enrich_article(url):
     return pub, (strip_tags(m.group(1))[:600] if m else ""), (html.unescape(img.group(1)) if img else "")
 
 
-def scrape_homepage(home, limit=150):
+def scrape_homepage(home, limit=150, stay_in_section=True):
     """Read article headlines straight from a homepage or section page (no dates; see enrich_article)."""
     data, final = fetch(home)
     page = data.decode("utf-8", "ignore")
     domain = urllib.parse.urlsplit(final).netloc.lower().removeprefix("www.")
     # homes like bbc.com/serbian/lat or dw.com/sr: stay inside that language section
     home_path = urllib.parse.urlsplit(home).path.rstrip("/")
-    section_prefix = home_path.rsplit("/", 1)[0] if home_path.count("/") > 1 else home_path
+    section_prefix = (home_path.rsplit("/", 1)[0] if home_path.count("/") > 1 else home_path) if stay_in_section else ""
     items, seen = [], set()
     for m in re.finditer(r'<a\b[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', page, re.S | re.I):
         href, text = m.group(1), clean_title(strip_tags(m.group(2)))
@@ -307,7 +307,8 @@ def with_pages(src, items):
     extra = []
     for page in pages:
         try:
-            found = scrape_homepage(page, limit=60)
+            # a listing page such as /najnovije links to articles all over the site
+            found = scrape_homepage(page, limit=60, stay_in_section=(page == src["home"]))
         except Exception:
             continue
         for it in found:
