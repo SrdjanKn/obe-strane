@@ -134,8 +134,8 @@ def enrich_article(url):
     return pub, (strip_tags(m.group(1))[:600] if m else ""), (html.unescape(img.group(1)) if img else "")
 
 
-def scrape_homepage(home):
-    """Fallback for outlets without a usable feed: read article headlines straight from the homepage."""
+def scrape_homepage(home, limit=150):
+    """Read article headlines straight from a homepage or section page (no dates; see enrich_article)."""
     data, final = fetch(home)
     page = data.decode("utf-8", "ignore")
     domain = urllib.parse.urlsplit(final).netloc.lower().removeprefix("www.")
@@ -161,7 +161,7 @@ def scrape_homepage(home):
             continue
         seen.add(key)
         items.append({"title": text, "url": url, "summary": "", "published": None, "image": ""})
-        if len(items) >= 150:
+        if len(items) >= limit:
             break
     return items
 
@@ -272,6 +272,7 @@ def db():
         published TEXT, fetched TEXT)""")
     if "image" not in [r[1] for r in con.execute("PRAGMA table_info(articles)")]:
         con.execute("ALTER TABLE articles ADD COLUMN image TEXT DEFAULT ''")
+    con.execute("CREATE TABLE IF NOT EXISTS skipped(id TEXT PRIMARY KEY, at TEXT)")   # page links with no usable date
     con.execute("""CREATE TABLE IF NOT EXISTS feeds(
         source_id TEXT PRIMARY KEY, feed_url TEXT, last_ok TEXT, last_error TEXT, last_count INTEGER)""")
     return con
@@ -293,8 +294,40 @@ def canonical_url(u):
     return urllib.parse.urlunsplit((p.scheme, p.netloc.lower(), p.path.rstrip("/"), urllib.parse.urlencode(q), ""))
 
 
+THIN_FEED = 30   # feeds with fewer items than this often miss articles: also read the homepage
+
+
+def with_pages(src, items):
+    """Add headlines from the outlet's homepage (thin feeds) and its listed section pages (sources.json "sections").
+    Feeds can leave articles out; the latest Serbian news matters most, and it sits on these pages."""
+    pages = list(src.get("sections", []))
+    if len(items) < THIN_FEED:
+        pages.insert(0, src["home"])
+    have = {canonical_url(i["url"]) for i in items}
+    extra = []
+    for page in pages:
+        try:
+            found = scrape_homepage(page, limit=60)
+        except Exception:
+            continue
+        for it in found:
+            key = canonical_url(it["url"])
+            if key not in have and not skip_url(it["url"]):
+                have.add(key)
+                it["from_page"] = True
+                extra.append(it)
+    return items + extra
+
+
 def collect_source(src, known_feed):
     """Fetch one source. Returns (source_id, feed_url, items, error)."""
+    sid, feed, items, err = _collect_source(src, known_feed)
+    if feed and not feed.startswith("html:"):
+        items = with_pages(src, items)
+    return sid, feed, items, err
+
+
+def _collect_source(src, known_feed):
     if known_feed and known_feed.startswith("html:"):
         try:
             return src["id"], known_feed, scrape_homepage(src["home"]), None
@@ -358,7 +391,7 @@ def collect(verbose=True):
         for it in items:
             if it["published"] is None:
                 aid = hashlib.sha1(canonical_url(it["url"]).encode()).hexdigest()[:16]
-                if not con.execute("SELECT 1 FROM articles WHERE id=?", (aid,)).fetchone():
+                if not con.execute("SELECT 1 FROM articles WHERE id=? UNION SELECT 1 FROM skipped WHERE id=?", (aid, aid)).fetchone():
                     todo.append(it)
     todo = todo[:600]
     if todo and verbose:
@@ -368,10 +401,19 @@ def collect(verbose=True):
             it["published"], it["summary"] = pub, summary or it["summary"]
             it["image"] = it.get("image") or img
             it["undated"] = pub is None
+            it["opened"] = True
+    # a page link with no publish date, or an old one, would show up as new: remember it and leave it out
+    cutoff = datetime.now(timezone.utc) - timedelta(days=14)
+    for sid, feed_url, items, err in results:
+        for it in items:
+            if it.get("from_page") and it.get("opened") and (it["published"] is None or it["published"] < cutoff):
+                it["drop"] = True
+                aid = hashlib.sha1(canonical_url(it["url"]).encode()).hexdigest()[:16]
+                con.execute("INSERT OR IGNORE INTO skipped VALUES (?,?)", (aid, now))
     for sid, feed_url, items, err in results:
         new = 0
         for it in items:
-            if skip_url(it["url"]):
+            if it.get("drop") or skip_url(it["url"]):
                 continue
             url = canonical_url(it["url"])
             aid = hashlib.sha1(url.encode()).hexdigest()[:16]
@@ -389,11 +431,13 @@ def collect(verbose=True):
               last_error=excluded.last_error, last_count=excluded.last_count""",
                     (sid, feed_url, now if not err else None, err, len(items)))
         if verbose:
-            status = f"{len(items):3d} items, {new:3d} new" if not err else f"FAILED - {err}"
+            pg = sum(1 for i in items if i.get("from_page"))
+            status = (f"{len(items) - pg:3d} items, {new:3d} new" + (f"  (+{pg} links from pages)" if pg else "")) if not err else f"FAILED - {err}"
             print(f"  {names[sid]:<28} {status}")
     # keep the database small: drop articles older than 14 days
     con.execute("DELETE FROM articles WHERE published < ?",
                 ((datetime.now(timezone.utc) - timedelta(days=14)).isoformat(),))
+    con.execute("DELETE FROM skipped WHERE at < ?", ((datetime.now(timezone.utc) - timedelta(days=30)).isoformat(),))
     con.commit()
     if verbose:
         print(f"\nCollected {total_new} new articles.")
