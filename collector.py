@@ -309,8 +309,11 @@ def with_pages(src, items):
         try:
             # a listing page such as /najnovije links to articles all over the site
             found = scrape_homepage(page, limit=60, stay_in_section=(page == src["home"]))
-        except Exception:
+        except Exception as e:
+            print(f"  page {page}: {type(e).__name__}: {e}")
             continue
+        if not found:
+            print(f"  page {page}: no article links")
         for it in found:
             key = canonical_url(it["url"])
             if key not in have and not skip_url(it["url"]):
