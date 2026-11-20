@@ -937,7 +937,7 @@ def export_site(hours=36):
     if (SITE_DIR / "logos").is_dir():
         for f in (SITE_DIR / "logos").iterdir():
             if f.suffix.lower() in (".png", ".svg", ".jpg", ".jpeg", ".webp"):
-                logos[f.stem] = f"logos/{f.name}"
+                logos[f.stem] = f"logos/{f.name}?v={hashlib.md5(f.read_bytes()).hexdigest()[:8]}"
 
     # balance: how many outlet appearances of each camp we showed, against what we collected
     shown, collected, outlets = Counter(), Counter(), Counter()
