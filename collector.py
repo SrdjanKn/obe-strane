@@ -779,7 +779,7 @@ def briefing(con, stories, n_articles):
         def entry(s):
             first = lambda k: next(({"source": a["source"], "title": a["title"], "url": a["url"]}
                                     for a in sorted(s["items"], key=lambda a: a["published"]) if a["camp"] == k), None)
-            return {"id": s["id"], "headline": s["headline"], "summary": s["summary"][:300], "image": s["image"],
+            return {"id": s["id"], "headline": s["headline"], "summary": s["summary"][:300], "image": s["image"], "image_source": s.get("image_source"),
                     "section": section_of([a["url"] for a in s["items"]]), "sources": s["sources"],
                     "split": dict(s["split"]), "blindspot": blind_key(s), "ai": s.get("ai"),
                     "pg": first("pro_government"), "cr": first("critical")}

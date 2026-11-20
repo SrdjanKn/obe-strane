@@ -234,12 +234,19 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
 .bal-row .pp{font:500 13px var(--sans);color:var(--ink2);text-align:right}
 .brief-head{text-align:center;padding:36px 0 22px;border-bottom:1px solid var(--rule)}
 .brief-head h1{margin:6px 0 8px;font:700 clamp(32px,5vw,48px)/1.1 var(--head)}
-.brief-item{display:grid;grid-template-columns:56px minmax(0,1fr);gap:8px 18px;padding:28px 0;border-bottom:1px solid var(--rule)}
+.brief-item{display:grid;grid-template-columns:56px minmax(0,1fr) 220px;gap:8px 22px;padding:28px 0;border-bottom:1px solid var(--rule)}
+.brief-item.no-img{grid-template-columns:56px minmax(0,1fr)}
+.brief-item .bi-img{display:block;padding-top:6px}
+.brief-item .bi-img .ph span{display:none}
+.brief-item.lead{grid-template-columns:56px minmax(0,1fr)}
+.brief-lead-img{grid-column:1/-1;display:block;margin-bottom:10px}
+.brief-lead-img .ph span{display:none}
+.brief-credit{font:400 12px var(--sans);color:var(--ink3);margin-top:6px}
 .brief-item .no{font:700 40px/1 var(--head);color:#c3c8d0}
 .brief-item h2{margin:6px 0 10px;font:700 25px/1.2 var(--head)}
 .brief-end{text-align:center;padding:40px 0 8px;font:italic 400 20px/1.5 var(--serif);color:var(--ink2)}
 @media (max-width:760px){.ai-two{grid-template-columns:minmax(0,1fr)} .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .bal-row{grid-template-columns:minmax(0,1fr)} .bal-row .pp{text-align:left} .brief-item{grid-template-columns:minmax(0,1fr)} .brief-item .no{font-size:28px}}
+  .bal-row{grid-template-columns:minmax(0,1fr)} .bal-row .pp{text-align:left} .brief-item,.brief-item.no-img,.brief-item.lead{grid-template-columns:minmax(0,1fr)} .brief-item .no{font-size:28px} .brief-item .bi-img{order:-1;padding-top:0}}
 @media (max-width:1080px){
   .lead{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);grid-template-rows:auto;grid-template-areas:"photo photo" "text quotes" "side more" "rail rail"}
   .rail{border-left:0;padding-left:0;border-top:0;padding-top:4px}
@@ -759,12 +766,17 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
     const q = (i, cls) => i ? `<a class="${cls}" ${out(i.url, i.source)}><div class="quote" style="font-size:16px">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${logo(i.source, 14)}${esc(src(i.source).name)}</div></a>` : "";
     const framing = s => [["pro_government", s.ai.provladini], ["critical", s.ai.kriticki]].filter(x => x[1] && s.split[x[0]]).map(([k, t]) =>
       `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${k === "pro_government" ? "Provladini" : "Kritički"}</h3><p style="font-size:15.5px">${esc(t)}</p></div>`).join("");
-    const item = (s, n) => `<article class="brief-item"><div class="no">${n}</div><div>
+    const full = id => D.stories.find(x => x.id === id) || {};
+    const img = s => s.image || full(s.id).image || "";
+    const credit = s => { const k = s.image_source || full(s.id).image_source; return k ? `<div class="brief-credit">Fotografija: ${esc(src(k).name)}</div>` : ""; };
+    const pic = (s, ratio) => { const ph = photo(Object.assign({}, s, {image: img(s)}), ratio); return live(s.id) ? `<a href="#/vest/${s.id}" tabindex="-1" aria-hidden="true">${ph}</a>` : ph; };
+    const item = (s, n) => { const has = !!img(s), lead = n === 1 && has;
+      return `<article class="brief-item${lead ? " lead" : has ? "" : " no-img"}">${lead ? `<div class="brief-lead-img">${pic(s, "16/9")}${credit(s)}</div>` : ""}<div class="no">${n}</div><div>
         ${kick([esc(s.section), s.sources + " " + form(s.sources, "medij"), s.blindspot ? EYE + bsLabel(s.blindspot) : ""].filter(Boolean).join(" · "), s.blindspot ? "amber" : "")}
         ${live(s.id) ? `<a href="#/vest/${s.id}"><h2 class="hl">${esc(s.headline)}</h2></a>` : `<h2 class="hl">${esc(s.headline)}</h2>`}
         ${s.ai && s.ai.ukratko ? `<p style="margin:0 0 14px">${esc(s.ai.ukratko)}</p>` : s.summary ? `<p style="margin:0 0 14px;color:var(--ink2)">${esc(tidy(s.summary, 240))}</p>` : ""}
         ${s.ai && (s.ai.provladini || s.ai.kriticki) ? `<div class="ai-two" style="margin-bottom:14px">${framing(s)}</div>` : (s.pg || s.cr) ? `<div class="quotes2">${q(s.pg, "q-pg")}${q(s.cr, "q-cr")}</div>` : ""}
-        ${bar(s, 6)}${cov(s)}</div></article>`;
+        ${bar(s, 6)}${cov(s)}</div>${has && !lead ? `<div class="bi-img">${pic(s, "3/2")}</div>` : ""}</article>`; };
     const list = B.stories || [], bs = B.blindspots || [];
     const mins = Math.max(3, Math.round((list.length + bs.length) * 0.6));
     const anyAi = list.some(s => s.ai);
