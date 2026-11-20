@@ -10,9 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Serif:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --pg:#b4472f; --cr:#24478f; --pub:#7d6aa8; --mix:#aaa59d; --intl:#3f7f86;
-  --ink:#121212; --ink2:#454549; --ink3:#5f5f66; --rule:#dcdcdc; --soft:#f6f6f4;
-  --amber:#a14a07; --amber-bg:#fbf3ea; --amber-on-dark:#f0a35e;
+  --pg:#d0021b; --cr:#0057b8; --pub:#6a4fb3; --mix:#9ba1aa; --intl:#007a87;
+  --ink:#121212; --ink2:#454549; --ink3:#5f5f66; --rule:#dcdee2; --soft:#f3f5f8;
+  --amber:#7d5400; --amber-bg:#fff7d9; --amber-on-dark:#f5b800; --sig:#f5b800; --sig-line:#ecd98f;
   --head:"Noto Serif", Georgia, serif;
   --brand:"DM Serif Display", Georgia, serif;
   --serif:"Source Sans 3", "Source Sans Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -50,7 +50,8 @@ img{display:block;max-width:100%}
 nav.sections{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 26px;padding:12px 0;border-top:1px solid var(--rule);border-bottom:3px solid var(--ink);font:600 14.5px var(--sans)}
 nav.sections a{padding:6px 0;border-bottom:2px solid transparent}
 nav.sections a.on{border-bottom-color:var(--ink)}
-nav.sections a.amber{color:var(--amber)}
+nav.sections a.amber{color:var(--ink);background:var(--sig);padding:6px 10px;border-radius:3px;display:inline-flex;align-items:center;border-bottom:0}
+nav.sections a.amber.on{box-shadow:inset 0 -2px 0 var(--ink)}
 nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .focus{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px;padding:12px 0 0;font:400 14px var(--sans);color:var(--ink2)}
 .focus b{color:var(--ink)}
@@ -84,11 +85,11 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .q-pg{display:block;border-left:3px solid var(--pg);padding-left:12px}
 .q-cr{display:block;border-left:3px solid var(--cr);padding-left:12px}
 .rail-item{display:block;padding:14px 0;border-top:1px solid var(--rule)}
-.bs-panel{background:var(--amber-bg);border-top:4px solid var(--amber);padding:16px 18px 18px;margin-bottom:6px}
+.bs-panel{background:var(--amber-bg);border-top:4px solid var(--sig);padding:16px 18px 18px;margin-bottom:6px}
 .bs-panel-head{display:flex;align-items:center;color:var(--amber);font:700 15px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase}
 .bs-panel-dek{margin:8px 0 0;font:400 14.5px/1.45 var(--sans);color:var(--ink2)}
 .bs-group h3{margin:20px 0 0;padding-bottom:7px;border-bottom:2px solid;font:700 11.5px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase}
-.bs-panel .rail-item{border-top:1px solid #ecdcc9;padding:12px 0 13px}
+.bs-panel .rail-item{border-top:1px solid var(--sig-line);padding:12px 0 13px}
 .bs-panel .bs-group .rail-item:first-of-type{border-top:0}
 .bs-panel .rail-item .hl{margin-bottom:10px}
 .sil{display:flex;gap:4px;height:7px}
@@ -105,7 +106,7 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .strip>a{flex:1 1 230px;min-width:0}
 .strip .hl{font-size:19px;line-height:1.28;margin:0 0 10px}
 .band{background:var(--ink);color:#fff;margin-top:44px}
-.bsday{background:var(--amber-bg);border-top:6px solid var(--amber);border-bottom:1px solid #ecdcc9;margin-top:48px}
+.bsday{background:var(--amber-bg);border-top:6px solid var(--sig);border-bottom:1px solid var(--sig-line);margin-top:48px}
 .bd-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;padding-top:40px;padding-bottom:48px}
 .bd-kick{display:flex;align-items:center;color:var(--amber);font:700 15px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:18px}
 .bd-h{margin:0 0 16px;font:700 clamp(28px,3.6vw,44px)/1.12 var(--head);color:var(--ink)}
@@ -117,11 +118,11 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .bd-bar.gone{border:2px dashed;background:transparent}
 .bd-lab{margin-top:8px;font:600 13px var(--sans);color:var(--ink2)}
 .bd-sub{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
-.bd-ai{margin-top:28px;padding-top:18px;border-top:1px solid #e3cdb3}
+.bd-ai{margin-top:28px;padding-top:18px;border-top:1px solid var(--sig-line)}
 .bd-ai p{margin:0 0 12px;font:400 17px/1.5 var(--serif)}
 .bd-ai .bd-frame{border-left:3px solid;padding-left:12px}
 .bd-ai .bd-note{font:400 12px var(--sans);color:var(--ink3);margin:0}
-.bd-item{display:block;padding:12px 0;border-top:1px solid #e3cdb3}
+.bd-item{display:block;padding:12px 0;border-top:1px solid var(--sig-line)}
 .bd-item .t{margin-top:5px;font:600 18px/1.3 var(--head);color:var(--ink)}
 @media (max-width:900px){.bd-grid{grid-template-columns:minmax(0,1fr);gap:28px;padding-top:28px;padding-bottom:32px}.bd-num{font-size:42px}}
 .band .wrap{padding-top:48px;padding-bottom:52px;display:flex;flex-wrap:wrap;gap:40px}
@@ -140,7 +141,7 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .li{display:block;padding:14px 0;border-top:1px solid var(--rule)}
 .li .hl{font-size:18px;line-height:1.3;font-weight:600;margin-bottom:9px}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 32px}
-.news{margin-top:52px;background:var(--amber-bg);border-top:3px solid var(--amber);padding:32px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
+.news{margin-top:52px;background:var(--amber-bg);border-top:3px solid var(--sig);padding:32px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
 .news h2{margin:0 0 6px;font:700 30px/1.15 var(--head)}
 .news form{flex:1 1 360px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .news label{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;font:600 13px var(--sans)}
@@ -171,7 +172,7 @@ ol.tl .when{font:700 13px/1 var(--sans);margin-bottom:6px}
 ol.tl .when span{font-weight:500;color:var(--ink3)}
 ol.tl a{font:500 18px/1.38 var(--serif)}
 ol.tl a:hover{text-decoration:underline}
-.bs-note{background:var(--amber-bg);border-top:3px solid var(--amber);padding:16px 20px;margin-top:24px;font:400 16px/1.5 var(--serif)}
+.bs-note{background:var(--amber-bg);border-top:3px solid var(--sig);padding:16px 20px;margin-top:24px;font:400 16px/1.5 var(--serif)}
 .bs-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
 .bs-tabs a,.chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border:1px solid var(--rule);border-radius:999px;font:600 14px var(--sans);color:var(--ink2);background:#fff}
 .bs-tabs a.on,.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
@@ -195,7 +196,7 @@ ol.tl a:hover{text-decoration:underline}
 .page-p{margin:0 0 20px;max-width:720px;color:var(--ink2)}
 .src-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--rule);font:500 15px var(--sans)}
 .src-row small{display:block;color:var(--ink3);font-size:12.5px;font-weight:400}
-.count{font:500 12.5px var(--sans);color:var(--ink2);background:#f0eee9;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.count{font:500 12.5px var(--sans);color:var(--ink2);background:#eceff3;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .empty{padding:60px 0;text-align:center;color:var(--ink2)}
 footer{background:var(--ink);color:#d0d0d4;margin-top:56px}
 footer .top{padding-top:40px;padding-bottom:32px;display:flex;flex-wrap:wrap;gap:32px 56px}
@@ -205,7 +206,7 @@ footer .links{display:flex;flex-direction:column;gap:10px;font:500 14px var(--sa
 footer .links b{color:#fff}
 footer .bottom{border-top:1px solid #333338;padding-top:16px;padding-bottom:24px;font:400 12.5px var(--sans);color:#9a9aa0}
 footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2px}
-.lg{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#ecebe7;color:var(--ink2);font-family:var(--sans);font-weight:700;letter-spacing:0;overflow:hidden;flex:none;vertical-align:-4px;margin-right:6px;line-height:1}
+.lg{position:relative;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#e8ebef;color:var(--ink2);font-family:var(--sans);font-weight:700;letter-spacing:0;overflow:hidden;flex:none;vertical-align:-4px;margin-right:6px;line-height:1}
 .lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
 .ai{border-top:3px solid var(--ink);padding-top:14px}
 .ai-sum{margin:0 0 18px;font:400 20px/1.5 var(--serif)}
@@ -234,7 +235,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
 .brief-head{text-align:center;padding:36px 0 22px;border-bottom:1px solid var(--rule)}
 .brief-head h1{margin:6px 0 8px;font:700 clamp(32px,5vw,48px)/1.1 var(--head)}
 .brief-item{display:grid;grid-template-columns:56px minmax(0,1fr);gap:8px 18px;padding:28px 0;border-bottom:1px solid var(--rule)}
-.brief-item .no{font:700 40px/1 var(--head);color:#c9c7c1}
+.brief-item .no{font:700 40px/1 var(--head);color:#c3c8d0}
 .brief-item h2{margin:6px 0 10px;font:700 25px/1.2 var(--head)}
 .brief-end{text-align:center;padding:40px 0 8px;font:italic 400 20px/1.5 var(--serif);color:var(--ink2)}
 @media (max-width:760px){.ai-two{grid-template-columns:minmax(0,1fr)} .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -267,6 +268,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
 .lv-left{grid-column:1/4;grid-row:1;min-width:0}
 .lv-hero{grid-column:4/10;grid-row:1;min-width:0}
 .lv-right{grid-column:10/13;grid-row:1;min-width:0}
+.lv-right.rail{border-left:0;padding-left:0}
 .lv-card{display:block}
 .lv-card .ph{margin-bottom:12px}
 .lv-card .hl{font-size:21px;line-height:1.22;margin:0 0 8px}
@@ -341,7 +343,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)", international: "var(--intl)"};
   const LAB = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
   const SECTION_ORDER = ["Politika", "Društvo", "Hronika", "Ekonomija", "Svet", "Region", "Kultura"];
-  const TONES = {Politika: "#7d8a96", Društvo: "#7a7166", Hronika: "#2f3846", Ekonomija: "#5f6f5c", Svet: "#5d7894", Region: "#6c6a86", Kultura: "#8a6f5c", Vesti: "#80858c"};
+  const TONES = {Politika: "#7d8a96", Društvo: "#6e7684", Hronika: "#2f3846", Ekonomija: "#5a6977", Svet: "#5d7894", Region: "#6c6a86", Kultura: "#7b8594", Vesti: "#80858c"};
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -431,7 +433,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   function compactHeader(sec) {
     return `<header class="compact-head"><div class="wrap">
       <a class="logo" href="#/">${mark(30)}<i>obe strane</i></a>
-      <nav aria-label="Rubrike">${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/slepe-tacke" style="color:var(--amber)">${EYE}Slepe tačke</a><a href="#/brifing">Brifing</a></nav>
+      <nav aria-label="Rubrike">${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/slepe-tacke" style="color:var(--ink);background:var(--sig);padding:3px 9px;border-radius:3px">${EYE}Slepe tačke</a><a href="#/brifing">Brifing</a></nav>
       <a class="btn dark" href="#/">Naslovna</a></div></header>`;
   }
   const footer = () => `<footer><div class="wrap top">
@@ -679,7 +681,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
       return {s, quiet, q, share: q / s.sources};
     }).filter(x => x.q > 0 && x.share <= 0.15 && (!want || x.quiet === want) && (!sec || x.s.section === sec))
       .sort((a, b) => a.share - b.share || b.s.sources - a.s.sources).slice(0, 6);
-    const nearCard = x => `<a class="bs-card" href="${link(x.s)}">${photo(x.s)}<div style="margin-top:12px"><span class="bs-label" style="background:#f3f1ec;color:var(--ink2)">Skoro slepa tačka · <span class="bs-side" style="color:${VAR[x.quiet]}">samo ${Math.round(100 * x.share)}% ${x.quiet === "pro_government" ? "provladinih" : "kritičkih"}</span></span></div><div class="hl">${esc(x.s.headline)}</div>${bar(x.s)}${covPct(x.s)}</a>`;
+    const nearCard = x => `<a class="bs-card" href="${link(x.s)}">${photo(x.s)}<div style="margin-top:12px"><span class="bs-label" style="background:#eef1f5;color:var(--ink2)">Skoro slepa tačka · <span class="bs-side" style="color:${VAR[x.quiet]}">samo ${Math.round(100 * x.share)}% ${x.quiet === "pro_government" ? "provladinih" : "kritičkih"}</span></span></div><div class="hl">${esc(x.s.headline)}</div>${bar(x.s)}${covPct(x.s)}</a>`;
     return `${header("bs")}<main class="wrap">
       <h1 class="page-h" style="display:flex;align-items:center;gap:12px"><span style="color:var(--amber);display:inline-flex">${EYE.replace('class="eye"', 'style="width:36px;height:36px"')}</span>Slepe tačke</h1>
       <p class="page-p">Vesti koje je objavilo više medija jedne strane, a nijedan medij druge. Računa se samo kada su mediji te strane u to vreme bili praćeni i objavljivali druge vesti.</p>
@@ -768,7 +770,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
       <div class="brief-head">${kick("Jutarnji brifing · " + esc(dateStr))}<h1>Obe strane u 5 minuta</h1>
         <p class="meta" style="font-size:14px;max-width:560px;margin:0 auto">${list.length} najvažnijih vesti iz poslednja 24 sata i kako ih je koja strana prenela. Izdanje se pravi jednom dnevno, u 7 ujutru. Čitanje: oko ${mins} minuta.</p></div>
       ${list.map((s, i) => item(s, i + 1)).join("")}
-      ${bs.length ? `<div class="sec-head" style="border-top-color:var(--amber)"><h2 style="color:var(--amber);display:flex;align-items:center">${EYE}Prećutano</h2><span class="meta">objavila samo jedna strana</span></div>${bs.map((s, i) => item(s, list.length + i + 1)).join("")}` : ""}
+      ${bs.length ? `<div class="sec-head" style="border-top-color:var(--sig)"><h2 style="color:var(--amber);display:flex;align-items:center">${EYE}Prećutano</h2><span class="meta">objavila samo jedna strana</span></div>${bs.map((s, i) => item(s, list.length + i + 1)).join("")}` : ""}
       ${anyAi ? `<p class="ai-note" style="margin-top:20px">Sažetke i opise uokviravanja napisao je AI model na osnovu naslova i uvoda članaka. Mogu da sadrže greške. <a href="#/o-nama/metodologija">Kako radimo</a></p>` : ""}
       <div class="brief-end">To je sve za danas. Sledeće izdanje je sutra u 7.<br><a href="#/" class="sans" style="font-size:15px;font-style:normal;text-decoration:underline">Vesti tokom dana su na naslovnoj</a></div>
     </main>${footer()}`;
