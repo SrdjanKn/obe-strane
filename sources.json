@@ -44,7 +44,7 @@
     {"id": "pravoucentar", "name": "Pravo u centar", "home": "https://pravoucentar.rs", "camp": "critical", "group": "Istraživački i analitički"},
 
     {"id": "juzne", "name": "Južne vesti", "home": "https://www.juznevesti.com", "camp": "critical", "group": "Regionalni i lokalni"},
-    {"id": "021", "name": "021.rs", "home": "https://www.021.rs", "sections": ["https://www.021.rs/info/srbija"], "camp": "critical", "group": "Regionalni i lokalni"},
+    {"id": "021", "name": "021.rs", "home": "https://www.021.rs", "sections": ["https://www.021.rs/najnovije/3", "https://www.021.rs/info/srbija/12"], "camp": "critical", "group": "Regionalni i lokalni"},
     {"id": "autonomija", "name": "Autonomija", "home": "https://www.autonomija.info", "camp": "critical", "group": "Regionalni i lokalni"},
     {"id": "glassumadije", "name": "Glas Šumadije", "home": "https://glassumadije.rs", "camp": "critical", "group": "Regionalni i lokalni"},
     {"id": "jugpress", "name": "JUGpress", "home": "https://jugpress.com", "camp": "critical", "group": "Regionalni i lokalni"},
