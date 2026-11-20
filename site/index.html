@@ -12,8 +12,8 @@
 /* Obe strane: design "Vaga" (see DESIGN.md). Pro-government always left of the seam, critical always right; dashes mean silence. */
 :root{
   --ink:#1b1d2a; --ink2:#555866; --ink3:#555866; --beton:#eceeec; --track:#dfe2df; --line:#d3d6d3;
-  --pg:#c8102e; --cr:#2445a3; --pub:#7d6aa8; --mix:#a9a69e; --intl:#3f7f86;
-  --amber:#9a5b00; --amber-bg:#fff; --amber-on-dark:#e7a24c;
+  --pg:#d0021b; --cr:#0057b8; --pub:#7d6aa8; --mix:#a9a69e; --intl:#3f7f86;
+  --sig:#f5b800; --amber:var(--ink); --amber-bg:#fff; --amber-on-dark:#f5b800;
   --rule:var(--line); --soft:var(--beton);
   --head:"Noto Serif", Georgia, serif;
   --brand:"DM Serif Display", Georgia, serif;
@@ -38,7 +38,8 @@ p,li,small,.dek{text-wrap:pretty}
 .meta{font:400 var(--s1)/1.45 var(--sans);color:var(--ink2)}
 .dim{color:var(--ink2);font-weight:400}
 .kicker{display:flex;flex-wrap:wrap;align-items:center;gap:2px 12px;font:600 var(--s1)/1.3 var(--sans);color:var(--ink);margin-bottom:8px}
-.kicker.amber{color:var(--amber)}
+.kicker.amber{color:var(--ink)}
+.kicker.amber svg,.bs-label svg{background:var(--sig);border-radius:2px;padding:1px}
 .kicker.amber .dim{color:var(--amber)}
 .sub-label{font:600 var(--s1)/1.3 var(--sans);color:var(--ink2);margin-bottom:10px}
 .eye{width:14px;height:14px;vertical-align:-2px;margin-right:6px}
@@ -71,7 +72,8 @@ nav.sections a{display:inline-block;padding:10px 0 11px;border-bottom:3px solid 
 nav.sections a:hover{border-bottom-color:var(--line)}
 nav.sections a.on{border-bottom-color:var(--ink)}
 nav.sections a.amber{color:var(--amber)}
-nav.sections a.amber.on{border-bottom-color:var(--amber)}
+nav.sections a.amber.on{border-bottom-color:var(--sig)}
+nav.sections a.amber svg,.compact-head nav a.amber svg{background:var(--sig);border-radius:2px;padding:1px}
 nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .focus{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding:12px 0 14px;font:400 15px var(--sans);color:var(--ink2);border-top:1px solid var(--line)}
 .focus b{color:var(--ink);font-weight:600}
@@ -132,8 +134,8 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 
 /* Slepe tačke rail: silence is drawn dashed */
 .bs-panel-h{margin:0;font:inherit}
-.bs-panel{border:2px dashed var(--amber);border-radius:6px;padding:18px 20px 20px;background:#fff}
-.bs-panel-head{display:flex;align-items:center;color:var(--amber);font:700 var(--s3)/1.1 var(--head)}
+.bs-panel{border:3px dashed var(--sig);border-radius:6px;padding:18px 20px 20px;background:#fff}
+.bs-panel-head{display:inline-flex;align-items:center;box-shadow:inset 0 -.4em 0 var(--sig);color:var(--ink);font:700 var(--s3)/1.1 var(--head)}
 .bs-panel-head .eye{width:18px;height:18px}
 .bs-panel-dek{margin:6px 0 0;font:400 15px/1.45 var(--sans);color:var(--ink2)}
 .bs-group h3{margin:18px 0 0;padding-bottom:6px;font:600 var(--s1)/1.2 var(--sans);border-bottom:1.5px solid}
@@ -147,7 +149,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .sil .gone{border:1.5px dashed;background:transparent}
 .sil::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink)}
 .sil-lab{display:flex;justify-content:space-between;margin-top:7px;font:600 var(--s1)/1 var(--sans)}
-.bs-panel .all{display:inline-block;margin-top:12px;font:700 15px var(--sans);color:var(--amber);text-decoration:underline;text-underline-offset:3px}
+.bs-panel .all{display:inline-block;margin-top:12px;font:700 15px var(--sans);color:var(--ink);text-decoration:underline;text-decoration-color:var(--sig);text-decoration-thickness:3px;text-underline-offset:3px}
 .brief-band{background:var(--beton);margin-top:56px;padding:40px 0 44px}
 .brief-band .wrap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--g);align-items:start}
 .bb-photo{grid-column:1/6}.bb-photo .ph{border-radius:6px}
@@ -192,11 +194,11 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 var(--g)}
 
 /* Slepa tačka dana */
-.bsday{background:var(--beton);margin-top:64px;border-top:2px dashed var(--amber)}
+.bsday{background:var(--beton);margin-top:64px;border-top:4px dashed var(--sig)}
 .bd-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--g);padding-top:44px;padding-bottom:52px}
 .bd-text{grid-column:1/8;min-width:0}
 .bd-side-col{grid-column:8/13;min-width:0}
-.bd-kick{display:flex;align-items:center;color:var(--amber);font:700 var(--s3)/1.1 var(--head);margin-bottom:16px}
+.bd-kick{display:inline-flex;align-items:center;box-shadow:inset 0 -.4em 0 var(--sig);color:var(--ink);font:700 var(--s3)/1.1 var(--head);margin-bottom:16px}
 .bd-kick .eye{width:20px;height:20px}
 .bd-h{margin:0 0 16px;font:700 var(--s5)/1.12 var(--head);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
 .bd-dek{margin:0 0 28px;font:400 18px/1.55 var(--serif);color:var(--ink2);max-width:60ch}
@@ -266,8 +268,8 @@ ol.tl li.c .tl-body{grid-column:1/-1;grid-row:2;justify-self:center;max-width:46
 
 ol.tl .tl-body>a{font:400 17px/1.4 var(--serif)}
 ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
-.bs-note{background:#fff;border:2px dashed var(--amber);border-radius:6px;padding:14px 18px;margin-top:20px;font:400 16px/1.5 var(--serif)}
-.bs-note b{color:var(--amber)}
+.bs-note{background:#fff;border:3px dashed var(--sig);border-radius:6px;padding:14px 18px;margin-top:20px;font:400 16px/1.5 var(--serif)}
+.bs-note b{color:var(--ink);box-shadow:inset 0 -.4em 0 var(--sig)}
 
 /* filters */
 .bs-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 6px}
@@ -283,7 +285,7 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 .bs-hero>a{grid-column:1/8;min-width:0}
 .bs-hero>div{grid-column:8/13;min-width:0}
 .bs-hero h2{margin:12px 0 12px;font:700 var(--s5)/1.12 var(--head)}
-.bs-label{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:0;border:0;font:600 var(--s1)/1.2 var(--sans);color:var(--amber);background:none}
+.bs-label{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding:0;border:0;font:600 var(--s1)/1.2 var(--sans);color:var(--ink);background:none}
 .bs-label.near{border-style:solid;border-color:var(--line);color:var(--ink2)}
 .bs-label .bs-side{font-weight:700}
 .bs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px var(--g);margin-top:8px}
@@ -384,13 +386,13 @@ nav.sections{font:700 17px var(--sans)}
 .rd-tab{position:relative;display:flex;justify-content:center;margin:0 0 22px;border-top:1px solid var(--ink)}
 .rd-tab>*{position:relative;top:-1px;padding:5px 12px 6px;background:var(--ink);color:#fff;font:700 17px/1.2 var(--sans)}
 .rd-tab a:hover{text-decoration:underline;text-underline-offset:3px}
-.rd-tab.amber{border-top-color:var(--amber)}
-.rd-tab.amber>*{background:var(--amber);display:inline-flex;align-items:center;gap:7px}
+.rd-tab.amber{border-top:2px solid var(--sig)}
+.rd-tab.amber>*{background:var(--sig);color:var(--ink);display:inline-flex;align-items:center;gap:7px}
 .rd-tab.amber svg{width:17px;height:17px}
 .rd-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px;margin:12px 0 6px;font:400 15px/1.3 var(--sans);color:var(--ink2)}
 .rd-meta b{font:800 15px/1.3 var(--head);color:var(--ink)}
 .rd-meta i{font-style:normal;color:var(--line)}
-.rd-meta b.amb{font:600 15px/1.3 var(--sans);color:var(--amber)}
+.rd-meta b.amb{font:600 15px/1.3 var(--sans);color:var(--ink);background:var(--sig);padding:0 4px;border-radius:2px}
 .rd-hl{margin:0;font:800 var(--s3)/1.18 var(--head);letter-spacing:-.012em;color:var(--ink);text-wrap:balance}
 .rd-dek{margin:6px 0 10px;font:400 17px/1.4 var(--sans);color:var(--ink2);text-wrap:pretty}
 a.rd-card:hover .rd-hl,a.rd-row:hover .rd-hl,a.rd-text:hover .rd-hl,a.rd-wide:hover .rd-hl{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
@@ -432,7 +434,7 @@ a.rd-card:hover .rd-hl,a.rd-row:hover .rd-hl,a.rd-text:hover .rd-hl,a.rd-wide:ho
 .rd-right .rd-row.no-pic{grid-template-columns:minmax(0,1fr)}
 .rd-right .rd-row .rd-hl{font-size:17px}
 .rd-row h4.rd-hl{margin-bottom:10px}
-.rd-all{display:inline-flex;align-items:center;min-height:44px;font:700 16px var(--sans);color:var(--amber);text-decoration:underline;text-underline-offset:3px}
+.rd-all{display:inline-flex;align-items:center;min-height:44px;font:700 16px var(--sans);color:var(--ink);text-decoration:underline;text-decoration-color:var(--sig);text-decoration-thickness:3px;text-underline-offset:3px}
 .rd-pair{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--g);margin-top:64px;align-items:start}
 .rd-pair>.rd-col4{grid-column:1/5}
 .rd-pair>.rd-col8{grid-column:5/13}
@@ -913,7 +915,7 @@ a.rd-card:hover .rd-hl,a.rd-row:hover .rd-hl,a.rd-text:hover .rd-hl,a.rd-wide:ho
       .sort((a, b) => a.share - b.share || b.s.sources - a.s.sources).slice(0, 6);
     const nearCard = x => `<a class="bs-card" href="${link(x.s)}">${photo(x.s)}<div style="margin-top:12px"><span class="bs-label near">Skoro slepa tačka: <span class="bs-side" style="color:${VAR[x.quiet]}">samo ${Math.round(100 * x.share)}% ${x.quiet === "pro_government" ? "provladinih" : "kritičkih"}</span></span></div><div class="hl">${esc(x.s.headline)}</div>${bar(x.s)}${covPct(x.s)}</a>`;
     return `${header("bs")}<main class="wrap">
-      <h1 class="page-h" style="display:flex;align-items:center;gap:12px"><span style="color:var(--amber);display:inline-flex">${EYE.replace('class="eye"', 'style="width:36px;height:36px"')}</span>Slepe tačke</h1>
+      <h1 class="page-h" style="display:inline-flex;align-items:center;gap:12px;box-shadow:inset 0 -.32em 0 var(--sig)"><span style="color:var(--amber);display:inline-flex">${EYE.replace('class="eye"', 'style="width:36px;height:36px"')}</span>Slepe tačke</h1>
       <p class="page-p">Vesti koje je objavilo više medija jedne strane, a nijedan medij druge. Računa se samo kada su mediji te strane u to vreme bili praćeni i objavljivali druge vesti.</p>
       <nav class="bs-tabs" aria-label="Filter">${tab("", "Sve", all.length)}${tab("provladini", "Prećutali provladini", all.filter(s => s.blindspot === "pro_government").length)}${tab("kriticki", "Prećutali kritički", all.filter(s => s.blindspot === "critical").length)}</nav>
       ${chips}
@@ -1024,7 +1026,7 @@ a.rd-card:hover .rd-hl,a.rd-row:hover .rd-hl,a.rd-text:hover .rd-hl,a.rd-wide:ho
       <div class="brief-head">${kick(parts("Jutarnji brifing", esc(dateStr)))}<h1>Obe strane u 5 minuta</h1>
         <p class="meta" style="font-size:14px;max-width:560px;margin:0 auto">${list.length} najvažnijih vesti iz poslednja 24 sata i kako ih je koja strana prenela. Izdanje se pravi jednom dnevno, u 7 ujutru. Čitanje: oko ${mins} minuta.</p></div>
       ${list.map((s, i) => item(s, i + 1)).join("")}
-      ${bs.length ? `<div class="sec-head" style="border-top-color:var(--amber)"><h2 style="color:var(--amber);display:flex;align-items:center">${EYE}Prećutano</h2><span class="meta">objavila samo jedna strana</span></div>${bs.map((s, i) => item(s, list.length + i + 1)).join("")}` : ""}
+      ${bs.length ? `<div class="sec-head" style="border-top-color:var(--sig)"><h2 style="color:var(--amber);display:flex;align-items:center">${EYE}Prećutano</h2><span class="meta">objavila samo jedna strana</span></div>${bs.map((s, i) => item(s, list.length + i + 1)).join("")}` : ""}
       ${anyAi ? `<p class="ai-note" style="margin-top:20px">Sažetke i opise uokviravanja napisao je AI model na osnovu naslova i uvoda članaka. Mogu da sadrže greške. <a href="#/o-nama/metodologija">Kako radimo</a></p>` : ""}
       <div class="brief-end">To je sve za danas. Sledeće izdanje je sutra u 7.<br><a href="#/" class="sans" style="font-size:15px;font-style:normal;text-decoration:underline">Vesti tokom dana su na naslovnoj</a></div>
     </main>${footer()}`;

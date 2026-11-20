@@ -18,9 +18,9 @@ The site is a measuring instrument for the media, not a newspaper. Its signature
 |---|---|---|
 | Tinta | `#1B1D2A` | Text and primary buttons; a blue-black printing ink rather than plain #111 |
 | Beton | `#ECEEEC` | Panels, footer, meter tracks; cool concrete grey |
-| Grimiz | `#C8102E` | Pro-government (data). Replaced Cigla #A93A2B: the brick tone read as generic terracotta |
-| Kobalt | `#2445A3` | Critical (data) |
-| Oker | `#9A5B00` | Slepe tačke and silence (dashed outlines, labels) |
+| Crvena | `#D0021B` | Pro-government (data). "Signal" set, replaced Cigla #A93A2B (read as generic terracotta) |
+| Plava | `#0057B8` | Critical (data). "Signal" set |
+| Signal žuta | `#F5B800` | Slepe tačke and silence: tab, dashed outlines, highlighter behind ink text. Never used as text (too light) |
 | Grafit | `#555866` | Secondary text |
 
 The data-only colors for the neutral groups stay as they are: public broadcasters `#7D6AA8`, in-between `#A9A69E`, international `#3F7F86`.
