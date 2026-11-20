@@ -12,7 +12,7 @@
 /* Obe strane: design "Vaga" (see DESIGN.md). Pro-government always left of the seam, critical always right; dashes mean silence. */
 :root{
   --ink:#1b1d2a; --ink2:#555866; --ink3:#555866; --beton:#eceeec; --track:#dfe2df; --line:#d3d6d3;
-  --pg:#a93a2b; --cr:#2445a3; --pub:#7d6aa8; --mix:#a9a69e; --intl:#3f7f86;
+  --pg:#c8102e; --cr:#2445a3; --pub:#7d6aa8; --mix:#a9a69e; --intl:#3f7f86;
   --amber:#9a5b00; --amber-bg:#fff; --amber-on-dark:#e7a24c;
   --rule:var(--line); --soft:var(--beton);
   --head:"Noto Serif", Georgia, serif;
@@ -101,7 +101,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .cov b{font-weight:700}
 
 /* photos */
-.ph{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#71757a;border-radius:3px}
+.ph{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#686d75;border-radius:3px}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ph span{position:absolute;left:14px;bottom:12px;z-index:1;font:600 var(--s1)/1 var(--sans);color:#fff}
 .ph.has-img span{display:none}
@@ -555,7 +555,7 @@ a.rd-card:hover .rd-hl,a.rd-row:hover .rd-hl,a.rd-text:hover .rd-hl,a.rd-wide:ho
   const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)", international: "var(--intl)"};
   const LAB = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
   const SECTION_ORDER = ["Politika", "Društvo", "Hronika", "Ekonomija", "Svet", "Region", "Kultura"];
-  const TONES = {Politika: "#69757e", Društvo: "#7a7166", Hronika: "#2f3846", Ekonomija: "#5f6f5c", Svet: "#5a748f", Region: "#6c6a86", Kultura: "#8a6f5c", Vesti: "#70757a"};
+  const TONES = {Politika: "#5f6b78", Društvo: "#666b73", Hronika: "#2f3846", Ekonomija: "#56656a", Svet: "#5a6b84", Region: "#62657c", Kultura: "#6b6878", Vesti: "#686d75"};
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
