@@ -31,7 +31,7 @@ img{display:block;max-width:100%}
 .sans{font-family:var(--sans)}
 .hl{font-family:var(--head);font-weight:700;letter-spacing:-.01em;color:var(--ink)}
 .meta{font:500 13px/1.4 var(--sans);color:var(--ink3)}
-.kicker{font:700 11.5px/1.2 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px}
+.kicker{font:700 12px/1.2 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px}
 .kicker.amber{color:var(--amber)}
 .eye{width:13px;height:13px;vertical-align:-2px;margin-right:5px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -353,12 +353,46 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   .lv-left{margin-top:30px}
   .lv-over-txt{padding:0 18px 20px}
   .lv-over h2,.lv-over .long{font-size:29px;max-width:none}.lv-over h3{font-size:25px;max-width:none}
-  .lv-over .ph{aspect-ratio:4/5!important}
+  .lv-over .ph{aspect-ratio:4/3!important}
   .lv-sec-p>.lv-over{margin-bottom:22px}
   .lv-sec-k>*+*{margin-top:24px}
   .lv-wide{grid-template-columns:minmax(0,1fr);gap:12px}.lv-wide .hl{font-size:21px}
   .lv-trio{display:block!important}.lv-trio .lv-card+.lv-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--rule)}
   .lv-row{grid-template-columns:minmax(0,1fr) 88px}
+}
+.s-tog{display:none}
+@media (max-width:480px){ .lv-over .ph{aspect-ratio:4/5!important} }
+@media (max-width:1080px){
+  .compact-head .wrap{flex-wrap:wrap;gap:0 16px;padding-top:10px;padding-bottom:0}
+  .compact-head nav{order:3;flex:1 0 100%;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;gap:22px;align-items:center;margin:8px -16px 0;padding:0 16px;border-top:1px solid var(--rule);scrollbar-width:none}
+  .compact-head nav::-webkit-scrollbar{display:none}
+  .compact-head nav a{padding:12px 0;flex:none}
+  .compact-head nav a:first-child{padding:9px 12px!important;display:inline-flex;align-items:center}
+  .compact-head .btn{min-height:36px}
+}
+@media (max-width:760px){
+  .util{display:none}
+  body.ss .util{display:block}
+  .util .date{display:none}
+  .util .wrap{padding-top:8px;padding-bottom:8px}
+  .util form{width:100%} .util input{flex:1;width:auto;height:44px} .util .btn{min-height:44px}
+  .mast{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:8px 16px;overflow:hidden}
+  .mast .name{font-size:32px}
+  .mast .mark{width:30px!important;height:30px!important}
+  .mast .tag{display:none}
+  .s-tog{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-8px;border:0;background:none;color:var(--ink);cursor:pointer}
+  nav.sections{padding:0 16px;gap:22px;align-items:center;scrollbar-width:none}
+  nav.sections::-webkit-scrollbar,.focus::-webkit-scrollbar{display:none}
+  nav.sections a{padding:12px 0;flex:none}
+  nav.sections a.amber{padding:10px 12px}
+  .focus{padding:0;gap:22px;scrollbar-width:none}
+  .focus a,.focus b{padding:11px 0;flex:none}
+  .subnav .wrap{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding-top:0;padding-bottom:0;gap:22px;scrollbar-width:none}
+  .subnav .wrap::-webkit-scrollbar{display:none}
+  .subnav button,.subnav a,.subnav b{padding:12px 0;flex:none}
+  footer .links{gap:0} footer .links a{padding:10px 0}
+  .bs-panel-head{padding:8px 0}
+  .brief-item .no{display:none}
 }
 </style>
 </head>
@@ -441,7 +475,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
       <span class="date">${esc(day(D.generated))} · ažurirano u ${clock(D.generated)}</span>
       <form id="search" role="search"><label class="vh" for="q">Pretraga</label><input id="q" type="search" placeholder="Pretraži vesti…"><button class="btn dark" type="submit">Traži</button></form>
     </div></div>
-    <header class="wrap mast"><a href="#/">${mark(42, 4)}<span class="name"><i>obe strane</i></span></a>
+    <header class="wrap mast"><a href="#/">${mark(42, 4)}<span class="name"><i>obe strane</i></span></a><button class="s-tog" type="button" aria-label="Pretraga" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
       <div class="tag">Ista vest, dve strane. Sve što su objavili mediji u Srbiji, uporedo.</div></header>
     <div class="wrap">
       <nav class="sections" aria-label="Rubrike">
@@ -798,7 +832,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   function checkPage(raw) {
     let u = (raw || "").trim();
     if (u && !/^https?:\/\//i.test(u)) u = "https://" + u;
-    const head = `${header("chk")}<main class="wrap chk-page"><h1 class="page-h">Proveri link</h1>
+    const head = `${compactHeader()}<main class="wrap chk-page"><h1 class="page-h">Proveri link</h1>
       <p class="page-p" style="margin-bottom:20px">Nalepite link bilo kog članka iz srpskih medija. Pokazaćemo čiji je medij, kojoj strani pripada i kako je istu vest prenela druga strana.</p>${chkForm(raw, true)}`;
     const end = `</main>${footer()}`;
     if (!u) return head + `<p class="meta" style="margin-top:14px">Na primer: link sa N1, Informera, Danasa ili Kurira.</p>` + end;
@@ -955,6 +989,8 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
       : page === "o-nama" ? about() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
       : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : home();
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
+    const tog = document.querySelector(".s-tog");
+    if (tog) tog.addEventListener("click", () => { const on = document.body.classList.toggle("ss"); tog.setAttribute("aria-expanded", on); if (on) { window.scrollTo(0, 0); document.getElementById("q").focus(); } });
     const f = document.getElementById("search");
     if (f) f.addEventListener("submit", e => { e.preventDefault(); const v = document.getElementById("q").value.trim(); if (v) location.hash = "#/pretraga/" + encodeURIComponent(v); });
     document.querySelectorAll(".chk-form").forEach(fm => fm.addEventListener("submit", e => { e.preventDefault(); const v = fm.u.value.trim(); location.hash = "#/proveri/" + encodeURIComponent(v); }));
