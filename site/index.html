@@ -394,6 +394,11 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   .bs-panel-head{padding:8px 0}
   .brief-item .no{display:none}
 }
+.story-fig{margin:28px auto 0}
+.story-fig .ph span{display:none}
+.story-fig .ph{max-height:max(260px,calc(100vh - 360px))}
+.story-fig figcaption{margin-top:8px}
+@media (max-width:760px){ .story-fig{margin-top:0;padding:0} .story-fig figcaption{padding:0 16px} }
 </style>
 </head>
 <body>
@@ -673,7 +678,8 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
     <div class="subnav"><div class="wrap"><b style="color:var(--ink)">${esc(s.section)} ›</b>
       ${s.ai ? '<button data-go="ukratko">Ukratko</button>' : ""}<button data-go="poredjenje">Kako su naslovili</button><button data-go="hronologija">Hronologija</button><button data-go="pokrivenost">Pokrivenost</button><a href="#/izvori">Izvori</a></div></div>
     <article class="story">
-      <div class="col" style="padding-top:40px">
+      ${s.image ? `<figure class="wide story-fig">${photo(s, "16/9")}${s.image_source ? `<figcaption class="meta">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
+      <div class="col" style="padding-top:${s.image ? 22 : 40}px">
         ${kick(esc(s.section) + (s.blindspot ? " · " + EYE + "Slepa tačka" : ""), s.blindspot ? "amber" : "")}
         <h1 class="hl">${esc(s.headline)}</h1>
         ${s.summary ? `<p class="dek" style="color:var(--ink2);margin:0 0 22px">${esc(tidy(s.summary))}</p>` : ""}
@@ -681,7 +687,6 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
         <div class="byline"><div class="meta"><b style="color:var(--ink)">Priču prati ${s.sources} medija</b> · prvi objavio ${esc(src(s.broke).name)} u ${clock(s.first)} · poslednji članak u ${clock(its[its.length - 1].published)}</div>
           <button class="pill" id="share" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Podeli</span></button></div>
       </div>
-      ${s.image ? `<figure class="wide" style="margin:28px auto 0">${photo(s, "16/9")}${s.image_source ? `<figcaption class="meta" style="margin-top:8px">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
       ${aiBox(s)}
       <section id="pokrivenost" class="col" style="margin-top:36px" aria-label="Pokrivenost"><div class="covbox">
         <div><div class="kicker" style="color:var(--ink2)">Ko je objavio</div><div class="sent">${sentence}</div>${bar(s, 14)}${cov(s)}</div>
