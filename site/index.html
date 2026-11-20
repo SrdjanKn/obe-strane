@@ -141,8 +141,18 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .sil::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink)}
 .sil-lab{display:flex;justify-content:space-between;margin-top:7px;font:600 12.5px/1 var(--sans)}
 .bs-panel .all{display:inline-block;margin-top:12px;font:700 15px var(--sans);color:var(--amber);text-decoration:underline;text-underline-offset:3px}
-.rail-brief{display:block;margin-top:20px;padding:16px 18px;background:var(--beton);border-radius:6px}
-.rail-brief .hl{font-size:var(--s3);line-height:1.2;margin-bottom:6px}
+.brief-band{background:var(--beton);margin-top:56px;padding:40px 0 44px}
+.brief-band .wrap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--g);align-items:start}
+.bb-photo{grid-column:1/6}.bb-photo .ph{border-radius:6px}
+.bb-body{grid-column:6/13;max-width:640px}
+.bb-title{font:700 var(--s3)/1.2 var(--sans);margin:0 0 4px;color:var(--ink)}
+.bb-facts{font:400 var(--s1)/1.4 var(--sans);color:var(--ink2);margin:0 0 18px;font-variant-numeric:tabular-nums}
+.bb-body .hl{font-size:var(--s5);line-height:1.12;margin:0 0 12px}
+.bb-body .hl a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.bb-lede{font-size:var(--s2);line-height:1.5;margin:0 0 18px}
+.bb-more{font-size:15.5px;line-height:1.55;margin:0 0 22px;color:var(--ink2)}
+.bb-more a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.bb-more a:hover{text-decoration-color:var(--ink)}
 
 /* sections */
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:56px 0 20px}
@@ -351,6 +361,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   footer .top>div{grid-column:1/-1!important}
 }
 @media (max-width:760px){
+  .bb-photo,.bb-body{grid-column:1/-1} .bb-photo{margin-bottom:20px} .brief-band{padding:28px 0 32px;margin-top:40px}
   .wrap{--pad:16px} .col,.wide{padding:0 16px}
   .top-row{grid-template-columns:minmax(0,1fr);gap:14px;padding-top:16px}
   .brand .name{font-size:36px}
@@ -428,7 +439,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   }
   // Serbian number agreement: 1 provladin, 2-4 provladina, 5+ provladinih (11-14 -> many)
   const FORMS = {pro_government: ["provladin", "provladina", "provladinih"], critical: ["kritički", "kritička", "kritičkih"],
-                 public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], international: ["međunarodni", "međunarodna", "međunarodnih"], medij: ["medij", "medija", "medija"], prica: ["priča", "priče", "priča"]};
+                 public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], international: ["međunarodni", "međunarodna", "međunarodnih"], medij: ["medij", "medija", "medija"], prica: ["priča", "priče", "priča"], vest: ["vest", "vesti", "vesti"], clanak: ["članak", "članka", "članaka"], minut: ["minut", "minuta", "minuta"]};
   const form = (n, k) => { const f = FORMS[k], d = n % 10, h = n % 100; return n === 1 || (d === 1 && h !== 11) ? f[0] : (d >= 2 && d <= 4 && (h < 12 || h > 14)) ? f[1] : f[2]; };
   const tidy = (t, max) => {   // calm a SHOUTED first word, optionally shorten
     t = String(t || "").replace(/^([A-ZČĆŽŠĐ]{3,})(?=[\s,])/, w => w[0] + w.slice(1).toLowerCase());
@@ -581,11 +592,13 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
             ${group(quietPg, nPg, "pro_government", "Provladini nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
             ${bs.length ? `<a class="all" href="#/slepe-tacke">Sve slepe tačke (${bs.length})</a>` : `<p class="meta" style="margin-top:12px">Trenutno nema slepih tačaka.</p>`}
           </div>
-          ${D.briefing ? `<a href="#/brifing" class="rail-brief"><div class="sub-label">Jutarnji brifing</div><div class="hl">Obe strane u 5 minuta</div><div class="meta">${(D.briefing.stories || []).length} vesti, izdanje u ${clock(D.briefing.made)}</div></a>` : ""}
         </aside>
       </section>
-      ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2><a href="#/slepe-tacke">Sve slepe tačke</a></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
     </main>
+    ${D.briefing ? briefBand(D.briefing) : ""}
+    <div class="wrap">
+      ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2><a href="#/slepe-tacke">Sve slepe tačke</a></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
+    </div>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
       <div class="two">${secBlocks}</div>
@@ -795,6 +808,30 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   }
 
   // ---------------------------------------------------------------- jutarnji brifing
+  const briefMins = B => Math.max(3, Math.round(((B.stories || []).length + (B.blindspots || []).length) * 0.6));
+  function briefBand(B) {
+    const list = B.stories || [];
+    if (!list.length) return "";
+    const live = id => D.stories.find(s => s.id === id);
+    const top = list[0], topLive = live(top.id);
+    const pic = [top, topLive, ...list.slice(1)].find(x => x && x.image) || top;
+    const go = x => live(x.id) ? `#/vest/${x.id}` : "#/brifing";
+    const dateStr = new Date(B.day + "T12:00:00").toLocaleDateString("sr-Latn-RS", {weekday: "long", day: "numeric", month: "long"});
+    const n = list.length, a = B.articles || 0, m = briefMins(B);
+    const facts = `${n} ${form(n, "vest")}${a ? `, ${a} ${form(a, "clanak")}` : ""}, oko ${m} ${form(m, "minut")} čitanja`;
+    const others = list.slice(1, 4).map(x => `<a href="${go(x)}">${esc(x.headline)}</a>`);
+    const lede = top.ai && top.ai.ukratko ? top.ai.ukratko : tidy(top.summary || "", 220);
+    return `<section class="brief-band" aria-label="Jutarnji brifing"><div class="wrap">
+      <a class="bb-photo" href="#/brifing" tabindex="-1" aria-hidden="true">${photo(pic, "3/2")}</a>
+      <div class="bb-body">
+        <h2 class="bb-title"><a href="#/brifing">Jutarnji brifing</a></h2>
+        <p class="bb-facts">${esc(dateStr.charAt(0).toUpperCase() + dateStr.slice(1))}: ${facts}</p>
+        <h3 class="hl"><a href="${go(top)}">${esc(top.headline)}</a></h3>
+        ${lede ? `<p class="bb-lede">${esc(lede)}</p>` : ""}
+        ${others.length ? `<p class="bb-more">Takođe u brifingu: ${others.join("; ")}${n > 4 ? `; i još ${n - 4}` : ""}.</p>` : ""}
+        <a class="btn dark" href="#/brifing">Pročitaj brifing</a>
+      </div></div></section>`;
+  }
   function briefingPage() {
     const B = D.briefing;
     if (!B) return `${header("brief")}<div class="wrap empty">Prvi brifing stiže sutra u 7 ujutru.</div>${footer()}`;
@@ -810,7 +847,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
         ${s.ai && (s.ai.provladini || s.ai.kriticki) ? `<div class="ai-two" style="margin-bottom:14px">${framing(s)}</div>` : (s.pg || s.cr) ? `<div class="quotes2">${q(s.pg, "q-pg")}${q(s.cr, "q-cr")}</div>` : ""}
         ${bar(s, 6)}${cov(s)}</div></article>`;
     const list = B.stories || [], bs = B.blindspots || [];
-    const mins = Math.max(3, Math.round((list.length + bs.length) * 0.6));
+    const mins = briefMins(B);
     const anyAi = list.some(s => s.ai);
     return `${header("brief")}<main class="col" style="max-width:820px">
       <div class="brief-head">${kick(parts("Jutarnji brifing", esc(dateStr)))}<h1>Obe strane u 5 minuta</h1>
