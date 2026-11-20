@@ -7,7 +7,7 @@
 <meta name="description" content="Kako mediji u Srbiji izveštavaju o istim događajima: provladini i kritički naslovi, uporedo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Noto+Serif:wght@700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Noto+Serif:wght@700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 /* Obe strane: design "Vaga" (see DESIGN.md). Pro-government always left of the seam, critical always right; dashes mean silence. */
 :root{
@@ -54,7 +54,6 @@ p,li,small,.dek{text-wrap:pretty}
 .mark i{flex:1;background:var(--pg)} .mark i:last-child{background:var(--cr)} .mark b{background:#fff}
 
 /* header */
-header.top{border-bottom:1px solid var(--line)}
 .top-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px 40px;padding-top:20px;padding-bottom:18px}
 .brand{display:inline-flex;align-items:center;gap:14px;min-height:44px}
 .brand .name{font:400 44px/1 var(--brand);letter-spacing:-.02em}
@@ -379,6 +378,92 @@ footer .bottom::before{content:"";position:absolute;top:0;left:var(--pad,32px);r
 footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
 
 /* responsive */
+/* ---------- Home, Radar-style editorial layout ---------- */
+nav.sections{font:700 17px var(--sans)}
+.rd{padding-top:28px}
+.rd-tab{position:relative;display:flex;justify-content:center;margin:0 0 22px;border-top:1px solid var(--ink)}
+.rd-tab>*{position:relative;top:-1px;padding:5px 12px 6px;background:var(--ink);color:#fff;font:700 17px/1.2 var(--sans)}
+.rd-tab a:hover{text-decoration:underline;text-underline-offset:3px}
+.rd-tab.amber{border-top-color:var(--amber)}
+.rd-tab.amber>*{background:var(--amber);display:inline-flex;align-items:center;gap:7px}
+.rd-tab.amber svg{width:17px;height:17px}
+.rd-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px;margin:12px 0 6px;font:400 15px/1.3 var(--sans);color:var(--ink2)}
+.rd-meta b{font:800 15px/1.3 var(--head);color:var(--ink)}
+.rd-meta i{font-style:normal;color:var(--line)}
+.rd-meta b.amb{font:600 15px/1.3 var(--sans);color:var(--amber)}
+.rd-hl{margin:0;font:800 var(--s3)/1.18 var(--head);letter-spacing:-.012em;color:var(--ink);text-wrap:balance}
+.rd-dek{margin:6px 0 10px;font:400 17px/1.4 var(--sans);color:var(--ink2);text-wrap:pretty}
+a.rd-card:hover .rd-hl,a.rd-row:hover .rd-hl,a.rd-text:hover .rd-hl,a.rd-wide:hover .rd-hl{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.rd-card{display:block}
+.rd-card .meter,.rd-row .meter,.rd-text .meter{margin-top:4px}
+.rd-row{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:16px;padding:18px 0;border-top:1px solid var(--line)}
+.rd-row.no-pic{grid-template-columns:minmax(0,1fr)}
+.rd-row .rd-meta{margin-top:0}
+.rd-row .rd-hl{font-size:19px;line-height:1.22}
+.rd-row .ph{aspect-ratio:1/1!important;border-radius:3px}
+.rd-row .ph span{display:none}
+.rd-list .rd-row:first-child{border-top:0;padding-top:0}
+.rd-text{display:block;padding:18px 0;border-top:1px solid var(--line)}
+.rd-text .rd-meta{margin-top:0}
+/* the lead: headline set inside the photograph */
+.rd-over{position:relative;display:block;color:#fff;border-radius:3px;overflow:hidden;background:var(--ink)}
+.rd-over .ph{border-radius:0}
+.rd-over .ph span{display:none}
+.rd-over::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(27,29,42,0) 30%,rgba(27,29,42,.55) 55%,rgba(27,29,42,.92));pointer-events:none}
+.rd-over-txt{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:0 36px 30px;text-align:center}
+.rd-over-kick{font:600 16px/1.3 var(--sans);color:#fff;opacity:.92;margin-bottom:10px}
+.rd-over h2,.rd-over h3{margin:0 auto;max-width:18ch;font:800 52px/1.04 var(--head);letter-spacing:-.022em;color:#fff;text-wrap:balance}
+.rd-over h2.long{font-size:41.5px;max-width:22ch}
+.rd-over h3{font-size:var(--s5);max-width:20ch}
+.rd-over-meta{margin-top:12px;font:400 15px/1.3 var(--sans);color:#fff;opacity:.85}
+.rd-over-meta b{font:800 15px var(--head)}
+.rd-over:hover h2,.rd-over:hover h3{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
+.rd-top{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--g);align-items:start}
+.rd-left{grid-column:1/4;grid-row:1}
+.rd-left .rd-card+.rd-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+.rd-left .rd-text:first-of-type{margin-top:22px}
+.rd-hero{grid-column:4/10;grid-row:1;min-width:0}
+.rd-under{margin-top:18px}
+.rd-under .quotes2{margin-top:6px}
+.rd-credit{margin-top:8px}
+.rd-right{grid-column:10/13;grid-row:1;min-width:0}
+.rd-right .bs-group h3{margin:4px 0 0}
+.rd-right .rd-row{grid-template-columns:minmax(0,1fr) 84px}
+.rd-right .rd-row.no-pic{grid-template-columns:minmax(0,1fr)}
+.rd-right .rd-row .rd-hl{font-size:17px}
+.rd-row h4.rd-hl{margin-bottom:10px}
+.rd-all{display:inline-flex;align-items:center;min-height:44px;font:700 16px var(--sans);color:var(--amber);text-decoration:underline;text-underline-offset:3px}
+.rd-pair{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--g);margin-top:64px;align-items:start}
+.rd-pair>.rd-col4{grid-column:1/5}
+.rd-pair>.rd-col8{grid-column:5/13}
+.rd-pair>.rd-col12{grid-column:1/-1}
+.rd-sec-p{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,3fr);gap:0 var(--g);align-items:start}
+.rd-sec-p .rd-card+.rd-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+.rd-sec-k{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px var(--g);align-items:start}
+.rd-sec-k>.rd-over{grid-column:1/5;grid-row:1/3}
+.rd-sec-k>.rd-wide{grid-column:5/13}
+.rd-sec-k>.rd-trio{grid-column:5/13;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 var(--g)}
+.rd-wide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--g);align-items:center}
+.rd-wide .rd-hl{font-size:var(--s4);line-height:1.15}
+.rd-more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 var(--g)}
+.rd-more .rd-text:nth-child(-n+3){border-top:0;padding-top:0}
+.rd-under .sub-label{margin-top:22px}
+/* the one solid block: the morning briefing */
+.brief-band{background:var(--ink);color:#fff;margin-top:64px}
+.brief-band .bb-title{font:800 var(--s6)/1 var(--head);letter-spacing:-.02em;color:#fff;margin-bottom:10px}
+.brief-band .bb-title a{color:#fff}
+.brief-band .bb-facts{color:#c9cbd4}
+.brief-band .hl,.brief-band .hl a{color:#fff;font-weight:800}
+.brief-band .bb-lede{color:#e4e5ea}
+.brief-band .bb-more{color:#c9cbd4}
+.brief-band .bb-more a{color:#fff;text-decoration-color:rgba(255,255,255,.4)}
+.brief-band .bb-more a:hover{text-decoration-color:#fff}
+.brief-band .btn.dark{background:#fff;color:var(--ink);border-color:#fff}
+.brief-band .bb-nl{border-top-color:rgba(255,255,255,.22)}
+.brief-band .bb-nl label{color:#c9cbd4}
+.brief-band .bb-nl input{border-color:#fff}
+.brief-band .bb-nl .btn{background:transparent;color:#fff;border-color:#fff}
+.brief-band .ph span{display:none}
 @media (max-width:1080px){
   .top-row{grid-template-columns:auto minmax(0,1fr)} #search{grid-column:1/-1} #search input{flex:1}
   .today{justify-self:end;max-width:380px}
@@ -430,6 +515,30 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   .bal-row>span:first-child,.bal-row>div,.bal-row .pp{grid-column:1/-1} .bal-row{row-gap:8px}
   .brief-item{grid-template-columns:minmax(0,1fr)} .brief-item .no{font-size:var(--s4)}
   .page-h{font-size:var(--s5)}
+}
+@media (max-width:1080px){
+  .rd-left{grid-column:1/5}.rd-hero{grid-column:5/13}.rd-right{grid-column:1/-1;grid-row:2;margin-top:40px}
+  .rd-over h2{font-size:41.5px}.rd-over h2.long{font-size:33px}
+  .rd-pair>.rd-col4,.rd-pair>.rd-col8{grid-column:1/-1}.rd-pair>.rd-col8{margin-top:48px}
+  .rd-more{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rd-more .rd-text:nth-child(3){border-top:1px solid var(--line);padding-top:18px}
+}
+@media (max-width:760px){
+  .rd{padding-top:16px}
+  .rd-top,.rd-pair,.rd-sec-k{display:block}
+  .rd-hero{margin:0 -16px}.rd-hero .rd-over{border-radius:0}.rd-under{padding:0 16px}
+  .rd-left{margin-top:32px}
+  .rd-over-txt{padding:0 18px 20px}
+  .rd-over h2,.rd-over h2.long{font-size:30px;max-width:none}.rd-over h3{font-size:26.5px;max-width:none}
+  .rd-over .ph{aspect-ratio:4/5!important}
+  .rd-sec-p{display:block}.rd-sec-p>.rd-over{margin-bottom:22px}
+  .rd-sec-k>*+*{margin-top:24px}
+  .rd-wide{grid-template-columns:minmax(0,1fr);gap:12px}.rd-wide .rd-hl{font-size:var(--s3)}
+  .rd-trio{display:block!important}.rd-trio .rd-card+.rd-card{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+  .rd-more{grid-template-columns:minmax(0,1fr)}
+  .rd-more .rd-text:nth-child(n+2){border-top:1px solid var(--line);padding-top:18px}
+  .rd-row{grid-template-columns:minmax(0,1fr) 88px}
+  .brief-band .bb-title{font-size:var(--s5)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -586,63 +695,85 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
       <div class="quotes2">${q(p, "q-pg")}${q(c, "q-cr")}</div>`;
   }
 
+  // Radar-style building blocks for the home page
+  const pipe = '<i aria-hidden="true">|</i>';
+  const rdMeta = s => `<div class="rd-meta"><b>${esc(src(s.broke).name)}</b>${pipe}<span>${esc(s.section || "Vesti")}</span>${pipe}<span>${s.sources} medija</span></div>`;
+  const rdDek = (s, n = 120) => s.summary ? `<p class="rd-dek">${esc(tidy(s.summary, n))}</p>` : "";
+  const rdCard = (s, ratio = "3/2") => `<a class="rd-card" href="${link(s)}">${photo(s, ratio)}${rdMeta(s)}<h3 class="rd-hl">${esc(s.headline)}</h3>${rdDek(s)}${bar(s, 4)}</a>`;
+  const rdRow = s => `<a class="rd-row${s.image ? "" : " no-pic"}" href="${link(s)}"><div>${rdMeta(s)}<h3 class="rd-hl">${esc(s.headline)}</h3>${rdDek(s, 90)}${bar(s, 4)}</div>${s.image ? photo(s, "1/1") : ""}</a>`;
+  const rdText = s => `<a class="rd-text" href="${link(s)}">${rdMeta(s)}<h3 class="rd-hl">${esc(s.headline)}</h3>${rdDek(s, 110)}${bar(s, 4)}</a>`;
+  const rdBs = s => `<a class="rd-row${s.image ? "" : " no-pic"}" href="${link(s)}"><div><div class="rd-meta"><b class="amb">0% ${s.blindspot === "pro_government" ? "provladinih" : "kritičkih"}</b>${pipe}<span>${s.sources} medija</span></div><h4 class="rd-hl">${esc(s.headline)}</h4>${silence(s)}</div>${s.image ? photo(s, "1/1") : ""}</a>`;
+  const rdOver = (s, ratio, tag) => `<a class="rd-over" href="${link(s)}">${photo(s, ratio)}<div class="rd-over-txt"><div class="rd-over-kick">${esc(s.section || "Vesti")}, ${s.sources} medija</div><${tag}${tag === "h2" && s.headline.length > 80 ? ' class="long"' : ""}>${esc(s.headline)}</${tag}><div class="rd-over-meta">Prvi je objavio <b>${esc(src(s.broke).name)}</b> u ${clock(s.first)}</div></div></a>`;
+  const rdTab = (label, href, cls = "") => `<div class="rd-tab ${cls}">${href ? `<a href="${href}">${label}</a>` : `<span>${label}</span>`}</div>`;
+  const rdTabH = (label, href, cls = "") => `<h2 class="rd-tab ${cls}">${href ? `<a href="${href}">${label}</a>` : `<span>${label}</span>`}</h2>`;
+
   function home() {
     const S = D.stories;
     if (!S.length) return `${header("home")}<div class="wrap empty">Još nema dovoljno podataka. Sledeće prikupljanje je za najviše 15 minuta.</div>${footer()}`;
     const used = new Set();
     const take = (list, n) => list.filter(s => !used.has(s.id)).slice(0, n).map(s => (used.add(s.id), s));
-    // stories with a sharp photo go first where a photo is shown big (lead, photo strip)
+    // stories with a sharp photo go first where a photo is shown big
     const pick = (n, win) => { const pool = S.filter(s => !used.has(s.id)).slice(0, win);
       const sel = [...pool.filter(s => s.image), ...pool.filter(s => !s.image)].slice(0, n); sel.forEach(s => used.add(s.id)); return sel; };
     const [top] = pick(1, 3);
-    const sideList = take(S, 2);
+    const sideList = pick(2, 6);
     const under = take(S, 2);
     const bs = S.filter(s => s.blindspot);
     const quietPg = bs.filter(s => s.blindspot === "pro_government"), quietCr = bs.filter(s => s.blindspot === "critical");
     const nPg = quietCr.length ? 3 : 5, nCr = quietPg.length ? 3 : 5;
-    const group = (list, n, k, title) => list.length ? `<div class="bs-group"><h3 style="color:${VAR[k]};border-color:${VAR[k]}">${title}</h3>${list.slice(0, n).map(railItem).join("")}</div>` : "";
-    const strip = pick(4, 8);
+    const group = (list, n, k, title) => list.length ? `<div class="bs-group"><h3 style="color:${VAR[k]};border-color:${VAR[k]}">${title}</h3>${list.slice(0, n).map(rdBs).join("")}</div>` : "";
+    const strip = take(S, 4);
     const bsTop = bs.slice().sort((a, b) => b.sources - a.sources).slice(0, 3);
-    const bsDay = bsTop.find(s => s.image) || bsTop[0];   // the biggest one, preferring one with a sharp photo
+    const bsDay = bsTop.find(s => s.image) || bsTop[0];
     const counts = SECTION_ORDER.map(n => [n, S.filter(s => s.section === n && !used.has(s.id)).length]).filter(x => x[1] >= 2).sort((a, b) => b[1] - a[1]);
-    const secBlocks = counts.slice(0, 2).map(([n]) => {
-      const [l, ...rest] = take(S.filter(s => s.section === n), 4);
-      return `<section aria-label="${n}"><div class="sec-head"><h2>${n}</h2><a href="#/rubrika/${encodeURIComponent(n)}">Sve vesti iz rubrike</a></div>
-        <a class="sec-lead" href="${link(l)}"><div>${photo(l, "4/3")}</div><div>${kick(l.sources + " medija")}<div class="hl">${esc(l.headline)}</div>${bar(l)}${cov(l)}</div></a>
-        <div class="sec-rest">${rest.map(s => listItem(s)).join("")}</div></section>`;
-    }).join("");
-    const secCount = Math.min(2, counts.length);
+    const secLink = n => `#/rubrika/${encodeURIComponent(n)}`;
+    // first rubrika: photo with the headline inside, two cards beside it
+    const secP = n => { const sel = S.filter(s => s.section === n && !used.has(s.id));
+      const lead = [...sel.filter(s => s.image), ...sel][0]; used.add(lead.id); const rest = take(sel, 2);
+      return `<section aria-label="${esc(n)}">${rdTabH(esc(n), secLink(n))}<div class="rd-sec-p">${rdOver(lead, "4/5", "h3")}<div>${rest.map(x => rdCard(x)).join("")}</div></div></section>`; };
+    // second rubrika: tall photo, one wide story, three small cards
+    const secK = n => { const sel = S.filter(s => s.section === n && !used.has(s.id));
+      const lead = [...sel.filter(s => s.image), ...sel][0]; used.add(lead.id); const [w, ...trio] = take(sel, 4);
+      return `<section class="rd-pair" aria-label="${esc(n)}"><div class="rd-col12">${rdTabH(esc(n), secLink(n))}<div class="rd-sec-k">${rdOver(lead, "3/4", "h3")}
+        ${w ? `<a class="rd-wide" href="${link(w)}">${photo(w, "16/9")}<div>${rdMeta(w)}<h3 class="rd-hl">${esc(w.headline)}</h3>${rdDek(w)}${bar(w, 4)}</div></a>` : ""}
+        ${trio.length ? `<div class="rd-trio">${trio.map(x => rdCard(x, "16/10")).join("")}</div>` : ""}</div></div></section>`; };
+    const sec1 = counts[0] ? secP(counts[0][0]) : "";
+    const n2 = counts.slice(1).find(([n]) => S.filter(s => s.section === n && !used.has(s.id)).length >= 2);
+    const sec2 = n2 ? secK(n2[0]) : "";
     const more = take(S, 18);
     return `${header("home")}
-    <main class="wrap">
-      <section class="lead" aria-label="Glavna vest">
-        <div class="lead-text">
-          <a href="${link(top)}">${secKick(top, top.sources + " medija")}<h1 class="hl" style="${top.headline.length > 90 ? "font-size:var(--s5)" : ""}">${esc(top.headline)}</h1>${top.summary ? `<p class="dek">${esc(tidy(top.summary, 220))}</p>` : ""}</a>
-          ${bar(top, 8)}${cov(top)}
-        </div>
-        <div class="lead-side">${sideList.map(x => listItem(x, true)).join("")}</div>
-        <div class="lead-photo"><a href="${link(top)}">${photo(top, "16/10")}</a>
-          ${top.image && top.image_source ? `<div class="meta" style="margin-top:8px">Fotografija: ${esc(src(top.image_source).name)}</div>` : ""}</div>
-        <div class="lead-quotes">${quotes(top)}</div>
-        <div class="lead-more">${under.map(x => listItem(x, true)).join("")}</div>
-        <aside class="rail" aria-label="Slepe tačke">
-          <div class="bs-panel">
-            <h2 class="bs-panel-h"><a href="#/slepe-tacke" class="bs-panel-head">${EYE}Slepe tačke</a></h2>
-            <p class="bs-panel-dek">Vesti koje je objavila samo jedna strana. Druga strana ih je prećutala.</p>
-            ${group(quietPg, nPg, "pro_government", "Provladini nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
-            ${bs.length ? `<a class="all" href="#/slepe-tacke">Sve slepe tačke (${bs.length})</a>` : `<p class="meta" style="margin-top:12px">Trenutno nema slepih tačaka.</p>`}
+    <main class="wrap rd">
+      <h1 class="vh">Obe strane: vesti iz Srbije, uporedo iz provladinih i kritičkih medija</h1>
+      <section class="rd-top" aria-label="Glavne vesti">
+        <div class="rd-hero">
+          ${rdOver(top, "4/5", "h2")}
+          <div class="rd-under">
+            ${top.image && top.image_source ? `<div class="meta rd-credit">Fotografija: ${esc(src(top.image_source).name)}</div>` : ""}
+            ${top.summary ? `<p class="rd-dek" style="font-size:var(--s2)">${esc(tidy(top.summary, 220))}</p>` : ""}
+            ${bar(top, 10)}${cov(top)}
+            ${quotes(top)}
           </div>
+        </div>
+        <div class="rd-left">${sideList.map(x => rdCard(x)).join("")}${under.map(rdText).join("")}</div>
+        <aside class="rd-right" aria-label="Slepe tačke">
+          ${rdTabH(`${EYE}Slepe tačke`, "#/slepe-tacke", "amber")}
+          <p class="rd-dek" style="margin-top:0">Vesti koje je objavila samo jedna strana. Druga strana ih je prećutala.</p>
+          ${group(quietPg, nPg, "pro_government", "Provladini nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
+          ${bs.length ? `<a class="rd-all" href="#/slepe-tacke">Sve slepe tačke (${bs.length})</a>` : `<p class="meta" style="margin-top:12px">Trenutno nema slepih tačaka.</p>`}
         </aside>
       </section>
     </main>
     ${D.briefing ? briefBand(D.briefing, true) : ""}
     <div class="wrap">
-      ${strip.length ? `<section aria-label="Najvažnije danas"><div class="sec-head"><h2>Najvažnije danas</h2></div><div class="strip">${strip.map(stripCard).join("")}</div></section>` : ""}
+      <div class="rd-pair">
+        ${strip.length ? `<section class="${sec1 ? "rd-col4" : "rd-col12"}" aria-label="Najvažnije danas">${rdTabH("Najvažnije danas")}<div class="rd-list">${strip.map(rdRow).join("")}</div></section>` : ""}
+        ${sec1 ? `<div class="${strip.length ? "rd-col8" : "rd-col12"}">${sec1}</div>` : ""}
+      </div>
     </div>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
-      <div class="${secCount === 1 ? "sec-one" : "two"}">${secBlocks}</div>
-      ${more.length ? `<section aria-label="Još vesti"><div class="sec-head"><h2>Još vesti</h2></div><div class="grid3">${more.map(s => listItem(s, true)).join("")}</div></section>` : ""}
+      ${sec2}
+      ${more.length ? `<section class="rd-pair" aria-label="Još vesti"><div class="rd-col12">${rdTabH("Još vesti")}<div class="rd-more">${more.map(rdText).join("")}</div></div></section>` : ""}
       ${D.briefing ? "" : newsletter()}
     </div>${footer()}`;
   }
