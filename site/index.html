@@ -416,9 +416,10 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
     <div class="wrap">
       <nav class="sections" aria-label="Rubrike">
         <a href="#/" class="${active === "home" ? "on" : ""}">Naslovna</a>
+        <a href="#/slepe-tacke" class="amber ${active === "bs" ? "on" : ""}">${EYE}Slepe tačke</a>
+        <span class="sep" aria-hidden="true"></span>
         ${secsWithNews().map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" class="${active === n ? "on" : ""}">${n}</a>`).join("")}
         <span class="sep" aria-hidden="true"></span>
-        <a href="#/slepe-tacke" class="amber ${active === "bs" ? "on" : ""}">${EYE}Slepe tačke</a>
         <a href="#/brifing" class="${active === "brief" ? "on" : ""}">Brifing</a>
         <a href="#/izvori" class="${active === "src" ? "on" : ""}">Izvori</a>
       </nav>
@@ -434,7 +435,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   function compactHeader(sec) {
     return `<header class="compact-head"><div class="wrap">
       <a class="logo" href="#/">${mark(30)}<i>obe strane</i></a>
-      <nav aria-label="Rubrike">${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/slepe-tacke" style="color:var(--ink);background:var(--sig);padding:3px 9px;border-radius:3px">${EYE}Slepe tačke</a><a href="#/brifing">Brifing</a></nav>
+      <nav aria-label="Rubrike"><a href="#/slepe-tacke" style="color:var(--ink);background:var(--sig);padding:3px 9px;border-radius:3px">${EYE}Slepe tačke</a>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/brifing">Brifing</a></nav>
       <a class="btn dark" href="#/">Naslovna</a></div></header>`;
   }
   const footer = () => `<footer><div class="wrap top">
