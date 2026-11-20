@@ -62,7 +62,7 @@ header.top{border-bottom:1px solid var(--line)}
 .today-line{font:400 var(--s1)/1.3 var(--sans);color:var(--ink2);text-align:center;margin-bottom:8px;text-transform:none}
 .today-line::first-letter{text-transform:uppercase}
 .today-meter{display:block}
-.today-cap{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font:600 12.5px/1.2 var(--sans);color:var(--ink2)}
+.today-cap{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font:600 var(--s1)/1.2 var(--sans);color:var(--ink2)}
 .today-cap span:nth-child(2){font-weight:400}
 #search{display:flex;gap:8px}
 #search input{height:40px;width:210px;padding:0 12px;border:1.5px solid var(--line);border-radius:4px;background:#fff;font:400 15px var(--sans)}
@@ -115,7 +115,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .lead-side{grid-area:s;min-width:0}
 .lead-more{grid-area:m;min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--g);align-content:start}
 .rail{grid-area:r;min-width:0}
-.lead h1{margin:0 0 14px;font-size:var(--s5);line-height:1.12}
+.lead h1{margin:0 0 14px;font-size:var(--s6);line-height:1.08;letter-spacing:-.02em}
 .dek{margin:0 0 20px;font:400 18px/1.55 var(--serif);color:var(--ink2)}
 .quotes2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-bottom:16px;position:relative}
 .quotes2::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink)}
@@ -126,6 +126,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .q-pg:hover .quote,.q-cr:hover .quote{text-decoration:underline;text-underline-offset:3px}
 
 /* Slepe tačke rail: silence is drawn dashed */
+.bs-panel-h{margin:0;font:inherit}
 .bs-panel{border:2px dashed var(--amber);border-radius:6px;padding:18px 20px 20px;background:#fff}
 .bs-panel-head{display:flex;align-items:center;color:var(--amber);font:700 var(--s3)/1.1 var(--head)}
 .bs-panel-head .eye{width:18px;height:18px}
@@ -140,18 +141,18 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .sil span{flex:1;box-sizing:border-box;border-radius:1px}
 .sil .gone{border:1.5px dashed;background:transparent}
 .sil::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink)}
-.sil-lab{display:flex;justify-content:space-between;margin-top:7px;font:600 12.5px/1 var(--sans)}
+.sil-lab{display:flex;justify-content:space-between;margin-top:7px;font:600 var(--s1)/1 var(--sans)}
 .bs-panel .all{display:inline-block;margin-top:12px;font:700 15px var(--sans);color:var(--amber);text-decoration:underline;text-underline-offset:3px}
 .brief-band{background:var(--beton);margin-top:56px;padding:40px 0 44px}
 .brief-band .wrap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--g);align-items:start}
 .bb-photo{grid-column:1/6}.bb-photo .ph{border-radius:6px}
 .bb-body{grid-column:6/13;max-width:640px}
-.bb-title{font:700 var(--s3)/1.2 var(--sans);margin:0 0 4px;color:var(--ink)}
+.bb-title{font:700 var(--s4)/1.15 var(--head);letter-spacing:-.012em;margin:0 0 4px;color:var(--ink)}
 .bb-facts{font:400 var(--s1)/1.4 var(--sans);color:var(--ink2);margin:0 0 18px;font-variant-numeric:tabular-nums}
 .bb-body .hl{font-size:var(--s5);line-height:1.12;margin:0 0 12px}
 .bb-body .hl a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
 .bb-lede{font-size:var(--s2);line-height:1.5;margin:0 0 18px}
-.bb-more{font-size:15.5px;line-height:1.55;margin:0 0 22px;color:var(--ink2)}
+.bb-more{font-size:15px;line-height:1.55;margin:0 0 22px;color:var(--ink2)}
 .bb-more a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .bb-more a:hover{text-decoration-color:var(--ink)}
 .bb-more{max-width:62ch}
@@ -170,12 +171,12 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 
 /* sections */
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:56px 0 20px}
-.sec-head h2{margin:0;font:700 var(--s5)/1.1 var(--head);letter-spacing:-.015em}
+.sec-head h2{margin:0;font:700 var(--s4)/1.15 var(--head);letter-spacing:-.015em}
 .sec-head a{font:600 15px var(--sans);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
 .sec-head a:hover{text-decoration-color:var(--ink)}
 .strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px var(--g)}
 .strip>a{min-width:0}
-.strip .hl{font-size:19px;line-height:1.28;margin:0 0 12px}
+.strip .hl{font-size:var(--s3);line-height:1.22;margin:0 0 12px}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--g)}
 .two>section{min-width:0}
 .sec-lead{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding-bottom:10px}
@@ -192,8 +193,8 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .bd-side-col{grid-column:8/13;min-width:0}
 .bd-kick{display:flex;align-items:center;color:var(--amber);font:700 var(--s3)/1.1 var(--head);margin-bottom:16px}
 .bd-kick .eye{width:20px;height:20px}
-.bd-h{margin:0 0 16px;font:700 var(--s6)/1.1 var(--head);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
-.bd-dek{margin:0 0 28px;font:400 19px/1.55 var(--serif);color:var(--ink2);max-width:60ch}
+.bd-h{margin:0 0 16px;font:700 var(--s5)/1.12 var(--head);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
+.bd-dek{margin:0 0 28px;font:400 18px/1.55 var(--serif);color:var(--ink2);max-width:60ch}
 .bd-dek b{color:var(--ink);font-weight:600}
 .bd-meter{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:540px}
 .bd-meter::after{content:"";position:absolute;left:50%;top:0;bottom:22px;width:2px;margin-left:-1px;background:var(--ink)}
@@ -231,7 +232,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .pill:hover{background:var(--beton)}
 .covbox{background:var(--beton);padding:28px 30px;border-radius:6px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px}
 .covbox>div{min-width:0}
-.covbox .sent{font:400 19px/1.5 var(--serif);margin-bottom:22px}
+.covbox .sent{font:400 18px/1.5 var(--serif);margin-bottom:22px}
 .covbox .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line);font:400 15px var(--sans)}
 .covbox .row:first-child{border-top:0}
 .covbox .row b{font-weight:700}
@@ -243,7 +244,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .side h3 .n{font:700 var(--s3)/1 var(--sans)}
 .side a{display:block;padding:14px 0;border-top:1px solid var(--line)}
 .side h3+a{border-top:0}
-.side a .t{font:700 19px/1.3 var(--head)}
+.side a .t{font:700 var(--s3)/1.25 var(--head)}
 .side a:hover .t{text-decoration:underline;text-underline-offset:3px}
 .side .none{margin-top:10px;padding:18px;border:2px dashed currentColor;border-radius:6px;font:400 17px/1.45 var(--serif);color:var(--ink2)}
 /* timeline on the seam: time in the middle, pro-government left, critical right */
@@ -282,7 +283,7 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 .bs-label .bs-side{font-weight:700}
 .bs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px var(--g);margin-top:8px}
 .bs-card{display:block;min-width:0}
-.bs-card .hl{font-size:19px;line-height:1.28;margin:12px 0 12px}
+.bs-card .hl{font-size:var(--s3);line-height:1.22;margin:12px 0 12px}
 .who{font:400 var(--s1)/1.45 var(--sans);color:var(--ink2);margin-top:8px}
 .who b{color:var(--ink);font-weight:600}
 .pub-list a{display:block;padding:11px 0;border-top:1px solid var(--line)}
@@ -318,8 +319,8 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 .ai-side:first-child{padding:2px 20px 2px 0;text-align:right}
 .ai-side:only-child{grid-column:1/-1;text-align:left;padding:0}
 .ai-side h3{margin:0 0 6px;font:700 15px/1.2 var(--sans)}
-.ai-side p{margin:0;font:400 16.5px/1.5 var(--serif)}
-.ai-diff{margin:20px 0 0;padding:14px 16px;background:#fff;border-radius:4px;font:400 16.5px/1.5 var(--serif)}
+.ai-side p{margin:0;font:400 var(--s2)/1.5 var(--serif)}
+.ai-diff{margin:20px 0 0;padding:14px 16px;background:#fff;border-radius:4px;font:400 var(--s2)/1.5 var(--serif)}
 .ai-note{margin:14px 0 0;font:400 var(--s1)/1.45 var(--sans);color:var(--ink2)}
 .ai-note a{text-decoration:underline}
 
@@ -603,7 +604,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
     <main class="wrap">
       <section class="lead" aria-label="Glavna vest">
         <div class="lead-text">
-          <a href="${link(top)}">${secKick(top, top.sources + " medija")}<h1 class="hl" style="${top.headline.length > 90 ? "font-size:29px" : ""}">${esc(top.headline)}</h1>${top.summary ? `<p class="dek">${esc(tidy(top.summary, 220))}</p>` : ""}</a>
+          <a href="${link(top)}">${secKick(top, top.sources + " medija")}<h1 class="hl" style="${top.headline.length > 90 ? "font-size:var(--s5)" : ""}">${esc(top.headline)}</h1>${top.summary ? `<p class="dek">${esc(tidy(top.summary, 220))}</p>` : ""}</a>
           ${bar(top, 8)}${cov(top)}
         </div>
         <div class="lead-side">${sideList.map(x => listItem(x, true)).join("")}</div>
@@ -613,7 +614,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
         <div class="lead-more">${under.map(x => listItem(x, true)).join("")}</div>
         <aside class="rail" aria-label="Slepe tačke">
           <div class="bs-panel">
-            <a href="#/slepe-tacke" class="bs-panel-head">${EYE}Slepe tačke</a>
+            <h2 class="bs-panel-h"><a href="#/slepe-tacke" class="bs-panel-head">${EYE}Slepe tačke</a></h2>
             <p class="bs-panel-dek">Vesti koje je objavila samo jedna strana. Druga strana ih je prećutala.</p>
             ${group(quietPg, nPg, "pro_government", "Provladini nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
             ${bs.length ? `<a class="all" href="#/slepe-tacke">Sve slepe tačke (${bs.length})</a>` : `<p class="meta" style="margin-top:12px">Trenutno nema slepih tačaka.</p>`}
@@ -663,7 +664,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
     if (!a || !a.ukratko) return "";
     const side = (k, text) => text && s.split[k] ? `<div class="ai-side" style="--c:${VAR[k]}"><h3 style="color:${VAR[k]}">Kako su uokvirili ${k === "pro_government" ? "provladini" : "kritički"}</h3><p>${esc(text)}</p></div>` : "";
     return `<section id="ukratko" class="col" style="margin-top:36px" aria-label="Ukratko"><div class="ai">
-      <div class="kicker" style="color:var(--ink2)">Ukratko</div><p class="ai-sum">${esc(a.ukratko)}</p>
+      <h2 class="kicker" style="margin-top:0;color:var(--ink2)">Ukratko</h2><p class="ai-sum">${esc(a.ukratko)}</p>
       ${a.provladini || a.kriticki ? `<div class="ai-two">${side("pro_government", a.provladini)}${side("critical", a.kriticki)}</div>` : ""}
       ${a.razlika ? `<p class="ai-diff"><b class="sans" style="font-size:14px">Glavna razlika:</b> ${esc(a.razlika)}</p>` : ""}
       <p class="ai-note">Ovaj sažetak je automatski napisao AI model na osnovu naslova i uvoda članaka, bez sopstvene ocene. Može da sadrži greške: proverite u izvornim člancima ispod. <a href="#/o-nama/metodologija">Kako radimo</a></p>
@@ -865,7 +866,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
     const live = id => D.stories.some(s => s.id === id);
     const q = (i, cls) => i ? `<a class="${cls}" ${out(i.url, i.source)}><div class="quote" style="font-size:16px">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${logo(i.source, 14)}${esc(src(i.source).name)}</div></a>` : "";
     const framing = s => [["pro_government", s.ai.provladini], ["critical", s.ai.kriticki]].filter(x => x[1] && s.split[x[0]]).map(([k, t]) =>
-      `<div class="ai-side" style="--c:${VAR[k]}"><h3 style="color:${VAR[k]}">${k === "pro_government" ? "Provladini" : "Kritički"}</h3><p style="font-size:15.5px">${esc(t)}</p></div>`).join("");
+      `<div class="ai-side" style="--c:${VAR[k]}"><h3 style="color:${VAR[k]}">${k === "pro_government" ? "Provladini" : "Kritički"}</h3><p style="font-size:var(--s2)">${esc(t)}</p></div>`).join("");
     const item = (s, n) => `<article class="brief-item"><div class="no">${n}</div><div>
         ${kick(parts(esc(s.section), s.sources + " " + form(s.sources, "medij"), s.blindspot ? EYE + bsLabel(s.blindspot) : ""), s.blindspot ? "amber" : "")}
         ${live(s.id) ? `<a href="#/vest/${s.id}"><h2 class="hl">${esc(s.headline)}</h2></a>` : `<h2 class="hl">${esc(s.headline)}</h2>`}
