@@ -102,7 +102,7 @@ nav.sections .sep{width:1px;background:var(--line);margin:8px 0 12px}
 .cov b{font-weight:700}
 
 /* photos */
-.ph{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#8a8f96;border-radius:3px}
+.ph{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#71757a;border-radius:3px}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ph span{position:absolute;left:14px;bottom:12px;z-index:1;font:600 var(--s1)/1 var(--sans);color:#fff}
 .ph.has-img span{display:none}
@@ -300,7 +300,7 @@ ol.tl .tl-body>a:hover{text-decoration:underline;text-underline-offset:3px}
 .page-p{margin:0 0 24px;max-width:68ch;color:var(--ink2);font-size:18px}
 .src-group{margin-top:44px}
 .src-head{display:flex;align-items:baseline;gap:14px;padding-bottom:10px;border-bottom:2px solid var(--c)}
-.src-head h2{margin:0;font:700 var(--s4)/1.1 var(--head);letter-spacing:-.012em;color:var(--c)}
+.src-head h2{margin:0;font:700 var(--s4)/1.1 var(--head);letter-spacing:-.012em;color:var(--ct,var(--c))}
 .src-head span{font:400 15px var(--sans);color:var(--ink2);font-variant-numeric:tabular-nums}
 .src-sub{margin:22px 0 0;padding-bottom:6px;font:600 var(--s1)/1.3 var(--sans);color:var(--ink2)}
 .src-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:4px 20px;padding:12px 0 13px;border-top:1px solid var(--line);font:400 16px var(--sans)}
@@ -446,7 +446,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
   const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)", international: "var(--intl)"};
   const LAB = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
   const SECTION_ORDER = ["Politika", "Društvo", "Hronika", "Ekonomija", "Svet", "Region", "Kultura"];
-  const TONES = {Politika: "#7d8a96", Društvo: "#7a7166", Hronika: "#2f3846", Ekonomija: "#5f6f5c", Svet: "#5d7894", Region: "#6c6a86", Kultura: "#8a6f5c", Vesti: "#80858c"};
+  const TONES = {Politika: "#69757e", Društvo: "#7a7166", Hronika: "#2f3846", Ekonomija: "#5f6f5c", Svet: "#5a748f", Region: "#6c6a86", Kultura: "#8a6f5c", Vesti: "#70757a"};
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -801,7 +801,7 @@ footer .bottom a{color:var(--ink);text-decoration:underline;text-underline-offse
       const body = groups.length > 1
         ? groups.map(g => `<h3 class="src-sub">${esc(g || "Ostali")}</h3>${list.filter(s => (s.group || "") === g).map(row).join("")}`).join("")
         : list.map(row).join("");
-      return `<section class="src-group" style="--c:${VAR[k]}"><div class="src-head"><h2>${LAB[k]}</h2><span>${list.length} ${form(list.length, "medij")}</span></div>${body}</section>`;
+      return `<section class="src-group" style="--c:${VAR[k]};--ct:${k === "mixed" ? "var(--ink2)" : VAR[k]}"><div class="src-head"><h2>${LAB[k]}</h2><span>${list.length} ${form(list.length, "medij")}</span></div>${body}</section>`;
     };
     return `${header("src")}<main class="wrap"><h1 class="page-h">Izvori i vlasništvo</h1>
       <p class="page-p">Pratimo ${D.sources.filter(s => !s.paused).length} medija. Kliknite na medij za njegov profil: vlasnik, izvor podatka, broj vesti i priče u kojima se pojavljuje. Oznake su početne procene zasnovane na javnim analizama medijske scene (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i podložne su proveri. Međunarodni mediji se prikazuju, ali se ne računaju ni na jednu stranu.</p>
