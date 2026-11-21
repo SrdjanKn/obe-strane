@@ -415,6 +415,23 @@ footer .brand-logo{color:#fff}
 .ton-now{display:flex;gap:16px;font:600 13px var(--sans);margin-bottom:6px}
 .ton-note{margin:28px 0 56px;max-width:760px}
 @media (max-width:760px){.ton-key{grid-template-columns:minmax(0,1fr);gap:12px;padding:18px}}
+.reci .page-p{max-width:760px}
+.w-cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px}
+.w-cols h2{font:700 22px/1.2 var(--head);margin:0 0 8px;padding-bottom:10px;border-bottom:3px solid currentColor}
+.w-row{border-bottom:1px solid var(--rule)}
+.w-row summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;cursor:pointer;list-style:none}
+.w-row summary::-webkit-details-marker{display:none}
+.w-word{font:700 20px/1.2 var(--head)}
+.w-ex{padding:0 0 14px}
+.w-story{display:block;font:600 14px/1.35 var(--sans);margin-bottom:6px;color:var(--ink2)}
+.w-q{border-left:3px solid;padding-left:10px;margin:6px 0;font:500 15px/1.4 var(--head)}
+.w-hit{background:#fff1c2;font-weight:700}
+.w-story-box{display:grid;gap:8px;background:var(--soft);padding:14px 16px;margin:0 0 20px}
+.w-title{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.w-lab{display:inline-block;width:80px;font:600 13px var(--sans);color:var(--ink2)}
+.w-chip{display:inline-block;border:1.5px solid;padding:3px 9px;margin:2px 6px 2px 0;font:600 14px var(--sans);background:#fff}
+.w-chip small{font-weight:400;color:var(--ink3)}
+@media (max-width:760px){.w-cols{grid-template-columns:1fr;gap:28px}.w-lab{display:block;width:auto;margin-bottom:2px}}
 </style>
 </head>
 <body>
@@ -532,7 +549,7 @@ footer .brand-logo{color:#fff}
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
     </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
   function balanceLine() {
     const b = balanceObj();
@@ -718,6 +735,8 @@ footer .brand-logo{color:#fff}
       <section id="poredjenje" class="wide" style="margin-top:44px" aria-label="Kako su naslovili">
         <h2 class="h2">Kako su naslovili</h2>
         <p style="margin:0 0 20px;color:var(--ink2)">Isti događaj, naslovi iz dva tabora, po vremenu objave. Naslovi vode na izvorni članak.</p>
+        ${(() => { const w = storyWords(s); if (!w || (!w.pg.length && !w.cr.length)) return ""; const chips = (arr, k) => arr.map(x => `<span class="w-chip" style="border-color:${VAR[k]};color:${VAR[k]}">${esc(x.word)} <small>${x.n}/${x.of}</small></span>`).join("") || `<span class="meta">nema izdvojenih reči</span>`;
+          return `<div class="w-story-box"><a href="#/reci" class="w-title">Reči koje biraju</a><div><span class="w-lab">Režimski</span>${chips(w.pg, "pro_government")}</div><div><span class="w-lab">Kritički</span>${chips(w.cr, "critical")}</div></div>`; })()}
         <div class="sides">${side(pg, "pro_government", "Režimski mediji")}${side(cr, "critical", "Kritički mediji")}</div>
       </section>
       <section id="hronologija" class="col" style="margin-top:48px" aria-label="Hronologija">
@@ -938,6 +957,42 @@ footer .brand-logo{color:#fff}
       <div class="ton-grid">${cards}</div>
       <p class="meta ton-note">Brojimo samo naslove, posle prebacivanja ćirilice u latinicu, sa svim padežima reči. Merenje traje od ${fmtD(days[0].d)} ${days[0].d.slice(0, 4)}. i svakog dana se dopunjuje. Reči ne kažu sve o tonu teksta, ali pokazuju kako se menja rečnik.</p></main>${footer()}`;
   }
+
+  // ---- reči koje biraju
+  const CYRL = {"а":"a","б":"b","в":"v","г":"g","д":"d","ђ":"đ","е":"e","ж":"ž","з":"z","и":"i","ј":"j","к":"k","л":"l","љ":"lj","м":"m","н":"n","њ":"nj","о":"o","п":"p","р":"r","с":"s","т":"t","ћ":"ć","у":"u","ф":"f","х":"h","ц":"c","ч":"č","џ":"dž","ш":"š"};
+  const STOPW = new Set(("ali ili koji koja koje kojeg kojem kojih ovo ova ovaj taj nije nisu nece hoce biti bio bila bilo bili bice samo sve svi svih vise manje kada gde kako zasto prema izmedju preko ispred tokom zbog radi protiv godine godina danas juce sutra ovde tamo video foto vesti srbija srbije srbiji srbiju evra dinara miliona milion milijardi hitno uzivo oglasio oglasila rekao rekla kaze izjavio izjavila naveo navela posle pred kroz nakon ovog ovde njegov njena njihov jedan jedna jedno dana dok sada ipak jos vec evo ovim znaci poznato reci beograd beogradu novi nova novu nove novog novom novim ponovo dve dva tri prvi prva prvo ima imaju sada sad zato posto takodje jer").split(" "));
+  const toLat = t => [...String(t).toLowerCase()].map(ch => CYRL[ch] ?? ch).join("");
+  const stemOf = w => fold(w).slice(0, 6);
+  const wordsOf = title => { const seen = new Map(); toLat(title).split(/[^a-z0-9čćšžđ]+/u).forEach(w => { const k = fold(w); if (k.length < 4 || STOPW.has(k) || /^\d+$/.test(k)) return; const st = stemOf(w); if (!seen.has(st)) seen.set(st, w); }); return seen; };
+  function storyWords(s) {
+    const by = {pro_government: [], critical: []};
+    s.items.forEach(i => { const c = src(i.source).camp; if (by[c]) by[c].push(i); });
+    if (by.pro_government.length < 2 || by.critical.length < 2) return null;
+    const tally = list => { const m = new Map(); list.forEach(i => wordsOf(i.title).forEach((w, st) => { const e = m.get(st) || {n: 0, forms: {}, items: []}; e.n++; e.forms[w] = (e.forms[w] || 0) + 1; e.items.push(i); m.set(st, e); })); return m; };
+    const P = tally(by.pro_government), C = tally(by.critical), np = by.pro_government.length, nc = by.critical.length;
+    const pick = (A, B, na, nb) => [...A].filter(([st, e]) => e.n >= 2 && e.n / na - ((B.get(st) || {n: 0}).n / nb) >= 0.5)
+      .sort((a, b) => b[1].n / na - a[1].n / na).slice(0, 4).map(([st, e]) => ({st, word: Object.entries(e.forms).sort((a, b) => b[1] - a[1])[0][0], n: e.n, of: na, items: e.items}));
+    return {pg: pick(P, C, np, nc), cr: pick(C, P, nc, np), pgItems: by.pro_government, crItems: by.critical};
+  }
+  const markWord = (title, st) => esc(title).replace(/[\p{L}\d]+/gu, w => stemOf(toLat(w)) === st ? `<b class="w-hit">${w}</b>` : w);
+  function wordsPage() {
+    const agg = {pg: new Map(), cr: new Map()};
+    D.stories.forEach(s => { const r = storyWords(s); if (!r) return; ["pg", "cr"].forEach(side => r[side].forEach(w => { const e = agg[side].get(w.st) || {forms: {}, ex: []}; e.forms[w.word] = (e.forms[w.word] || 0) + 1;
+      e.ex.push({s, hit: w.items[0], other: (side === "pg" ? r.crItems : r.pgItems)[0]}); agg[side].set(w.st, e); })); });
+    const list = (side, camp, otherCamp) => { const rows = [...agg[side]].sort((a, b) => b[1].ex.length - a[1].ex.length).slice(0, 18);
+      if (!rows.length) return `<p class="meta">Za sada nema dovoljno priča koje su pratile obe strane.</p>`;
+      return rows.map(([st, e]) => { const word = Object.entries(e.forms).sort((a, b) => b[1] - a[1])[0][0];
+        return `<details class="w-row"><summary><span class="w-word" style="color:${VAR[camp]}">${esc(word)}</span><span class="meta">${e.ex.length} ${form(e.ex.length, "prica")}</span></summary>
+          ${e.ex.slice(0, 3).map(x => `<div class="w-ex"><a class="w-story" href="#/vest/${x.s.id}">${esc(x.s.headline)}</a>
+            <div class="w-q" style="border-left-color:${VAR[camp]}">„${markWord(x.hit.title, st)}“ <span class="meta">${esc(src(x.hit.source).name)}</span></div>
+            <div class="w-q" style="border-left-color:${VAR[otherCamp]}">„${esc(x.other.title)}“ <span class="meta">${esc(src(x.other.source).name)}</span></div></div>`).join("")}</details>`; }).join(""); };
+    const nStories = D.stories.filter(s => storyWords(s)).length;
+    return `${compactHeader()}<main class="wrap reci"><h1 class="page-h">Reči koje biraju</h1>
+      <p class="page-p">Isti događaj, različite reči. Za svaku priču koju su pratile obe strane upoređujemo naslove i izdvajamo reči koje koristi većina naslova jedne strane, a retko druga. Ovde su reči koje se najčešće izdvajaju u poslednjih ${D.hours} sati, iz ${nStories} ${form(nStories, "prica")}. Kliknite na reč da vidite primere.</p>
+      <div class="w-cols"><section><h2 style="color:var(--pg)">Režimski pišu</h2>${list("pg", "pro_government", "critical")}</section>
+      <section><h2 style="color:var(--cr)">Kritički pišu</h2>${list("cr", "critical", "pro_government")}</section></div>
+      <p class="meta ton-note">Reč se računa kad je koristi najmanje dva naslova jedne strane i bar polovina naslova te strane više nego druga. Različiti oblici iste reči se spajaju. Za promene kroz duže vreme pogledajte ${`<a href="#/ton" style="text-decoration:underline">Kako se menja ton</a>`}.</p></main>${footer()}`;
+  }
   function briefingPage() {
     const B = D.briefing;
     if (!B) return `${header("brief")}<div class="wrap empty">Prvi brifing stiže sutra u 7 ujutru.</div>${footer()}`;
@@ -1058,7 +1113,7 @@ footer .brand-logo{color:#fff}
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
       : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
       : page === "o-nama" ? about() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
-      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : home();
+      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : home();
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const tog = document.querySelector(".s-tog");
     if (tog) tog.addEventListener("click", () => { const on = document.body.classList.toggle("ss"); tog.setAttribute("aria-expanded", on); if (on) { window.scrollTo(0, 0); document.getElementById("q").focus(); } });
