@@ -902,6 +902,65 @@ def _try(fn, arg):
 
 # ---------------------------------------------------------------- site export
 
+
+# ---------------------------------------------------------------- tone over time (headline word counts per side)
+
+TONE_TERMS = [
+    ("studenti", "„Studenti“", r"\bstudent\w*"),
+    ("blokaderi", "„Blokaderi“", r"\bblokader\w*"),
+    ("lista", "Studentska lista", r"\bstudentsk\w* list\w*"),
+    ("vucic", "Vučić", r"\bvucic\w*"),
+    ("sns", "SNS / naprednjaci", r"\bsns\b|\bnaprednja\w*"),
+    ("rezim", "„Režim“", r"\brezim\w*"),
+    ("vlast", "Nova vlast / vlada", r"\bnov\w* (vlast|vlad)\w*"),
+    ("izdaja", "„Izdaja“, „obojena revolucija“, „plaćenici“", r"\bizdaj\w*|\bobojen\w* revoluc\w*|\bplacenic\w*"),
+]
+TONE_RX = [(k, re.compile(rx)) for k, _, rx in TONE_TERMS]
+PUBLIC_DATA = "https://srdjankn.github.io/obe-strane/data.js"
+
+
+def tone_trends(con, sources):
+    """Daily counts of loaded words in headlines, per camp. Days stay in the database after the articles are
+    deleted (articles are kept 14 days), so the series grows over time."""
+    con.execute("CREATE TABLE IF NOT EXISTS tone(day TEXT, camp TEXT, n INTEGER, counts TEXT, PRIMARY KEY(day, camp))")
+    if not con.execute("SELECT 1 FROM tone LIMIT 1").fetchone():
+        try:   # cache was lost: take the series back from the published site
+            raw = urllib.request.urlopen(urllib.request.Request(PUBLIC_DATA, headers={"User-Agent": UA}), timeout=20).read().decode("utf-8")
+            old = json.loads(raw[raw.index("{"):raw.rindex("}") + 1]).get("tone") or {}
+            keys = [t[0] for t in old.get("terms", [])]
+            for d in old.get("days", []):
+                for camp, row in d["c"].items():
+                    con.execute("INSERT OR REPLACE INTO tone VALUES(?,?,?,?)",
+                                (d["d"], camp, row[0], json.dumps(dict(zip(keys, row[1:])))))
+        except Exception as e:
+            print("  tone: no earlier series to restore:", e)
+    camp_of = {s["id"]: s["camp"] for s in sources}
+    local = lambda iso: (datetime.fromisoformat(iso) + timedelta(hours=1)).date().isoformat()   # Belgrade day
+    first_full = (datetime.now(timezone.utc) - timedelta(days=13)).date().isoformat()          # earliest complete day
+    agg = defaultdict(lambda: [0, Counter()])
+    for sid, title, pub in con.execute("SELECT source_id, title, published FROM articles"):
+        camp = camp_of.get(sid)
+        if not camp or not pub:
+            continue
+        day = local(pub)
+        if day < first_full:
+            continue
+        t = normalise(title)
+        row = agg[(day, camp)]
+        row[0] += 1
+        for k, rx in TONE_RX:
+            if rx.search(t):
+                row[1][k] += 1
+    for (day, camp), (n, c) in agg.items():
+        con.execute("INSERT OR REPLACE INTO tone VALUES(?,?,?,?)", (day, camp, n, json.dumps(dict(c))))
+    con.commit()
+    days = defaultdict(dict)
+    for day, camp, n, cj in con.execute("SELECT day, camp, n, counts FROM tone ORDER BY day"):
+        c = json.loads(cj)
+        days[day][camp] = [n] + [c.get(k, 0) for k, _, _ in TONE_TERMS]
+    return {"terms": [[k, label] for k, label, _ in TONE_TERMS], "days": [{"d": d, "c": days[d]} for d in sorted(days)]}
+
+
 def export_site(hours=36):
     """Write site/data.js for the website (a JS file, so the site also works opened straight from disk)."""
     camps, stories, n_articles = build_stories(hours)
@@ -910,6 +969,7 @@ def export_site(hours=36):
     choose_images(con, stories)
     ai_summaries(con, stories)
     brief, brief_days = briefing(con, stories, n_articles)
+    tone = tone_trends(con, sources)
     now = datetime.now(timezone.utc)
     iso = lambda d: d.astimezone(timezone.utc).isoformat()
     for s in stories:
@@ -957,7 +1017,7 @@ def export_site(hours=36):
         "camps": camps, "ai_model": AI_MODEL,
         "balance": {"shown": dict(shown), "collected": dict(collected), "outlets": dict(outlets)},
         "topics": [{"slug": slug, "name": name, "stories": topic_counts[slug]} for slug, name, _ in TOPICS if topic_counts[slug]],
-        "briefing": brief, "briefing_days": brief_days,
+        "briefing": brief, "briefing_days": brief_days, "tone": tone,
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "owner": s.get("owner", ""), "owner_src": s.get("owner_src", ""),
                      "public_money": s.get("public_money", ""), "public_money_src": s.get("public_money_src", ""),
