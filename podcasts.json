@@ -1,0 +1,17 @@
+{
+  "_note": "Podcasts and talk shows shown on the site. camp: the side label shown next to the show (same keys as sources.json, or 'independent'). feed: RSS/Atom URL; itunes: Apple Podcasts id, used to look the feed up.",
+  "shows": [
+    {"id": "radar-nova", "name": "Radar", "by": "Nova", "camp": "critical",
+     "home": "https://www.youtube.com/playlist?list=PLD-J4DyIAqFDGDa1r-4Ev_v-pHBSSQ3JT",
+     "feed": "https://www.youtube.com/feeds/videos.xml?playlist_id=PLD-J4DyIAqFDGDa1r-4Ev_v-pHBSSQ3JT"},
+    {"id": "dlz", "name": "DLZ", "by": "Vidojković i Kulačin", "camp": "independent",
+     "home": "https://www.youtube.com/@dlzsavidojkovicemikulacinom",
+     "feed": "https://www.youtube.com/feeds/videos.xml?channel_id=UCEV0rOfrJ_oqTK7csl8VlEQ"},
+    {"id": "ova-situacija", "name": "Ova situacija", "by": "Vreme / Trek", "camp": "critical",
+     "home": "https://trek.rs/podkast/ova-situacija", "feed": "https://anchor.fm/s/f124f260/podcast/rss"},
+    {"id": "albatros", "name": "Albatros", "by": "Albatros News", "camp": "independent",
+     "home": "https://albatros.news/", "itunes": "1864868946"},
+    {"id": "signali", "name": "Signali", "by": "RTV", "camp": "public",
+     "home": "https://media.rtv.rs/sr_lat/signali", "itunes": "1594228355"}
+  ]
+}

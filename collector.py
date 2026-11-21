@@ -1017,6 +1017,86 @@ def chosen_words(con, sources, top=25, min_n=8, ZMIN=2.5):
             }
 
 
+
+# ---------------------------------------------------------------- podcasts and talk shows
+
+PODCASTS_FILE = Path(__file__).with_name("podcasts.json")
+
+
+def _txt(el, *paths, ns=None):
+    for p in paths:
+        x = el.find(p, ns or {})
+        if x is not None and (x.text or "").strip():
+            return x.text.strip()
+    return ""
+
+
+def parse_episodes(raw):
+    """Episodes from an RSS 2.0 podcast feed or a YouTube Atom feed."""
+    ns = {"a": "http://www.w3.org/2005/Atom", "m": "http://search.yahoo.com/mrss/",
+          "it": "http://www.itunes.com/dtds/podcast-1.0.dtd"}
+    root = ET.fromstring(raw)
+    out = []
+    for e in root.iter("{http://www.w3.org/2005/Atom}entry"):            # YouTube
+        link = e.find("a:link", ns)
+        thumb = e.find("m:group/m:thumbnail", ns)
+        out.append({"title": _txt(e, "a:title", ns=ns), "url": link.get("href") if link is not None else "",
+                    "date": _txt(e, "a:published", ns=ns), "img": thumb.get("url") if thumb is not None else "",
+                    "desc": _txt(e, "m:group/m:description", ns=ns)})
+    for e in root.iter("item"):                                            # RSS podcasts
+        img = e.find("it:image", ns)
+        enc = e.find("enclosure")
+        try:
+            date = parsedate_to_datetime(_txt(e, "pubDate")).astimezone(timezone.utc).isoformat()
+        except Exception:
+            date = ""
+        out.append({"title": _txt(e, "title"), "url": _txt(e, "link") or (enc.get("url") if enc is not None else ""),
+                    "date": date, "img": img.get("href") if img is not None else "",
+                    "desc": re.sub(r"<[^>]+>", " ", _txt(e, "description", "it:summary", ns=ns))})
+    chan_img = root.find("channel/it:image", ns)
+    if chan_img is not None:
+        for ep in out:
+            ep["img"] = ep["img"] or chan_img.get("href", "")
+    for ep in out:
+        ep["desc"] = re.sub(r"\s+", " ", html.unescape(ep["desc"] or "")).strip()[:240]
+        if ep["date"] and len(ep["date"]) > 10:
+            try:
+                ep["date"] = datetime.fromisoformat(ep["date"].replace("Z", "+00:00")).astimezone(timezone.utc).isoformat()
+            except Exception:
+                pass
+    return [ep for ep in out if ep["title"] and ep["url"]]
+
+
+def podcasts(stories, per_show=6, days=45):
+    if not PODCASTS_FILE.exists():
+        return None
+    shows = json.loads(PODCASTS_FILE.read_text(encoding="utf-8"))["shows"]
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    words = lambda t: {w for w in normalise(t).split() if len(w) >= 5 and w not in STOP}
+    story_words = [(s["id"], words(s["headline"] + " " + " ".join(a["title"] for a in s["items"][:8]))) for s in stories]
+    episodes = []
+    for sh in shows:
+        try:
+            feed = sh.get("feed")
+            if not feed and sh.get("itunes"):
+                look = json.loads(fetch(f"https://itunes.apple.com/lookup?id={sh['itunes']}&entity=podcast")[0])
+                feed = (look.get("results") or [{}])[0].get("feedUrl", "")
+            if not feed:
+                continue
+            eps = [e for e in parse_episodes(fetch(feed, timeout=20)[0]) if e["date"] >= since]
+            eps.sort(key=lambda e: e["date"], reverse=True)
+            for e in eps[:per_show]:
+                w = words(e["title"] + " " + e["desc"])
+                e["stories"] = [sid for sid, sw in story_words if len(w & sw) >= 3][:3]
+                e["show"] = sh["id"]
+                episodes.append(e)
+            print(f"  podcast {sh['name']}: {len(eps)} episodes in {days} days")
+        except Exception as ex:
+            print(f"  podcast {sh['name']}: failed ({ex})")
+    episodes.sort(key=lambda e: e["date"], reverse=True)
+    return {"shows": [{k: sh.get(k, "") for k in ("id", "name", "by", "camp", "home")} for sh in shows], "episodes": episodes}
+
+
 def export_site(hours=36):
     """Write site/data.js for the website (a JS file, so the site also works opened straight from disk)."""
     camps, stories, n_articles = build_stories(hours)
@@ -1027,6 +1107,7 @@ def export_site(hours=36):
     brief, brief_days = briefing(con, stories, n_articles)
     tone = tone_trends(con, sources)
     words = chosen_words(con, sources)
+    pods = podcasts(stories)
     now = datetime.now(timezone.utc)
     iso = lambda d: d.astimezone(timezone.utc).isoformat()
     for s in stories:
@@ -1074,7 +1155,7 @@ def export_site(hours=36):
         "camps": camps, "ai_model": AI_MODEL,
         "balance": {"shown": dict(shown), "collected": dict(collected), "outlets": dict(outlets)},
         "topics": [{"slug": slug, "name": name, "stories": topic_counts[slug]} for slug, name, _ in TOPICS if topic_counts[slug]],
-        "briefing": brief, "briefing_days": brief_days, "tone": tone, "words": words,
+        "briefing": brief, "briefing_days": brief_days, "tone": tone, "words": words, "podcasts": pods,
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "owner": s.get("owner", ""), "owner_src": s.get("owner_src", ""),
                      "public_money": s.get("public_money", ""), "public_money_src": s.get("public_money_src", ""),
