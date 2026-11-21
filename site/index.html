@@ -122,6 +122,33 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .bd-track{height:12px;background:#eef1f5;border-radius:3px;overflow:hidden}
 .bd-fill{height:100%;border-radius:3px}
 .bd-gone{height:100%;border:2px dashed;border-radius:3px;box-sizing:border-box}
+.bsday .bd-fill{transition:width .9s cubic-bezier(.2,.7,.2,1) .15s}
+.bsday.pre .bd-fill{width:0!important}
+.bsday:not(.pre) .bd-gone{animation:bd-pulse 1.4s ease-out 1.1s 1}
+@keyframes bd-pulse{0%{box-shadow:0 0 0 0 currentColor}60%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.sx{margin:0 0 30px}
+.sx-first{margin:0 0 14px;font:400 16px/1.5 var(--sans);color:var(--ink2)}.sx-first b{color:var(--ink)}
+.sx-track{position:relative;height:178px;background:var(--soft);border-radius:var(--r);touch-action:pan-y;cursor:crosshair;margin:0;outline-offset:3px}
+.sx-track:focus-visible{outline:2px solid var(--ink)}
+.sx-line{position:absolute;left:0;right:0;top:50%;height:1px;background:#c9ced6}
+.sx-lab{position:absolute;left:10px;z-index:3;background:var(--soft);padding:2px 4px 2px 0;font:700 11px/1 var(--sans);letter-spacing:.04em;text-transform:uppercase;pointer-events:none}
+.sx-lab-pg{top:10px}.sx-lab-cr{bottom:10px}
+.sx-in{position:absolute;top:0;bottom:0;left:22px;right:22px}
+.sx-grid{position:absolute;top:0;bottom:0;width:1px;background:#e2e6ec;pointer-events:none}
+.sx-tick{position:absolute;top:0;transform:translateX(-50%);font:500 11px/1 var(--sans);color:var(--ink3);white-space:nowrap}
+.sx-axis .sx-tick:first-child{transform:none;margin-left:-22px}.sx-axis .sx-tick:last-child{transform:translateX(-100%);margin-left:22px}
+.sx-dot{position:absolute;width:11px;height:11px;border-radius:50%;margin-left:-5.5px;box-shadow:0 0 0 2px var(--soft);transition:transform .15s,opacity .35s ease-out var(--d),scale .35s ease-out var(--d);pointer-events:none}
+.sx-pg{bottom:calc(50% + 9px + var(--k) * 13px)}.sx-cr{top:calc(50% + 9px + var(--k) * 13px)}.sx-mid{top:50%;margin-top:-5.5px;transform:translateX(calc(var(--k) * 4px))}
+.sx-dot.on{transform:scale(1.55);z-index:2}.sx-mid.on{transform:translateX(calc(var(--k) * 4px)) scale(1.55)}
+.sx-track.pre .sx-dot{opacity:0;scale:.3}
+.sx-cur{position:absolute;top:6px;bottom:6px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px;opacity:.75;pointer-events:none;transition:left .12s}
+.sx-axis{position:relative;height:14px;margin-top:7px}
+.sx-read{display:block;margin-top:12px;padding:12px 14px;border:1px solid var(--sig-line);border-radius:var(--r);min-height:68px;background:#fff}
+.sx-read:hover .sx-r-t{text-decoration:underline}
+.sx-r-meta{display:flex;align-items:center;gap:6px;font:500 13px/1.3 var(--sans);color:var(--ink2)}.sx-r-meta i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.sx-r-t{display:block;margin-top:5px;font:600 17px/1.35 var(--head);color:var(--ink)}
+.sx-hint{margin:8px 0 0}
+@media (prefers-reduced-motion:reduce){.sx-dot,.sx-cur,.bsday .bd-fill{transition:none}.bsday .bd-gone{animation:none!important}}
 .bd-l{font:600 13px var(--sans);color:var(--ink2)}
 .bd-logos{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
 .bd-logo{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:var(--soft);font:500 12.5px var(--sans);color:var(--ink2)}
@@ -587,6 +614,7 @@ footer .brand-logo{color:#fff}
     return d; };
   let D = prep(window.NEWS_DATA);
   const app = document.getElementById("app");
+  const MOTION = !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) && "IntersectionObserver" in window;
   const ORDER = ["pro_government", "public", "mixed", "international", "critical"];
   const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)", international: "var(--intl)"};
   const LAB = {pro_government: "Režimski", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
@@ -869,8 +897,8 @@ footer .brand-logo{color:#fff}
     const t0 = new Date(s.first).getTime();
     const meanwhile = D.stories.filter(x => x.id !== s.id && !x.blindspot && (x.split[silent] || 0) >= 2 && Math.abs(new Date(x.first).getTime() - t0) < 18 * 36e5)
       .sort((a, b) => (used.has(a.id) - used.has(b.id)) || (b.split[silent] || 0) - (a.split[silent] || 0)).slice(0, 3);
-    const bar = (k, v) => `<div class="bd-row"><span class="bd-n" style="color:${VAR[k]}">${v}</span><div class="bd-track">${v ? `<div class="bd-fill" style="width:${Math.max(8, v / Math.max(n, 1) * 100)}%;background:${VAR[k]}"></div>` : `<div class="bd-gone" style="border-color:${VAR[k]}"></div>`}</div><span class="bd-l">${form(v, k)}</span></div>`;
-    return `<section class="bsday" aria-label="Slepa tačka dana"><div class="wrap">
+    const bar = (k, v) => `<div class="bd-row"><span class="bd-n" style="color:${VAR[k]}" data-v="${v}">${MOTION && v ? 0 : v}</span><div class="bd-track">${v ? `<div class="bd-fill" style="width:${Math.max(8, v / Math.max(n, 1) * 100)}%;background:${VAR[k]}"></div>` : `<div class="bd-gone" style="border-color:${VAR[k]};color:${VAR[k]}"></div>`}</div><span class="bd-l">${form(v, k)}</span></div>`;
+    return `<section class="bsday${MOTION ? " pre" : ""}" aria-label="Slepa tačka dana"><div class="wrap">
       <div class="bd-top">
         <div class="bd-text">
           <a href="#/slepe-tacke" class="bd-kick">${EYE}Slepa tačka dana</a>
@@ -950,12 +978,70 @@ footer .brand-logo{color:#fff}
       <section id="hronologija" class="col" style="margin-top:48px" aria-label="Hronologija">
         <h2 class="h2">Hronologija</h2>
         <p style="margin:0 0 22px;color:var(--ink2)">Kako se vest širila kroz medije.</p>
+        ${spread(s, its)}
         <ol class="tl">${its.map(i => `<li><div class="when">${clock(i.published)} <span>· ${logo(i.source, 15)}${outletLink(i.source)} · ${dot(i.camp)}${LAB[i.camp]}</span></div><a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}">${esc(i.title)}</a></li>`).join("")}</ol>
       </section>
     </article>
     <div class="col">${newsletter()}</div>
     ${more.length ? `<div class="wrap"><div class="sec-head"><h2>Još iz rubrike ${esc(s.section)}</h2><a href="#/rubrika/${encodeURIComponent(s.section)}">Sve vesti →</a></div><div class="strip">${more.map(stripCard).join("")}</div></div>` : ""}
     ${footer()}`;
+  }
+
+  // the story's spread over time: režimski articles above the line, kritički below, the rest on it
+  function spread(s, its) {
+    if (its.length < 3) return "";
+    const T = its.map(i => new Date(i.published).getTime()), t0 = Math.min(...T), t1 = Math.max(...T), span = Math.max(t1 - t0, 36e5);
+    const pos = t => (t - t0) / span * 100, lane = k => k === "pro_government" ? "pg" : k === "critical" ? "cr" : "mid";
+    const stack = {};
+    const dots = its.map((i, n) => { const p = pos(T[n]), L = lane(i.camp), b = L + Math.round(p / 1.8), k = stack[b] = (stack[b] || 0) + 1;
+      return `<span class="sx-dot sx-${L}" style="left:${p.toFixed(2)}%;--k:${Math.min(k - 1, 5)};--d:${Math.round(p * 14)}ms;background:${VAR[i.camp] || "var(--mix)"}" data-n="${n}" data-p="${p.toFixed(2)}"
+        data-time="${clock(i.published)}" data-src="${esc(src(i.source).name)}" data-lab="${esc(LAB[i.camp] || "")}" data-col="${VAR[i.camp] || "var(--mix)"}" data-title="${esc(i.title)}" data-url="${esc(safe(i.url))}"></span>`; }).join("");
+    const hrs = span / 36e5, maxT = innerWidth < 600 ? 3 : 6, step = [1, 2, 3, 6, 12, 24].find(h => hrs / h <= maxT) || 24;
+    const first = new Date(t0); first.setMinutes(0, 0, 0); let tk = first.getTime() + 36e5, ticks = "";
+    let grid = "";
+    for (; tk < t1; tk += 36e5) { const d = new Date(tk), p = pos(tk); if (d.getHours() % step) continue; grid += `<span class="sx-grid" style="left:${p.toFixed(2)}%"></span>`;
+      if (p > 11 && p < 89) ticks += `<span class="sx-tick" style="left:${p.toFixed(2)}%">${d.getHours() === 0 ? d.toLocaleDateString("sr-Latn-RS", {day: "numeric", month: "numeric"}) : clock(d.toISOString())}</span>`; }
+    const fst = k => its.find(i => i.camp === k);
+    const fp = fst("pro_government"), fc = fst("critical");
+    const gap = (a, b) => { const m = Math.round(Math.abs(new Date(b.published) - new Date(a.published)) / 6e4); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}`; };
+    const firstLine = fp && fc ? (() => { const [a, b] = new Date(fp.published) <= new Date(fc.published) ? [fp, fc] : [fc, fp];
+        const wa = a.camp === "pro_government" ? "režimski" : "kritički", wb = b.camp === "pro_government" ? "Režimski" : "Kritički";
+        return `Prvi ${wa}: <b>${esc(src(a.source).name)}</b> u ${clock(a.published)}. ${wb} su se javili ${gap(a, b) === "0 min" ? "u isto vreme" : gap(a, b) + " kasnije"} (<b>${esc(src(b.source).name)}</b>).`; })()
+      : fp || fc ? `${fc ? "Režimski" : "Kritički"} mediji se nisu javili.` : "";
+    return `<div class="sx">${firstLine ? `<p class="sx-first">${firstLine}</p>` : ""}
+      <div class="sx-track${MOTION ? " pre" : ""}" tabindex="0" role="slider" aria-label="Članci po vremenu objave. Strelicama birate članak." aria-valuemin="0" aria-valuemax="${its.length - 1}" aria-valuenow="0">
+        <span class="sx-lab sx-lab-pg" style="color:var(--pg)">Režimski${fp ? "" : " · 0"}</span><span class="sx-lab sx-lab-cr" style="color:var(--cr)">Kritički${fc ? "" : " · 0"}</span>
+        <span class="sx-line"></span><div class="sx-in">${grid}${dots}<span class="sx-cur" aria-hidden="true"></span></div></div>
+      <div class="sx-axis"><div class="sx-in"><span class="sx-tick" style="left:0">${clock(new Date(t0).toISOString())}</span>${ticks}<span class="sx-tick" style="left:100%">${clock(new Date(t1).toISOString())}</span></div></div>
+      <a class="sx-read" target="_blank" rel="noopener" href="#"></a>
+      <p class="meta sx-hint">Prevucite preko linije da vidite naslove po satima.</p></div>`;
+  }
+  function wireSpread() {
+    const tr = document.querySelector(".sx-track"); if (!tr) return;
+    const dots = [...tr.querySelectorAll(".sx-dot")], cur = tr.querySelector(".sx-cur"), rd = document.querySelector(".sx-read");
+    let at = -1;
+    const show = n => { n = Math.max(0, Math.min(dots.length - 1, n)); if (n === at) return; at = n; const d = dots[n].dataset;
+      dots.forEach((x, i) => x.classList.toggle("on", i === n)); cur.style.left = d.p + "%";
+      rd.href = d.url; rd.innerHTML = `<span class="sx-r-meta"><i style="background:${d.col}"></i>${d.time} · <b>${d.src}</b> · ${d.lab}</span><span class="sx-r-t">${d.title}</span>`;
+      tr.setAttribute("aria-valuenow", n); tr.setAttribute("aria-valuetext", `${d.time}, ${d.src}: ${d.title}`); };
+    const near = x => { const r = tr.querySelector(".sx-in").getBoundingClientRect(), p = (x - r.left) / r.width * 100; let b = 0, bd = 1e9; dots.forEach((d, i) => { const dd = Math.abs(+d.dataset.p - p); if (dd < bd) { bd = dd; b = i; } }); return b; };
+    tr.addEventListener("pointermove", e => show(near(e.clientX)));
+    tr.addEventListener("pointerdown", e => show(near(e.clientX)));
+    tr.addEventListener("keydown", e => { const k = {ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1}[e.key]; if (k) { e.preventDefault(); show(at + k); } else if (e.key === "Home") show(0); else if (e.key === "End") show(dots.length - 1); });
+    show(0);
+    reveal(tr);
+  }
+  // one reveal per element when it scrolls into view (only when motion is allowed)
+  function reveal(el, done) {
+    if (!el || !el.classList.contains("pre")) { done && done(); return; }
+    const io = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; io.disconnect();
+      requestAnimationFrame(() => { el.classList.remove("pre"); done && done(); }); }), {threshold: 0.45});
+    io.observe(el);
+  }
+  function wireBand() {
+    const b = document.querySelector(".bsday"); if (!b) return;
+    reveal(b, () => b.querySelectorAll(".bd-n[data-v]").forEach(el => { const v = +el.dataset.v; if (!v || !MOTION) return; const t0 = performance.now();
+      const tick = t => { const f = Math.min(1, (t - t0 - 150) / 900); el.textContent = Math.round(v * (1 - Math.pow(1 - Math.max(0, f), 3))); if (f < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }));
   }
 
   function section(name) {
@@ -1521,6 +1607,8 @@ footer .brand-logo{color:#fff}
     if (nav && st) { const d = diet(); d.views.push({id: st.id, bs: !!st.blindspot, t: Date.now()}); saveDiet(d); }
     document.title = st ? `${st.headline} — Obe strane` : "Obe strane — ista vest, dve strane";
     balanceHome();
+    wireBand();
+    wireSpread();
   }
   function balanceHome() {
     const f = document.querySelector(".lv-fill"); if (!f) return;
