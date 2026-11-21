@@ -572,9 +572,13 @@ def _dot(a, b):
     return sum(x * y for x, y in zip(a, b))
 
 
-def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo=None, emb_threshold=0.36):
+def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo=None, emb_threshold=0.36,
+            mode="boost", word_min=0.12, emb_min=0.80):
     """Single-pass centroid clustering in time order. Returns list of clusters (lists of article dicts).
-    With embeddings, similarity = (1-w) * word cosine + w * meaning score, compared against emb_threshold."""
+    mode "boost" (default): word matching decides as before, and the meaning score can only add a join that word
+    matching narrowly missed: word cosine >= word_min AND meaning cosine >= emb_min. This catches reworded headlines
+    of the same event without merging different events on the same topic. mode "mix": weighted blend (tested, merges
+    too much).""
     emb_w = EMB_W if emb_w is None else emb_w
     emb_lo = EMB_LO if emb_lo is None else emb_lo
     docs = [tokens(a["title"]) * 3 + tokens(a["summary"]) for a in articles]
@@ -604,11 +608,15 @@ def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo
             if e is not None:
                 rows = np.array([c["k"] for c in live])
                 ev = np.asarray(e, dtype=np.float32)
-                ms = np.clip((E[rows] @ ev - emb_lo) / (1 - emb_lo), 0, None) * has_e[rows]
-                ws = [(1 - emb_w) * w + emb_w * float(m) for w, m in zip(ws, ms)]
+                raw = (E[rows] @ ev) * has_e[rows]
+                if mode == "mix":
+                    ms = np.clip((raw - emb_lo) / (1 - emb_lo), 0, None)
+                    ws = [(1 - emb_w) * w + emb_w * float(m) for w, m in zip(ws, ms)]
+                else:   # boost: lift a near-miss over the word threshold when the meaning clearly matches
+                    ws = [max(w, threshold + float(m) - emb_min) if (w >= word_min and m >= emb_min) else w for w, m in zip(ws, raw)]
             k = max(range(len(live)), key=lambda j: ws[j])
             best, best_sim = live[k], ws[k]
-        if best and best_sim >= (emb_threshold if use_emb else threshold):
+        if best and best_sim >= (emb_threshold if use_emb and mode == "mix" else threshold):
             best["items"].append(a)
             n = len(best["items"])
             cen = defaultdict(float, {w: x * (n - 1) / n for w, x in best["centroid"].items()})
@@ -648,10 +656,12 @@ def eval_clusters(hours=36):
     base = cluster(arts)
     bst, bs = stats(base); print("WORDS ONLY   ", bs)
     key = lambda c: frozenset(a["url"] for a in c)
-    for w, lo, th in [(0.55, 0.55, 0.36), (0.55, 0.55, 0.42), (0.6, 0.5, 0.40), (0.5, 0.6, 0.34), (0.7, 0.5, 0.45)]:
-        cl = cluster(arts, embs=embs, emb_w=w, emb_lo=lo, emb_threshold=th)
-        st, ss = stats(cl); print(f"EMB w={w} lo={lo} th={th}", ss)
-    cl = cluster(arts, embs=embs)
+    variants = [(0.12, 0.80), (0.15, 0.78), (0.10, 0.85), (0.08, 0.88), (0.15, 0.75)]
+    for wm, em in variants:
+        cl = cluster(arts, embs=embs, word_min=wm, emb_min=em)
+        st, ss = stats(cl); print(f"BOOST word>={wm} meaning>={em}", ss)
+    wm, em = [float(x) for x in os.environ.get("EVAL_PICK", "0.12,0.80").split(",")]
+    cl = cluster(arts, embs=embs, word_min=wm, emb_min=em)
     st, _ = stats(cl)
     # where the new clustering joins articles the old one kept apart (sample), and the reverse
     old_of = {}
@@ -662,9 +672,12 @@ def eval_clusters(hours=36):
     shown = 0
     for c in sorted(st, key=len, reverse=True):
         olds = Counter(old_of[a["url"]] for a in c)
-        if len(olds) > 1 and shown < 15:
+        if len(olds) > 1 and shown < 25:
             shown += 1
-            print(f"[{len(c)} art] " + " || ".join(sorted({a['title'][:70] for a in c})[:5]))
+            groups = defaultdict(list)
+            for a in c:
+                groups[old_of[a["url"]]].append(a["title"][:70])
+            print(f"[{len(c)} art from {len(olds)} old] " + " ##  ".join(" | ".join(g[:2]) for g in list(groups.values())[:4]))
     print("\n--- largest new stories ---")
     for c in sorted(st, key=lambda c: -len({a['source'] for a in c}))[:12]:
         print(f"[{len({a['source'] for a in c})} src] " + " || ".join(sorted({a['title'][:60] for a in c})[:4]))
