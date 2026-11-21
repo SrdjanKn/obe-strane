@@ -573,7 +573,7 @@ def _dot(a, b):
 
 
 def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo=None, emb_threshold=0.36,
-            mode="boost", word_min=0.12, emb_min=0.80):
+            mode="boost", word_min=0.12, emb_min=0.80, seed_min=0.75):
     """Single-pass centroid clustering in time order. Returns list of clusters (lists of article dicts).
     mode "boost" (default): word matching decides as before, and the meaning score can only add a join that word
     matching narrowly missed: word cosine >= word_min AND meaning cosine >= emb_min. This catches reworded headlines
@@ -593,6 +593,7 @@ def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo
     if use_emb:
         dim = len(next(iter(embs.values())))
         E = np.zeros((len(articles) + 1, dim), dtype=np.float32)    # cluster meaning-centroids, one row per cluster
+        SEED = np.zeros((len(articles) + 1, dim), dtype=np.float32) # the cluster's first article, to stop topic drift
         has_e = np.zeros(len(articles) + 1, dtype=bool)
     clusters = []  # each: {"items": [...], "centroid": {}, "last": datetime, "k": row}
     order = sorted(range(len(articles)), key=lambda i: articles[i]["published"])
@@ -609,11 +610,13 @@ def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo
                 rows = np.array([c["k"] for c in live])
                 ev = np.asarray(e, dtype=np.float32)
                 raw = (E[rows] @ ev) * has_e[rows]
+                seed = (SEED[rows] @ ev) * has_e[rows]
                 if mode == "mix":
                     ms = np.clip((raw - emb_lo) / (1 - emb_lo), 0, None)
                     ws = [(1 - emb_w) * w + emb_w * float(m) for w, m in zip(ws, ms)]
                 else:   # boost: lift a near-miss over the word threshold when the meaning clearly matches
-                    ws = [max(w, threshold + float(m) - emb_min) if (w >= word_min and m >= emb_min) else w for w, m in zip(ws, raw)]
+                    ws = [max(w, threshold + float(m) - emb_min) if (w >= word_min and m >= emb_min and sd >= seed_min) else w
+                          for w, m, sd in zip(ws, raw, seed)]
             k = max(range(len(live)), key=lambda j: ws[j])
             best, best_sim = live[k], ws[k]
         if best and best_sim >= (emb_threshold if use_emb and mode == "mix" else threshold):
@@ -627,12 +630,14 @@ def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo
             if e is not None:
                 r = best["k"]
                 ec = E[r] * (n - 1) / n + np.asarray(e, dtype=np.float32) / n if has_e[r] else np.asarray(e, dtype=np.float32)
+                if not has_e[r]:
+                    SEED[r] = np.asarray(e, dtype=np.float32)
                 E[r] = ec / (np.linalg.norm(ec) or 1.0); has_e[r] = True
             best["last"] = max(best["last"], a["published"])
         else:
             r = len(clusters)
             if use_emb and e is not None:
-                E[r] = np.asarray(e, dtype=np.float32); has_e[r] = True
+                E[r] = np.asarray(e, dtype=np.float32); SEED[r] = E[r]; has_e[r] = True
             clusters.append({"items": [a], "centroid": dict(v), "last": a["published"], "k": r})
     return [c["items"] for c in clusters]
 
@@ -656,12 +661,18 @@ def eval_clusters(hours=36):
     base = cluster(arts)
     bst, bs = stats(base); print("WORDS ONLY   ", bs)
     key = lambda c: frozenset(a["url"] for a in c)
-    variants = [(0.12, 0.80), (0.15, 0.78), (0.10, 0.85), (0.08, 0.88), (0.15, 0.75)]
-    for wm, em in variants:
-        cl = cluster(arts, embs=embs, word_min=wm, emb_min=em)
-        st, ss = stats(cl); print(f"BOOST word>={wm} meaning>={em}", ss)
-    wm, em = [float(x) for x in os.environ.get("EVAL_PICK", "0.12,0.80").split(",")]
-    cl = cluster(arts, embs=embs, word_min=wm, emb_min=em)
+    old_of = {}
+    for i, c in enumerate(base):
+        for a in c:
+            old_of[a["url"]] = i
+    def drift(st):   # new stories built from 5+ old ones: likely topic merges rather than one event
+        return sum(1 for c in st if len({old_of[a["url"]] for a in c}) >= 5)
+    variants = [(0.12, 0.80, 0.0), (0.12, 0.80, 0.75), (0.12, 0.80, 0.80), (0.10, 0.82, 0.78), (0.15, 0.78, 0.75)]
+    for wm, em, sm in variants:
+        cl = cluster(arts, embs=embs, word_min=wm, emb_min=em, seed_min=sm)
+        st, ss = stats(cl); print(f"BOOST word>={wm} meaning>={em} seed>={sm}", ss, "drift5+:", drift(st))
+    wm, em, sm = [float(x) for x in os.environ.get("EVAL_PICK", "0.12,0.80,0.78").split(",")]
+    cl = cluster(arts, embs=embs, word_min=wm, emb_min=em, seed_min=sm)
     st, _ = stats(cl)
     # where the new clustering joins articles the old one kept apart (sample), and the reverse
     old_of = {}
