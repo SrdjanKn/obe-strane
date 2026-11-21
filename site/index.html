@@ -631,7 +631,7 @@ footer .brand-logo{color:#fff}
           </div>
           <div class="chk"><h3>Proveri link</h3><p>Nalepite link članka i vidite čiji je medij i kako je istu vest prenela druga strana.</p>${chkForm()}</div>
           ${D.briefing ? `<a href="#/brifing" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Jutarnji brifing</div><div class="hl">Obe strane u 5 minuta</div><div class="meta">${(D.briefing.stories || []).length} vesti · izdanje u ${clock(D.briefing.made)}</div></a>` : ""}
-          ${D.tone && D.tone.days.length > 1 ? `<a href="#/ton" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Posle izbora</div><div class="hl">Kako se menja ton</div><div class="meta">Reči u naslovima obe strane, dan po dan</div></a>` : ""}
+          ${D.tone && D.tone.days.filter(d => (d.c.pro_government || [0])[0] >= 150).length > 1 ? `<a href="#/ton" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Posle izbora</div><div class="hl">Kako se menja ton</div><div class="meta">Reči u naslovima obe strane, dan po dan</div></a>` : ""}
         </aside>
       </section>
       <div class="lv-pair">
@@ -897,7 +897,8 @@ footer .brand-logo{color:#fff}
 
   // ---- ton kroz vreme
   function tonePage() {
-    const T = D.tone || {terms: [], days: []}, days = T.days, terms = T.terms;
+    const T = D.tone || {terms: [], days: []}, terms = T.terms;
+    const days = T.days.filter(d => (d.c.pro_government || [0])[0] >= 150 && (d.c.critical || [0])[0] >= 100);   // skip thin days (too few headlines to compare)
     const head = `${compactHeader()}<main class="wrap ton"><h1 class="page-h">Kako se menja ton</h1>
       <p class="page-p">Posle izbora 25. oktobra 2026. režimski mediji su počeli da menjaju način na koji pišu o studentima, SNS-u i novoj vlasti. Ovde svakog dana brojimo koliko često se određene reči pojavljuju u naslovima jedne i druge strane, na 1.000 naslova.</p>`;
     if (days.length < 2) return head + `<p class="meta" style="margin:24px 0 60px">Merenje je tek počelo. Prvi grafikoni se pojavljuju posle dva dana podataka.</p></main>${footer()}`;
