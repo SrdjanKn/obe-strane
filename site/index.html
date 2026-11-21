@@ -483,6 +483,20 @@ footer .brand-logo{color:#fff}
 .intro-more{font:500 14px var(--sans);text-decoration:underline;color:var(--ink2);white-space:nowrap}
 @media (max-width:1080px){.intro-in{grid-template-columns:minmax(0,1fr)}.intro-l{grid-template-columns:minmax(0,1fr);gap:8px}}
 @media (max-width:760px){.intro-in{padding:14px 16px}.intro-a .btn{min-height:44px}}
+/* rounded corners: photos and boxes */
+:root{--r:8px;--r-sm:5px}
+.ph,.lv-over,.ep-tile,.ep-img,.story-fig .ph{border-radius:var(--r)}
+.lv-row .ph,.ep-c .ep-img{border-radius:var(--r-sm)}
+.lv-over .ph{border-radius:0}
+.q-card{border-radius:0 var(--r) var(--r) 0}
+.covbox,.box,.bs-panel,.bs-note,.news,.ton-key,.chk-out{border-radius:0 0 var(--r) var(--r)}
+.ai-diff,.w-story-box,.intro-in .btn,.chk-other{border-radius:var(--r)}
+.btn,.util input,.chk-form input,.subscribe input,input[type=email]{border-radius:var(--r-sm)}
+.bar{border-radius:3px}
+.ep-lab,.q-one,.bs-label,.w-chip,.ep-tile-top{border-radius:3px}
+.w-chip{border-radius:999px}
+.ep-tile-top{border-radius:0}
+@media (max-width:760px){.lv-hero>.lv-over,.story-fig .ph{border-radius:0}}
 </style>
 </head>
 <body>
