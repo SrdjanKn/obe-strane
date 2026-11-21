@@ -56,7 +56,7 @@ jobs:
       - name: Collect and build
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # optional: AI summaries are skipped without it
-          OBE_EMB: "0"          # meaning-based grouping: off until tuned with the 'Compare story grouping' workflow
+          OBE_EMB: "1"          # meaning-based grouping on (tuned with the "Compare story grouping" workflow)
         run: |
           pip install --quiet pillow fastembed   # pillow: cover-photo check; fastembed: meaning-based story grouping
           python3 collector.py run

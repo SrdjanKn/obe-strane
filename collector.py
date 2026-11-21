@@ -573,7 +573,7 @@ def _dot(a, b):
 
 
 def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo=None, emb_threshold=0.36,
-            mode="boost", word_min=0.12, emb_min=0.80, seed_min=0.75):
+            mode="boost", word_min=0.10, emb_min=0.82, seed_min=0.78):
     """Single-pass centroid clustering in time order. Returns list of clusters (lists of article dicts).
     mode "boost" (default): word matching decides as before, and the meaning score can only add a join that word
     matching narrowly missed: word cosine >= word_min AND meaning cosine >= emb_min. This catches reworded headlines
