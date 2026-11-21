@@ -462,6 +462,14 @@ footer .brand-logo{color:#fff}
 .w-lab{display:inline-block;width:80px;font:600 13px var(--sans);color:var(--ink2)}
 .w-chip{display:inline-block;border:1.5px solid;padding:3px 9px;margin:2px 6px 2px 0;font:600 14px var(--sans);background:#fff}
 .w-chip small{font-weight:400;color:var(--ink3)}
+button.w-chip{cursor:pointer;transition:background .15s,color .15s}
+.w-chip.on{background:var(--c);color:#fff!important}.w-chip.on small{color:rgba(255,255,255,.8)}
+.w-tip{margin:2px 0 0}
+.sides .side a{transition:opacity .2s}
+.sides.hl-on .side a:not(.has){opacity:.32}
+.wq{border-radius:3px;transition:background .15s,box-shadow .15s}
+.wq.lit{background:#ffe27a;box-shadow:0 0 0 2px #ffe27a}
+
 @media (max-width:760px){.w-cols{grid-template-columns:1fr;gap:28px}.w-lab{display:block;width:auto;margin-bottom:2px}}
 .citati .page-p{max-width:760px}
 .q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
@@ -938,8 +946,10 @@ footer .brand-logo{color:#fff}
     if (!s) return `${compactHeader()}<div class="wrap empty">Ova vest više nije u izboru poslednjih ${D.hours} sati. <a href="#/" style="text-decoration:underline">Nazad na naslovnu</a></div>${footer()}`;
     const its = s.items.map(i => ({...i, camp: camp(i.source)}));
     const pg = its.filter(i => i.camp === "pro_government"), cr = its.filter(i => i.camp === "critical");
+    const sw = storyWords(s), stems = new Set(sw ? [...sw.pg, ...sw.cr].map(x => x.st) : []);
+    const wrapW = t => stems.size ? esc(t).replace(/[\p{L}\d]+/gu, w => { const st = stemOf(toLat(w)); return stems.has(st) ? `<span class="wq" data-w="${st}">${w}</span>` : w; }) : esc(t);
     const side = (list, k, title) => `<div class="side" style="border-top-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${title} · ${list.length}</h3>
-      ${list.length ? list.map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="t">${esc(i.title)}</div><div class="meta" style="margin-top:4px">${logo(i.source, 16)}${esc(src(i.source).name)} · ${clock(i.published)}</div></a>`).join("")
+      ${list.length ? list.map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="t">${wrapW(i.title)}</div><div class="meta" style="margin-top:4px">${logo(i.source, 16)}${esc(src(i.source).name)} · ${clock(i.published)}</div></a>`).join("")
         : `<div class="none">Nijedan ${k === "critical" ? "kritički" : "režimski"} medij nije objavio ovu vest.</div>`}</div>`;
     const p = s.split.pro_government || 0, c = s.split.critical || 0;
     const rest = ["public", "mixed", "international"].filter(k => s.split[k]).map(k => `${s.split[k]} ${form(s.split[k], k)}`).join(" i ");
@@ -969,8 +979,8 @@ footer .brand-logo{color:#fff}
       <section id="poredjenje" class="wide" style="margin-top:44px" aria-label="Kako su naslovili">
         <h2 class="h2">Kako su naslovili</h2>
         <p style="margin:0 0 20px;color:var(--ink2)">Isti događaj, naslovi iz dva tabora, po vremenu objave. Naslovi vode na izvorni članak.</p>
-        ${(() => { const w = storyWords(s); if (!w || (!w.pg.length && !w.cr.length)) return ""; const chips = (arr, k) => arr.map(x => `<span class="w-chip" style="border-color:${VAR[k]};color:${VAR[k]}">${esc(x.word)} <small>${x.n}/${x.of}</small></span>`).join("") || `<span class="meta">nema izdvojenih reči</span>`;
-          return `<div class="w-story-box"><a href="#/reci" class="w-title">Reči koje biraju</a><div><span class="w-lab">Režimski</span>${chips(w.pg, "pro_government")}</div><div><span class="w-lab">Kritički</span>${chips(w.cr, "critical")}</div></div>`; })()}
+        ${(() => { const w = sw; if (!w || (!w.pg.length && !w.cr.length)) return ""; const chips = (arr, k) => arr.map(x => `<button type="button" class="w-chip" data-w="${x.st}" aria-pressed="false" style="border-color:${VAR[k]};color:${VAR[k]};--c:${VAR[k]}" title="U ${x.n} od ${x.of} ${k === "pro_government" ? "režimskih" : "kritičkih"} naslova">${esc(x.word)} <small>${x.n}/${x.of}</small></button>`).join("") || `<span class="meta">nema izdvojenih reči</span>`;
+          return `<div class="w-story-box"><a href="#/reci" class="w-title">Reči koje biraju</a><div><span class="w-lab">Režimski</span>${chips(w.pg, "pro_government")}</div><div><span class="w-lab">Kritički</span>${chips(w.cr, "critical")}</div><p class="meta w-tip">Pređite preko reči ili je dodirnite da vidite gde se javlja u naslovima.</p></div>`; })()}
         <div class="sides">${side(pg, "pro_government", "Režimski mediji")}${side(cr, "critical", "Kritički mediji")}</div>
         ${(() => { const qs = storyQuotes(s); return qs.length ? `<h3 class="h3" style="margin:32px 0 12px">Citati u ovoj priči</h3><div class="q-grid">${qs.slice(0, 6).map(x => qCard(x, false)).join("")}</div>` : ""; })()}
         ${(() => { const eps = ((D.podcasts || {}).episodes || []).filter(e => (e.stories || []).includes(s.id)); return eps.length ? `<h3 class="h3" style="margin:32px 0 12px">Razgovori o ovoj temi</h3><div class="ep-grid">${eps.slice(0, 4).map(e => epCard(e, true)).join("")}</div>` : ""; })()}
@@ -1609,6 +1619,23 @@ footer .brand-logo{color:#fff}
     balanceHome();
     wireBand();
     wireSpread();
+    wireWords();
+  }
+  // "Reči koje biraju" on a story: a word lights up in every headline that uses it; the rest fade
+  function wireWords() {
+    const box = document.querySelector(".sides"), chips = [...document.querySelectorAll(".w-story-box .w-chip")]; if (!box || !chips.length) return;
+    let pinned = "";
+    const light = st => { box.classList.toggle("hl-on", !!st);
+      box.querySelectorAll(".wq").forEach(x => x.classList.toggle("lit", x.dataset.w === st));
+      box.querySelectorAll(".side a").forEach(a => a.classList.toggle("has", !!st && !!a.querySelector(`.wq[data-w="${st}"]`)));
+      chips.forEach(c => { c.classList.toggle("on", c.dataset.w === st); c.setAttribute("aria-pressed", c.dataset.w === pinned); }); };
+    chips.forEach(c => {
+      c.addEventListener("mouseenter", () => light(c.dataset.w));
+      c.addEventListener("mouseleave", () => light(pinned));
+      c.addEventListener("focus", () => light(c.dataset.w));
+      c.addEventListener("blur", () => light(pinned));
+      c.addEventListener("click", () => { pinned = pinned === c.dataset.w ? "" : c.dataset.w; light(pinned); });
+    });
   }
   function balanceHome() {
     const f = document.querySelector(".lv-fill"); if (!f) return;
