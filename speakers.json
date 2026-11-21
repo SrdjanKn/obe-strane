@@ -1,6 +1,124 @@
 {
-  "_note": "Optional details for people quoted on the site. Key: the speaker's surname as it appears in headlines (any case). role: short title shown under the name. photo: URL of a photo you have the right to use (leave empty to show initials).",
+  "_note": "People quoted on the site, in order of how often they appear. Fill in for each person: name (full name, shown on the card), role (short title), photo (URL of a photo you have the right to use; leave empty to keep the coloured initials), credit (photographer or source, shown as 'Foto: ...'), credit_url (optional link). Key = full name as it appears in headlines, or just the surname. A full-name key wins over a surname key.",
   "speakers": {
-    "Primer": {"name": "Ime Prezime", "role": "funkcija", "photo": ""}
+    "Aleksandar Čupić": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Vučić": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Peter Mađar": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Melanija Tramp": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Tramp": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Vladica Ilić": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Miloš Vučević": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Mali": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Zelenski": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Miodrag Linta": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Merc": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Zaharova": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Marina Raguš": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Aleksandra Štimac": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Milenko Jovanov": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Dodik": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    },
+    "Јово Бакић": {
+      "name": "",
+      "role": "",
+      "photo": "",
+      "credit": "",
+      "credit_url": ""
+    }
   }
 }
