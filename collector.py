@@ -266,7 +266,7 @@ def parse_feed(data):
 # ---------------------------------------------------------------- storage
 
 def db():
-    con = sqlite3.connect(DB_PATH)
+    con = sqlite3.connect(DB_PATH, timeout=60)
     con.execute("""CREATE TABLE IF NOT EXISTS articles(
         id TEXT PRIMARY KEY, source_id TEXT, title TEXT, summary TEXT, url TEXT,
         published TEXT, fetched TEXT)""")
@@ -543,6 +543,7 @@ def _get_embedder():
 def embed_articles(con, arts):
     """url -> unit vector (list of floats) for each article; None if embeddings are unavailable."""
     import array
+    con.commit()
     con.execute("CREATE TABLE IF NOT EXISTS emb(url TEXT PRIMARY KEY, vec BLOB)")
     have = {}
     urls = [a["url"] for a in arts]
@@ -565,6 +566,7 @@ def embed_articles(con, arts):
         con.commit()
         print(f"  embedded {len(todo)} new articles")
     con.execute("DELETE FROM emb WHERE url NOT IN (SELECT url FROM articles)")
+    con.commit()
     return have
 
 
