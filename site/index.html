@@ -432,6 +432,15 @@ footer .brand-logo{color:#fff}
 .w-chip{display:inline-block;border:1.5px solid;padding:3px 9px;margin:2px 6px 2px 0;font:600 14px var(--sans);background:#fff}
 .w-chip small{font-weight:400;color:var(--ink3)}
 @media (max-width:760px){.w-cols{grid-template-columns:1fr;gap:28px}.w-lab{display:block;width:auto;margin-bottom:2px}}
+.citati .page-p{max-width:760px}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.q-card{background:var(--soft);border-left:4px solid var(--rule);padding:16px 18px}
+.q-who{font:700 13px/1.2 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+.q-text{margin:0 0 12px;font:600 19px/1.3 var(--head);color:var(--ink)}
+.q-meta{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font:500 13px var(--sans);color:var(--ink2)}
+.q-one{color:#fff;padding:3px 7px;font:700 11px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase}
+.q-story{display:block;margin-top:10px;font:500 13.5px/1.35 var(--sans);color:var(--ink2);text-decoration:underline;text-decoration-color:var(--rule)}
+.h3{font:700 20px/1.2 var(--head)}
 </style>
 </head>
 <body>
@@ -549,7 +558,7 @@ footer .brand-logo{color:#fff}
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
     </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
   function balanceLine() {
     const b = balanceObj();
@@ -738,6 +747,7 @@ footer .brand-logo{color:#fff}
         ${(() => { const w = storyWords(s); if (!w || (!w.pg.length && !w.cr.length)) return ""; const chips = (arr, k) => arr.map(x => `<span class="w-chip" style="border-color:${VAR[k]};color:${VAR[k]}">${esc(x.word)} <small>${x.n}/${x.of}</small></span>`).join("") || `<span class="meta">nema izdvojenih reči</span>`;
           return `<div class="w-story-box"><a href="#/reci" class="w-title">Reči koje biraju</a><div><span class="w-lab">Režimski</span>${chips(w.pg, "pro_government")}</div><div><span class="w-lab">Kritički</span>${chips(w.cr, "critical")}</div></div>`; })()}
         <div class="sides">${side(pg, "pro_government", "Režimski mediji")}${side(cr, "critical", "Kritički mediji")}</div>
+        ${(() => { const qs = storyQuotes(s); return qs.length ? `<h3 class="h3" style="margin:32px 0 12px">Citati u ovoj priči</h3><div class="q-grid">${qs.slice(0, 6).map(x => qCard(x, false)).join("")}</div>` : ""; })()}
       </section>
       <section id="hronologija" class="col" style="margin-top:48px" aria-label="Hronologija">
         <h2 class="h2">Hronologija</h2>
@@ -992,6 +1002,56 @@ footer .brand-logo{color:#fff}
       <section><h2 style="color:var(--cr)">Kritički pišu</h2>${list(W && W.cr, "critical", "pro_government")}</section></div>
       <p class="meta ton-note">Poredimo koliko često se svaka reč javlja u naslovima režimskih i kritičkih medija, uzimajući u obzir da režimskih naslova ima više. Prikazujemo samo reči sa jasnom razlikom (statistička mera „log-odds“). Različiti oblici iste reči se spajaju, ćirilica se prebacuje u latinicu. Za promene kroz vreme pogledajte <a href="#/ton" style="text-decoration:underline">Kako se menja ton</a>.</p></main>${footer()}`;
   }
+  // ---- citati
+  const Q_BLOCK = new Set("video foto uzivo blog anketa ekskluzivno hit sok haos drama detalji pogledajte saznaje otkriva novo vesti hronika vreme uzbuna alarm horor jezivo tragedija nesreca najnovije oglasio oglasila stizu stigla upozorenje vazno hitno cena cene rezultati izbori raspored prognoza sport kviz test mapa pitanje odgovor bonus live update dan nedelja jutro vece projekat slucaj afera protest protesti kosovo rusija ukrajina litijum ekspo tema region svet analiza komentar intervju istrazivanje tragom foto-galerija".split(" "));
+  const qClean = t => String(t).replace(/\s*[\(\[](video|foto|uživo|uzivo|anketa|galerija)[^\)\]]*[\)\]]\s*/gi, " ").replace(/\s+/g, " ").trim();
+  function quoteOf(title) {
+    const t = qClean(title), m = t.match(/^([^:„“"”]{2,48}?):\s+(.{12,})$/u);
+    if (!m) return null;
+    const who = m[1].trim(), words = who.split(/\s+/);
+    if (words.length > 4 || /\d/.test(who)) return null;
+    if (words.includes("i") || (D.topics || []).some(t => fold(t.name) === fold(who))) return null;
+    if (!words.every(w => /^[A-ZČĆŠŽĐА-ЯЂЈЉЊЋЏ]/u.test(w) || /^(de|van|von|al|bin|i)$/.test(w))) return null;
+    if (words.some(w => Q_BLOCK.has(fold(toLat(w))))) return null;
+    let q = m[2].trim(); const inner = q.match(/[„"“]([^“”"]{12,})[“”"]/u); if (inner) q = inner[1];
+    q = q.replace(/^[„"“]+|[“”"]+$/gu, "").trim();
+    if (q.split(/\s+/).length < 4) return null;
+    if (!/^[„"“A-ZČĆŠŽĐА-ЯЂЈЉЊЋЏ0-9]/u.test(m[2].trim())) return null;   // topic labels ("Litijum: meštani...") continue in lower case
+    const last = fold(toLat(words[words.length - 1])).replace(/(a|u|om|e)$/, "");
+    const display = words.map(w => w === w.toUpperCase() && w.length > 4 ? w[0] + w.slice(1).toLowerCase() : w).join(" ");
+    return {key: last, who: display, q, toks: new Set(toLat(q).split(/[^a-z0-9čćšžđ]+/u).map(w => fold(w).slice(0, 5)).filter(w => w.length >= 4))};
+  }
+  const jacc = (a, b) => { let i = 0; a.forEach(x => b.has(x) && i++); return i / Math.max(1, Math.min(a.size, b.size)); };
+  function storyQuotes(s) {
+    const groups = [];
+    s.items.forEach(it => { const q = quoteOf(it.title); if (!q) return;
+      const g = groups.find(g => g.key === q.key && jacc(g.toks, q.toks) >= 0.5);
+      if (g) { g.items.push(it); g.forms.push(q); q.toks.forEach(x => g.toks.add(x)); } else groups.push({key: q.key, toks: new Set(q.toks), items: [it], forms: [q], s}); });
+    return groups.filter(g => g.items.length >= 2).map(g => {
+      const c = {pro_government: 0, critical: 0, other: 0}; const seen = new Set();
+      g.items.forEach(i => { if (seen.has(i.source)) return; seen.add(i.source); const k = src(i.source).camp; c[k in c ? k : "other"]++; });
+      const best = g.forms.slice().sort((a, b) => a.q.length - b.q.length)[Math.floor((g.forms.length - 1) / 2)];
+      const who = g.forms.map(f => f.who).sort((a, b) => b.length - a.length)[0];
+      return {who, q: best.q, n: seen.size, c, s: g.s, items: g.items, first: g.items.slice().sort((a, b) => a.published.localeCompare(b.published))[0]};
+    }).sort((a, b) => b.n - a.n);
+  }
+
+  const qCard = (x, withStory = true) => { const one = x.c.pro_government && !x.c.critical ? "pro_government" : x.c.critical && !x.c.pro_government ? "critical" : "";
+    return `<article class="q-card"${one ? ` style="border-left-color:${VAR[one]}"` : ""}><div class="q-who">${esc(x.who)}</div><blockquote class="q-text">„${esc(x.q)}“</blockquote>
+      <div class="q-meta"><span>Preneli: <b>${x.n}</b> ${form(x.n, "medij")}</span><span style="color:var(--pg)">${x.c.pro_government} ${form(x.c.pro_government, "pro_government")}</span><span style="color:var(--cr)">${x.c.critical} ${form(x.c.critical, "critical")}</span>${x.c.other ? `<span>${x.c.other} ostalih</span>` : ""}
+      ${one ? `<span class="q-one" style="background:${VAR[one]}">Samo ${one === "pro_government" ? "režimski" : "kritički"}</span>` : ""}</div>
+      ${withStory ? `<a class="q-story" href="#/vest/${x.s.id}">Iz priče: ${esc(x.s.headline)}</a>` : ""}</article>`; };
+  function quotesPage(filter) {
+    const all = D.stories.flatMap(storyQuotes).sort((a, b) => b.n - a.n);
+    const isOne = (x, k) => x.c[k] >= 2 && !x.c[k === "pro_government" ? "critical" : "pro_government"];
+    const list = filter === "rezimski" ? all.filter(x => isOne(x, "pro_government")) : filter === "kriticki" ? all.filter(x => isOne(x, "critical")) : all;
+    const tab = (f, label, n) => `<a href="#/citati${f ? "/" + f : ""}" class="chip ${(filter || "") === f ? "on" : ""}">${label} <small>${n}</small></a>`;
+    return `${compactHeader()}<main class="wrap citati"><h1 class="page-h">Citati</h1>
+      <p class="page-p">Ko je šta rekao i ko je to preneo. Izjave iz naslova svih medija u poslednjih ${D.hours} sati, spojene kad više medija prenosi istu izjavu. Kad izjavu prenosi samo jedna strana, to je slepa tačka na nivou jedne rečenice.</p>
+      <div class="chips" style="margin:18px 0 24px">${tab("", "Sve", all.length)}${tab("rezimski", "Prenose samo režimski", all.filter(x => isOne(x, "pro_government")).length)}${tab("kriticki", "Prenose samo kritički", all.filter(x => isOne(x, "critical")).length)}</div>
+      <div class="q-grid">${list.slice(0, 60).map(x => qCard(x)).join("") || `<p class="meta">Nema citata za ovaj filter.</p>`}</div>
+      <p class="meta ton-note">Citat prepoznajemo po obliku naslova „Ime: izjava“, a izjave istog govornika spajamo kad se reči dovoljno poklapaju. Prikazujemo izjave koje su preneli najmanje dva medija. Govornik može biti i institucija (na primer tužilaštvo ili Batut).</p></main>${footer()}`;
+  }
   function briefingPage() {
     const B = D.briefing;
     if (!B) return `${header("brief")}<div class="wrap empty">Prvi brifing stiže sutra u 7 ujutru.</div>${footer()}`;
@@ -1112,7 +1172,7 @@ footer .brand-logo{color:#fff}
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
       : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
       : page === "o-nama" ? about() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
-      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : home();
+      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : home();
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const tog = document.querySelector(".s-tog");
     if (tog) tog.addEventListener("click", () => { const on = document.body.classList.toggle("ss"); tog.setAttribute("aria-expanded", on); if (on) { window.scrollTo(0, 0); document.getElementById("q").focus(); } });
