@@ -107,25 +107,29 @@ nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .strip>a{flex:1 1 230px;min-width:0}
 .strip .hl{font-size:19px;line-height:1.28;margin:0 0 10px}
 .band{background:var(--ink);color:#fff;margin-top:44px}
-.bsday{background:var(--amber-bg);border-top:6px solid var(--sig);border-bottom:1px solid var(--sig-line);margin-top:48px}
-.bd-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;padding-top:40px;padding-bottom:48px}
-.bd-kick{display:flex;align-items:center;color:var(--amber);font:700 15px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:18px}
-.bd-h{margin:0 0 16px;font:700 clamp(28px,3.6vw,44px)/1.12 var(--head);color:var(--ink)}
-.bd-dek{margin:0 0 26px;font:400 19px/1.5 var(--serif);color:var(--ink2)}
+.bsday{background:var(--amber-bg);border-top:6px solid var(--sig);border-bottom:1px solid var(--sig-line);margin-top:48px;padding:36px 0 40px}
+.bd-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;align-items:start}
+.bd-kick{display:flex;align-items:center;color:var(--amber);font:700 14px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px}
+.bd-h{margin:0 0 12px;font:700 clamp(26px,2.8vw,36px)/1.15 var(--head);color:var(--ink)}
+.bd-dek{margin:0 0 14px;font:400 18px/1.5 var(--serif);color:var(--ink2)}
 .bd-dek b{color:var(--ink);font-weight:600}
-.bd-meter{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:520px}
-.bd-num{font:700 54px/1 var(--head);margin-bottom:10px}
-.bd-bar{height:12px;border-radius:2px;box-sizing:border-box}
-.bd-bar.gone{border:2px dashed;background:transparent}
-.bd-lab{margin-top:8px;font:600 13px var(--sans);color:var(--ink2)}
-.bd-sub{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
-.bd-ai{margin-top:28px;padding-top:18px;border-top:1px solid var(--sig-line)}
-.bd-ai p{margin:0 0 12px;font:400 17px/1.5 var(--serif)}
-.bd-ai .bd-frame{border-left:3px solid;padding-left:12px}
-.bd-ai .bd-note{font:400 12px var(--sans);color:var(--ink3);margin:0}
-.bd-item{display:block;padding:12px 0;border-top:1px solid var(--sig-line)}
-.bd-item .t{margin-top:5px;font:600 18px/1.3 var(--head);color:var(--ink)}
-@media (max-width:900px){.bd-grid{grid-template-columns:minmax(0,1fr);gap:28px;padding-top:28px;padding-bottom:32px}.bd-num{font-size:42px}}
+.bd-ai{margin:0 0 18px;font:400 16px/1.5 var(--serif);color:var(--ink2);border-left:3px solid var(--sig);padding-left:12px}
+.bd-note{font:600 11px var(--sans);color:var(--ink3);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.bd-card{background:#fff;border-radius:var(--r);padding:18px 20px;box-shadow:0 0 0 1px var(--sig-line)}
+.bd-sub{font:700 12px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px}
+.bd-row{display:grid;grid-template-columns:44px minmax(0,1fr) 90px;align-items:center;gap:12px;margin:6px 0}
+.bd-n{font:700 34px/1 var(--head)}
+.bd-track{height:12px;background:#eef1f5;border-radius:3px;overflow:hidden}
+.bd-fill{height:100%;border-radius:3px}
+.bd-gone{height:100%;border:2px dashed;border-radius:3px;box-sizing:border-box}
+.bd-l{font:600 13px var(--sans);color:var(--ink2)}
+.bd-logos{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
+.bd-logo{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:var(--soft);font:500 12.5px var(--sans);color:var(--ink2)}
+.bd-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}
+.bd-item{display:block;padding:11px 0;border-top:1px solid var(--rule)}
+.bd-item .t{margin-top:4px;font:600 16.5px/1.3 var(--head);color:var(--ink)}
+.bd-more{display:inline-block;margin-top:10px;font:600 13.5px var(--sans);text-decoration:underline}
+@media (max-width:900px){.bd-top,.bd-cards{grid-template-columns:minmax(0,1fr);gap:16px}.bsday{padding:28px 0 32px}.bd-cards{margin-top:16px}}
 .band .wrap{padding-top:48px;padding-bottom:52px;display:flex;flex-wrap:wrap;gap:40px}
 .band h2{margin:0 0 16px;font:700 clamp(26px,3.4vw,38px)/1.15 var(--head);color:#fff}
 .band p{margin:0 0 26px;font:400 18px/1.55 var(--serif);color:#d0d0d4}
@@ -765,26 +769,35 @@ footer .brand-logo{color:#fff}
   function bsBand(s) {
     const silent = s.blindspot, loud = silent === "pro_government" ? "critical" : "pro_government";
     const n = s.split[loud] || 0, others = s.sources - n;
-    const items = s.items.filter(i => camp(i.source) === loud).slice(0, 4);
     const sideWord = k => k === "pro_government" ? "režimski" : "kritički";
+    const loudItems = s.items.filter(i => camp(i.source) === loud);
+    const outlets = [...new Set(loudItems.map(i => i.source))];
     const ai = s.ai && s.ai.ukratko ? s.ai : null;
-    const loudFrame = ai && (loud === "pro_government" ? ai.provladini : ai.kriticki);
-    const big = k => k === silent
-      ? `<div class="bd-side"><div class="bd-num" style="color:${VAR[k]}">0</div><div class="bd-bar gone" style="border-color:${VAR[k]}"></div><div class="bd-lab">${form(0, k)} ${form(0, "medij")}</div></div>`
-      : `<div class="bd-side"><div class="bd-num" style="color:${VAR[k]}">${n}</div><div class="bd-bar" style="background:${VAR[k]}"></div><div class="bd-lab">${form(n, k)} ${form(n, "medij")}</div></div>`;
-    return `<section class="bsday" aria-label="Slepa tačka dana"><div class="wrap bd-grid">
-      <div class="bd-text">
-        <a href="#/slepe-tacke" class="bd-kick">${EYE}Slepa tačka dana</a>
-        <a href="${link(s)}"><h2 class="bd-h">${esc(s.headline)}</h2></a>
-        <p class="bd-dek">Ovu vest ${n === 1 ? "objavio je" : "objavilo je"} ${n} ${form(n, loud)} ${form(n, "medij")}${others ? ` (i još ${others} ${others === 1 ? "drugi" : "drugih"})` : ""}. <b>Nijedan ${sideWord(silent)} medij je nije preneo.</b></p>
-        <div class="bd-meter">${big("pro_government")}${big("critical")}</div>
-        ${ai ? `<div class="bd-ai"><div class="bd-sub">Ukratko</div><p>${esc(ai.ukratko)}</p>${loudFrame ? `<p class="bd-frame" style="border-left-color:${VAR[loud]}"><b style="color:${VAR[loud]}">Kako su je preneli ${loud === "pro_government" ? "režimski" : "kritički"}:</b> ${esc(loudFrame)}</p>` : ""}<p class="bd-note">Sažetak je napisao AI model na osnovu naslova i uvoda.</p></div>` : ""}
-        <a class="btn dark" href="${link(s)}" style="margin-top:22px">Cela priča</a>
+    const t0 = new Date(s.first).getTime();
+    const meanwhile = D.stories.filter(x => x.id !== s.id && !x.blindspot && (x.split[silent] || 0) >= 2 && Math.abs(new Date(x.first).getTime() - t0) < 18 * 36e5)
+      .sort((a, b) => (b.split[silent] || 0) - (a.split[silent] || 0)).slice(0, 3);
+    const bar = (k, v) => `<div class="bd-row"><span class="bd-n" style="color:${VAR[k]}">${v}</span><div class="bd-track">${v ? `<div class="bd-fill" style="width:${Math.max(8, v / Math.max(n, 1) * 100)}%;background:${VAR[k]}"></div>` : `<div class="bd-gone" style="border-color:${VAR[k]}"></div>`}</div><span class="bd-l">${form(v, k)}</span></div>`;
+    return `<section class="bsday" aria-label="Slepa tačka dana"><div class="wrap">
+      <div class="bd-top">
+        <div class="bd-text">
+          <a href="#/slepe-tacke" class="bd-kick">${EYE}Slepa tačka dana</a>
+          <a href="${link(s)}"><h2 class="bd-h">${esc(s.headline)}</h2></a>
+          <p class="bd-dek">Ovu vest ${n === 1 ? "objavio je" : "objavilo je"} ${n} ${form(n, loud)} ${form(n, "medij")}${others ? ` (i još ${others} ${others === 1 ? "drugi" : "drugih"})` : ""}. <b>Nijedan ${sideWord(silent)} medij je nije preneo.</b></p>
+          ${ai ? `<p class="bd-ai">${esc(ai.ukratko)} <span class="bd-note">AI sažetak</span></p>` : ""}
+          <a class="btn dark" href="${link(s)}">Cela priča</a>
+        </div>
+        <div class="bd-card bd-meter">
+          <div class="bd-sub">Ko je objavio</div>
+          ${bar(loud, n)}${bar(silent, 0)}
+          <div class="bd-logos">${outlets.slice(0, 14).map(id => `<span class="bd-logo">${logo(id, 16)}${esc(src(id).name)}</span>`).join("")}${outlets.length > 14 ? `<span class="bd-logo">+${outlets.length - 14}</span>` : ""}</div>
+        </div>
       </div>
-      <div class="bd-side-col">
-        ${s.image ? `<figure style="margin:0">${photo(s, "16/10")}${s.image_source ? `<figcaption class="meta" style="margin-top:7px">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
-        <div class="bd-sub" style="margin-top:${s.image ? 22 : 0}px">Ko je objavio</div>
-        ${items.map(i => `<a class="bd-item" ${out(i.url, i.source)}><div class="meta">${logo(i.source, 15)}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}
+      <div class="bd-cards">
+        <div class="bd-card"><div class="bd-sub" style="color:${VAR[loud]}">Kako su naslovili ${sideWord(loud)}</div>
+          ${loudItems.slice(0, 3).map(i => `<a class="bd-item" ${out(i.url, i.source)}><div class="meta">${logo(i.source, 15)}${esc(src(i.source).name)} · ${clock(i.published)}</div><div class="t">${esc(i.title)}</div></a>`).join("")}
+          ${loudItems.length > 3 ? `<a class="bd-more" href="${link(s)}">Svi naslovi (${loudItems.length})</a>` : ""}</div>
+        <div class="bd-card"><div class="bd-sub" style="color:${VAR[silent]}">Šta su u isto vreme objavljivali ${sideWord(silent)}</div>
+          ${meanwhile.length ? meanwhile.map(x => `<a class="bd-item" href="${link(x)}"><div class="meta">${x.split[silent]} ${form(x.split[silent], silent)} ${form(x.split[silent], "medij")} · ${esc(x.section)}</div><div class="t">${esc(x.headline)}</div></a>`).join("") : `<p class="meta" style="margin:8px 0 0">Nema drugih priča te strane u isto vreme.</p>`}</div>
       </div></div></section>`;
   }
 
