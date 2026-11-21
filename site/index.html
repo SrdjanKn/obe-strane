@@ -544,7 +544,27 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
 .tk-win{flex:1;min-width:0;overflow:hidden;display:flex;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent)}
 .tk-track{display:flex;align-items:stretch;width:max-content;animation:tks linear infinite}
 .tk-dup{display:flex;align-items:stretch}
-.tk-win:hover .tk-track,.tk-win:focus-within .tk-track{animation-play-state:paused}
+.tk-win:hover .tk-track,.tk-win:focus-within .tk-track,.tk.paused .tk-track{animation-play-state:paused}
+.tk-pause{display:inline-grid;place-items:center;width:26px;height:26px;margin-left:2px;border:1px solid var(--rule);border-radius:50%;background:#fff;color:var(--ink);cursor:pointer;padding:0}
+.tk-pause svg{fill:currentColor}.tk-pause .i-pl{display:none}.tk.paused .tk-pause .i-pa{display:none}.tk.paused .tk-pause .i-pl{display:block}.tk.paused .tk-live{animation:none}
+.tk-pause:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.bar-x i{cursor:pointer;transition:filter .15s}.bar-x i:hover,.bar-x i.on{filter:brightness(1.12) saturate(1.1)}.bar-x i:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.bar-x{overflow:visible}
+.barpop{position:absolute;z-index:60;background:#fff;border:1px solid var(--sig-line);border-radius:10px;box-shadow:0 10px 30px rgba(20,28,40,.14);padding:12px 12px 6px;max-height:340px;overflow:auto}
+.bp-h{font:700 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+.bp-i{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--rule)}
+.bp-i b{display:block;font:600 13px/1.2 var(--sans);color:var(--ink)}.bp-t{display:block;font:400 13px/1.35 var(--sans);color:var(--ink2);margin-top:2px}
+.bp-i:hover .bp-t{text-decoration:underline}
+.dtoast{position:fixed;z-index:70;right:18px;bottom:18px;width:300px;max-width:calc(100vw - 36px);background:#fff;border:1px solid var(--sig-line);border-radius:12px;box-shadow:0 12px 34px rgba(20,28,40,.18);padding:12px 14px;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .3s,opacity .3s}
+.dtoast.in{transform:none;opacity:1;pointer-events:auto}
+.dt-h{display:flex;justify-content:space-between;font:700 13px/1.2 var(--sans);color:var(--ink)}.dt-h a{font-weight:600;text-decoration:underline;color:var(--ink2)}
+.dt-bar{display:flex;gap:2px;height:10px;margin:10px 0 7px;border-radius:3px;overflow:hidden;background:#eef1f5}.dt-bar i{display:block;height:100%;transition:width .8s cubic-bezier(.2,.7,.2,1) .15s}
+.dt-n{display:flex;justify-content:space-between;font:400 12px/1 var(--sans);color:var(--ink3)}.dt-n b{font-weight:700}
+.w-sort{margin:6px 0 20px}.w-sort .chip{cursor:pointer;font:inherit}
+.chk-anim>*{animation:chkin .45s cubic-bezier(.2,.7,.2,1) both}.chk-anim>:nth-child(2){animation-delay:.3s}.chk-anim>:nth-child(3){animation-delay:.6s}
+.chk-anim .chk-other{animation:chkin .4s cubic-bezier(.2,.7,.2,1) both}.chk-anim .chk-other:nth-of-type(1){animation-delay:.8s}.chk-anim .chk-other:nth-of-type(2){animation-delay:.95s}.chk-anim .chk-other:nth-of-type(3){animation-delay:1.1s}
+@keyframes chkin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.chk-anim>*,.chk-anim .chk-other{animation:none}.dt-bar i,.dtoast{transition:none}}
 @keyframes tks{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .tk-i{display:flex;align-items:center;gap:8px;padding:0 22px;white-space:nowrap;font:400 14px/1 var(--sans);color:var(--ink2);border-right:1px solid var(--rule)}
 .tk-i b{color:var(--ink);font-weight:700}
@@ -644,8 +664,9 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
       const pg = s.split.pro_government || 0, cr = s.split.critical || 0, o = s.sources - pg - cr;
       const seg = (n, c, t) => n ? `<i style="width:${100 * n / s.sources}%;background:${c}" title="${t}: ${n}"></i>` : "";
       return `<div class="bar" style="height:${h}px">${seg(pg, VAR.pro_government, LAB.pro_government)}${seg(o, "var(--mix)", "Ostali")}${seg(cr, VAR.critical, LAB.critical)}</div>`; }
-    return `<div class="bar" style="height:${h}px">${ORDER.filter(k => s.split[k]).map(k =>
-      `<i style="width:${100 * s.split[k] / s.sources}%;background:${VAR[k]}" title="${LAB[k]}: ${s.split[k]}"></i>`).join("")}</div>`; };
+    return `<div class="bar${h >= 8 ? " bar-x" : ""}" style="height:${h}px"${h >= 8 ? ` data-id="${s.id}"` : ""}>${ORDER.filter(k => s.split[k]).map(k =>
+      h >= 8 ? `<i data-k="${k}" tabindex="0" role="button" aria-label="${LAB[k]}: ${s.split[k]} ${form(s.split[k], "medij")}. Prikaži medije." style="width:${100 * s.split[k] / s.sources}%;background:${VAR[k]}"></i>`
+        : `<i style="width:${100 * s.split[k] / s.sources}%;background:${VAR[k]}" title="${LAB[k]}: ${s.split[k]}"></i>`).join("")}</div>`; };
   const cov = s => `<div class="cov"><span class="pg"><b>${pct(s, "pro_government")}%</b> režimski</span><span>${s.sources} medija</span><span class="cr"><b>${pct(s, "critical")}%</b> kritički</span></div>`;
   const dot = k => `<i class="dot" style="background:${VAR[k]}"></i>`;
   const kick = (t, cls = "") => `<div class="kicker ${cls}">${t}</div>`;
@@ -690,8 +711,53 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
   document.addEventListener("click", e => {
     const a = e.target.closest && e.target.closest("a[data-s]");
     if (!a) return;
-    const d = diet(); d.reads.push({s: a.dataset.s, c: camp(a.dataset.s), t: Date.now()}); saveDiet(d);
+    const d = diet(), before = dietShare(d.reads); d.reads.push({s: a.dataset.s, c: camp(a.dataset.s), t: Date.now()}); saveDiet(d);
+    dietToast(before, dietShare(d.reads));
   });
+  // ---- coverage-bar popover: which outlets make up this part of the bar
+  const pop = document.createElement("div"); pop.className = "barpop"; pop.hidden = true; pop.setAttribute("role", "dialog"); document.body.appendChild(pop);
+  let popFor = null, popT = 0;
+  const popHide = () => { pop.hidden = true; if (popFor) popFor.classList.remove("on"); popFor = null; };
+  const popShow = seg => {
+    clearTimeout(popT); if (popFor === seg && !pop.hidden) return;
+    const b = seg.closest(".bar-x"), st = D.stories.find(x => x.id === b.dataset.id), k = seg.dataset.k; if (!st) return;
+    const seen = new Set(), arts = st.items.filter(i => camp(i.source) === k && !seen.has(i.source) && seen.add(i.source));
+    pop.innerHTML = `<div class="bp-h" style="color:${VAR[k]}">${LAB[k]} · ${arts.length} ${form(arts.length, "medij")}</div>
+      ${arts.map(i => `<a class="bp-i" ${out(i.url, i.source)}>${logo(i.source, 18)}<span><b>${esc(src(i.source).name)}</b><span class="bp-t">${esc(i.title)}</span></span></a>`).join("")}`;
+    if (popFor) popFor.classList.remove("on"); popFor = seg; seg.classList.add("on");
+    pop.hidden = false;
+    const r = seg.getBoundingClientRect(), w = Math.min(340, innerWidth - 24);
+    pop.style.width = w + "px";
+    pop.style.left = Math.max(12, Math.min(innerWidth - w - 12, r.left + r.width / 2 - w / 2)) + scrollX + "px";
+    pop.style.top = r.bottom + scrollY + 10 + "px";
+  };
+  const popLater = () => { clearTimeout(popT); popT = setTimeout(popHide, 220); };
+  document.addEventListener("pointerover", e => { const seg = e.target.closest && e.target.closest(".bar-x i"); if (seg && e.pointerType === "mouse") popShow(seg); else if (e.target.closest && e.target.closest(".barpop")) clearTimeout(popT); });
+  document.addEventListener("pointerout", e => { if (e.pointerType === "mouse" && e.target.closest && (e.target.closest(".bar-x i") || e.target.closest(".barpop"))) popLater(); });
+  document.addEventListener("click", e => { const seg = e.target.closest && e.target.closest(".bar-x i");
+    if (seg) { e.preventDefault(); popFor === seg && !pop.hidden ? popHide() : popShow(seg); } else if (!(e.target.closest && e.target.closest(".barpop"))) popHide(); });
+  document.addEventListener("focusin", e => { const seg = e.target.closest && e.target.closest(".bar-x i"); if (seg) popShow(seg); else if (!(e.target.closest && e.target.closest(".barpop"))) popHide(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !pop.hidden) { const f = popFor; popHide(); f && f.focus(); }
+    else if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".bar-x i")) { e.preventDefault(); const a = pop.querySelector("a"); a && a.focus(); } });
+  addEventListener("hashchange", popHide);
+
+  // ---- 8. reading an article nudges "Moja medijska ishrana": a small bar shows the new balance
+  const dietShare = reads => { const n = reads.length || 1, c = k => reads.filter(r => r.c === k).length;
+    return {pg: c("pro_government") / n * 100, cr: c("critical") / n * 100, n: reads.length}; };
+  let toastT = 0;
+  function dietToast(before, after) {
+    let t = document.querySelector(".dtoast");
+    if (!t) { t = document.createElement("div"); t.className = "dtoast"; t.setAttribute("role", "status"); document.body.appendChild(t);
+      t.addEventListener("mouseenter", () => clearTimeout(toastT)); t.addEventListener("mouseleave", () => { toastT = setTimeout(() => t.classList.remove("in"), 2500); }); }
+    const seg = (x, c) => `<i style="width:${x}%;background:${c}"></i>`;
+    const mid = x => Math.max(0, 100 - x.pg - x.cr);
+    t.innerHTML = `<div class="dt-h">Vaša medijska ishrana <a href="#/moja-ishrana">Pogledaj</a></div>
+      <div class="dt-bar">${seg(before.pg, "var(--pg)")}${seg(mid(before), "var(--mix)")}${seg(before.cr, "var(--cr)")}</div>
+      <div class="dt-n"><span style="color:var(--pg)"><b>${Math.round(after.pg)}%</b> režimski</span><span>${after.n} ${after.n === 1 ? "članak" : after.n % 10 >= 2 && after.n % 10 <= 4 && (after.n % 100 < 12 || after.n % 100 > 14) ? "članka" : "članaka"}</span><span style="color:var(--cr)"><b>${Math.round(after.cr)}%</b> kritički</span></div>`;
+    t.classList.add("in");
+    requestAnimationFrame(() => requestAnimationFrame(() => { const is = t.querySelectorAll(".dt-bar i"); [after.pg, mid(after), after.cr].forEach((x, i) => is[i].style.width = x + "%"); }));
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("in"), 6000);
+  }
   const balanceObj = () => { const sh = (D.balance && D.balance.shown) || {}; return {split: sh, sources: Object.values(sh).reduce((a, b) => a + b, 0)}; };
 
   function header(active) {
@@ -716,13 +782,17 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
     </div>
     ${ticker()}`;
   }
+  const tkPaused = () => { try { return localStorage.getItem("os_tk_paused") === "1"; } catch (_) { return false; } };
+  document.addEventListener("click", e => { const b = e.target.closest && e.target.closest(".tk-pause"); if (!b) return;
+    const on = !tkPaused(); try { localStorage.setItem("os_tk_paused", on ? "1" : "0"); } catch (_) {}
+    document.querySelectorAll(".tk").forEach(t => t.classList.toggle("paused", on)); b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "Pokreni traku sa vestima" : "Zaustavi traku sa vestima"); });
   function ticker() {
     const latest = D.stories.filter(st => st.sources >= 3).map(st => { const it = st.items.slice().sort((a, b) => b.published.localeCompare(a.published))[0]; return {st, it}; })
       .sort((a, b) => b.it.published.localeCompare(a.it.published)).slice(0, 28);
     if (latest.length < 4) return "";
     const ago = t => { const m = Math.max(1, Math.round((Date.now() - new Date(t)) / 6e4)); return m < 60 ? `${m} min` : `${Math.round(m / 60)} h`; };
     const items = latest.map(({st, it}) => `<a class="tk-i" href="${link(st)}"><span class="tk-dot" style="background:${VAR[camp(it.source)] || "var(--mix)"}"></span>${st.section ? `<b>${esc(st.section)}</b>` : ""}<span>${esc(lat(it.title))}</span><time>${esc(src(it.source).name)} · ${ago(it.published)}</time></a>`).join("");
-    return `<div class="tk" aria-label="Najnovije vesti"><div class="wrap tk-in"><span class="tk-lab"><span class="tk-live" aria-hidden="true"></span>Najnovije</span>
+    return `<div class="tk${tkPaused() ? " paused" : ""}" aria-label="Najnovije vesti"><div class="wrap tk-in"><span class="tk-lab"><span class="tk-live" aria-hidden="true"></span>Najnovije<button type="button" class="tk-pause" aria-pressed="${tkPaused()}" aria-label="Zaustavi traku sa vestima"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pa" d="M4 3h3v10H4zM9 3h3v10H9z"/><path class="i-pl" d="M5 3l8 5-8 5z"/></svg></button></span>
       <div class="tk-win"><div class="tk-track" style="animation-duration:${latest.length * 7}s">${items}<span aria-hidden="true" class="tk-dup">${items}</span></div></div></div></div>`;
   }
   function focusBar() {
@@ -1215,7 +1285,7 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
     } else {
       story = `<div class="chk-step"><h3>Priča</h3><p style="margin:0;color:var(--ink2)">Ovaj članak nije među vestima koje smo prikupili u poslednjih ${D.hours} sati, pa ne možemo da ga uporedimo sa drugom stranom. <a href="#/izvor/${encodeURIComponent(sid)}" style="text-decoration:underline">Najnovije vesti ovog medija</a></p></div>`;
     }
-    return head + `<div class="chk-res">${outlet}${story}</div>` + end;
+    return head + `<div class="chk-res${MOTION ? " chk-anim" : ""}">${outlet}${story}</div>` + end;
   }
 
   // ---- ton kroz vreme
@@ -1285,13 +1355,14 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
     const list = (rows, camp, other) => rows && rows.length ? rows.slice(0, 20).map(r => {
       const mine = camp === "pro_government" ? r.pg_per : r.cr_per, theirs = camp === "pro_government" ? r.cr_per : r.pg_per;
       const times = theirs ? (mine / theirs) : 0;
-      return `<details class="w-row"><summary><span class="w-word" style="color:${VAR[camp]}">${esc(r.w)}</span>
+      return `<details class="w-row" data-f="${mine}"><summary><span class="w-word" style="color:${VAR[camp]}">${esc(r.w)}</span>
         <span class="meta">${times >= 1.5 ? `${times >= 10 ? Math.round(times) : times.toFixed(1).replace(".", ",")}× češće` : ""}${!theirs ? "samo ova strana" : ""}</span></summary>
         <div class="w-ex"><div class="meta" style="margin-bottom:6px">${String(mine).replace(".", ",")} na 1.000 naslova ove strane · ${String(theirs).replace(".", ",")} kod druge</div>
         ${(r.ex[camp] || []).map(x => exq(x, camp)).join("")}${(r.ex[other] || []).slice(0, 1).map(x => exq(x, other)).join("")}</div></details>`; }).join("")
       : `<p class="meta">Za sada nema dovoljno naslova.</p>`;
     return `${compactHeader()}<main class="wrap reci"><h1 class="page-h">Reči koje biraju</h1>
       <p class="page-p">Reči koje se u naslovima jedne strane pojavljuju mnogo češće nego u naslovima druge, u svim vestima iz poslednjih 14 dana. Kliknite na reč da vidite primere naslova. Za reči jedne priče pogledajte okvir „Reči koje biraju“ na stranici te vesti.</p>
+      <div class="chips w-sort" role="group" aria-label="Redosled reči"><button type="button" class="chip on" data-sort="d" aria-pressed="true">Najveća razlika</button><button type="button" class="chip" data-sort="f" aria-pressed="false">Najčešće</button></div>
       <div class="w-cols"><section><h2 style="color:var(--pg)">Režimski pišu</h2>${list(W && W.pg, "pro_government", "critical")}</section>
       <section><h2 style="color:var(--cr)">Kritički pišu</h2>${list(W && W.cr, "critical", "pro_government")}</section></div>
       <p class="meta ton-note">Poredimo koliko često se svaka reč javlja u naslovima režimskih i kritičkih medija, uzimajući u obzir da režimskih naslova ima više. Prikazujemo samo reči sa jasnom razlikom (statistička mera „log-odds“). Različiti oblici iste reči se spajaju, ćirilica se prebacuje u latinicu. Za promene kroz vreme pogledajte <a href="#/ton" style="text-decoration:underline">Kako se menja ton</a>.</p></main>${footer()}`;
@@ -1620,6 +1691,21 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
     wireBand();
     wireSpread();
     wireWords();
+    wireSort();
+  }
+  function wireSort() {
+    const g = document.querySelector(".w-sort"); if (!g) return;
+    const lists = [...document.querySelectorAll(".w-cols section")].map(sec => { const rows = [...sec.querySelectorAll(".w-row")]; rows.forEach((r, i) => r.dataset.d = i); return {sec, rows}; });
+    g.addEventListener("click", e => { const b = e.target.closest("[data-sort]"); if (!b) return;
+      g.querySelectorAll("[data-sort]").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
+      const key = b.dataset.sort;
+      lists.forEach(({sec, rows}) => {
+        const first = new Map(rows.map(r => [r, r.getBoundingClientRect().top]));
+        rows.slice().sort((a, c) => key === "f" ? c.dataset.f - a.dataset.f : a.dataset.d - c.dataset.d).forEach(r => sec.appendChild(r));
+        if (!MOTION) return;
+        rows.forEach(r => { const dy = first.get(r) - r.getBoundingClientRect().top; if (!dy) return;
+          r.animate([{transform: `translateY(${dy}px)`}, {transform: "none"}], {duration: 420, easing: "cubic-bezier(.2,.7,.2,1)"}); });
+      }); });
   }
   // "Reči koje biraju" on a story: a word lights up in every headline that uses it; the rest fade
   function wireWords() {
