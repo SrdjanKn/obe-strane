@@ -12,6 +12,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read                 # to fetch the backup copy of the database from an earlier run
 
 concurrency:
   group: collect
@@ -36,11 +37,28 @@ jobs:
           key: newsdb-${{ github.run_id }}
           restore-keys: newsdb-
 
+      # If the cache was evicted, fall back to the newest backup uploaded by an earlier run (kept 7 days).
+      - name: Restore database from backup if the cache was empty
+        if: hashFiles('news.db') == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh run list -R "$GITHUB_REPOSITORY" -w "${{ github.workflow }}" -s success -L 30 --json databaseId -q '.[].databaseId' | while read r; do
+                 gh api "repos/$GITHUB_REPOSITORY/actions/runs/$r/artifacts" -q '.artifacts[] | select(.name=="newsdb-backup" and .expired==false) | .workflow_run.id' ; done | head -1)
+          if [ -n "$id" ]; then gh run download "$id" -R "$GITHUB_REPOSITORY" -n newsdb-backup -D . && ls -la news.db; else echo "no backup found, starting empty"; fi
+
+      - name: Restore embedding model
+        uses: actions/cache@v4
+        with:
+          path: .fastembed
+          key: fastembed-paraphrase-multilingual-MiniLM-L12-v2
+
       - name: Collect and build
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # optional: AI summaries are skipped without it
+          OBE_EMB: "0"          # meaning-based grouping: off until tuned with the 'Compare story grouping' workflow
         run: |
-          pip install --quiet pillow   # for the cover-photo quality check
+          pip install --quiet pillow fastembed   # pillow: cover-photo check; fastembed: meaning-based story grouping
           python3 collector.py run
 
       - name: Save article database
@@ -49,6 +67,21 @@ jobs:
         with:
           path: news.db
           key: newsdb-${{ github.run_id }}
+
+      # Backup copy outside the cache, four times a day (the cache can be evicted; this survives 7 days).
+      - name: Decide whether to back up
+        id: bk
+        run: |
+          h=$((10#$(date -u +%H))); m=$((10#$(date -u +%M)))
+          if [ "${{ github.event_name }}" != "schedule" ] || { [ $((h % 6)) -eq 0 ] && [ $m -lt 30 ]; }; then echo go=yes >> "$GITHUB_OUTPUT"; else echo go=no >> "$GITHUB_OUTPUT"; fi
+      - name: Back up article database
+        if: steps.bk.outputs.go == 'yes' && hashFiles('news.db') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsdb-backup
+          path: news.db
+          retention-days: 7
+          overwrite: true
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -517,35 +517,157 @@ def cosine(a, b):
     return sum(x * b.get(w, 0.0) for w, x in a.items())
 
 
-def cluster(articles, threshold=0.28, window_h=30):
-    """Single-pass centroid clustering in time order. Returns list of clusters (lists of article dicts)."""
+
+# ---------------------------------------------------------------- meaning-based similarity (embeddings)
+# A small multilingual model turns each headline into a vector, so "Vučić pomilovao..." and "Predsednik pomilovao
+# osuđenog..." land close together even with few shared words. Vectors are stored in the database, so each run
+# only embeds new articles. If the model isn't available, clustering falls back to word matching alone.
+
+EMB_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMB_W, EMB_LO = 0.55, 0.55     # weight of the meaning score; cosine below EMB_LO counts as no similarity
+_embedder = None
+
+
+def _get_embedder():
+    global _embedder
+    if _embedder is None:
+        try:
+            from fastembed import TextEmbedding
+            _embedder = TextEmbedding(EMB_MODEL, cache_dir=os.environ.get("OBE_EMB_CACHE", str(HERE / ".fastembed")))
+        except Exception as e:
+            print("  embeddings unavailable, word matching only:", e)
+            _embedder = False
+    return _embedder or None
+
+
+def embed_articles(con, arts):
+    """url -> unit vector (list of floats) for each article; None if embeddings are unavailable."""
+    import array
+    con.execute("CREATE TABLE IF NOT EXISTS emb(url TEXT PRIMARY KEY, vec BLOB)")
+    have = {}
+    urls = [a["url"] for a in arts]
+    for i in range(0, len(urls), 500):
+        chunk = urls[i:i + 500]
+        for u, b in con.execute(f"SELECT url, vec FROM emb WHERE url IN ({','.join('?' * len(chunk))})", chunk):
+            v = array.array("f"); v.frombytes(b); have[u] = list(v)
+    todo = [a for a in arts if a["url"] not in have]
+    if todo:
+        m = _get_embedder()
+        if not m:
+            return None
+        texts = [(a["title"] + ". " + (a["summary"] or "")[:200]).strip() for a in todo]
+        for a, v in zip(todo, m.embed(texts, batch_size=64)):
+            v = [float(x) for x in v]
+            n = math.sqrt(sum(x * x for x in v)) or 1.0
+            v = [x / n for x in v]
+            have[a["url"]] = v
+            con.execute("INSERT OR REPLACE INTO emb VALUES(?,?)", (a["url"], array.array("f", v).tobytes()))
+        con.commit()
+        print(f"  embedded {len(todo)} new articles")
+    con.execute("DELETE FROM emb WHERE url NOT IN (SELECT url FROM articles)")
+    return have
+
+
+def _dot(a, b):
+    return sum(x * y for x, y in zip(a, b))
+
+
+def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo=None, emb_threshold=0.36):
+    """Single-pass centroid clustering in time order. Returns list of clusters (lists of article dicts).
+    With embeddings, similarity = (1-w) * word cosine + w * meaning score, compared against emb_threshold."""
+    emb_w = EMB_W if emb_w is None else emb_w
+    emb_lo = EMB_LO if emb_lo is None else emb_lo
     docs = [tokens(a["title"]) * 3 + tokens(a["summary"]) for a in articles]
     vecs = vectorise(docs)
-    clusters = []  # each: {"items": [...], "centroid": {}, "last": datetime}
+    np = None
+    if embs:
+        try:
+            import numpy as np
+        except ImportError:
+            embs = None
+    use_emb = bool(embs)
+    if use_emb:
+        dim = len(next(iter(embs.values())))
+        E = np.zeros((len(articles) + 1, dim), dtype=np.float32)    # cluster meaning-centroids, one row per cluster
+        has_e = np.zeros(len(articles) + 1, dtype=bool)
+    clusters = []  # each: {"items": [...], "centroid": {}, "last": datetime, "k": row}
     order = sorted(range(len(articles)), key=lambda i: articles[i]["published"])
     for i in order:
         a, v = articles[i], vecs[i]
-        if not v:
+        e = embs.get(a["url"]) if use_emb else None
+        if not v and e is None:
             continue
+        live = [c for c in clusters if (a["published"] - c["last"]).total_seconds() <= window_h * 3600]
         best, best_sim = None, 0.0
-        for c in clusters:
-            if (a["published"] - c["last"]).total_seconds() > window_h * 3600:
-                continue
-            s = cosine(v, c["centroid"])
-            if s > best_sim:
-                best, best_sim = c, s
-        if best and best_sim >= threshold:
+        if live:
+            ws = [cosine(v, c["centroid"]) if v else 0.0 for c in live]
+            if e is not None:
+                rows = np.array([c["k"] for c in live])
+                ev = np.asarray(e, dtype=np.float32)
+                ms = np.clip((E[rows] @ ev - emb_lo) / (1 - emb_lo), 0, None) * has_e[rows]
+                ws = [(1 - emb_w) * w + emb_w * float(m) for w, m in zip(ws, ms)]
+            k = max(range(len(live)), key=lambda j: ws[j])
+            best, best_sim = live[k], ws[k]
+        if best and best_sim >= (emb_threshold if use_emb else threshold):
             best["items"].append(a)
-            k = len(best["items"])
-            cen = defaultdict(float, {w: x * (k - 1) / k for w, x in best["centroid"].items()})
+            n = len(best["items"])
+            cen = defaultdict(float, {w: x * (n - 1) / n for w, x in best["centroid"].items()})
             for w, x in v.items():
-                cen[w] += x / k
+                cen[w] += x / n
             norm = math.sqrt(sum(x * x for x in cen.values())) or 1.0
             best["centroid"] = {w: x / norm for w, x in cen.items()}
+            if e is not None:
+                r = best["k"]
+                ec = E[r] * (n - 1) / n + np.asarray(e, dtype=np.float32) / n if has_e[r] else np.asarray(e, dtype=np.float32)
+                E[r] = ec / (np.linalg.norm(ec) or 1.0); has_e[r] = True
             best["last"] = max(best["last"], a["published"])
         else:
-            clusters.append({"items": [a], "centroid": dict(v), "last": a["published"]})
+            r = len(clusters)
+            if use_emb and e is not None:
+                E[r] = np.asarray(e, dtype=np.float32); has_e[r] = True
+            clusters.append({"items": [a], "centroid": dict(v), "last": a["published"], "k": r})
     return [c["items"] for c in clusters]
+
+
+def eval_clusters(hours=36):
+    """Compare word-only clustering with the embedding mix on the real database (prints a report, changes nothing)."""
+    camps, sources = load_sources()
+    meta = {x["id"]: x for x in sources}
+    con = db()
+    since = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+    arts = [{"source": sid, "camp": meta[sid]["camp"], "title": t, "summary": sm or "", "url": u,
+             "published": datetime.fromisoformat(pub)}
+            for sid, t, sm, u, pub in con.execute("SELECT source_id, title, summary, url, published FROM articles WHERE published >= ?", (since,))
+            if sid in meta and not skip_url(u)]
+    t0 = time.time(); embs = embed_articles(con, arts); print(f"embedding: {time.time() - t0:.0f}s, {len(arts)} articles")
+    def stats(cl):
+        st = [c for c in cl if len({a['source'] for a in c}) >= 2]
+        both = [c for c in st if {a['camp'] for a in c} >= {"pro_government", "critical"}]
+        sizes = sorted((len({a['source'] for a in c}) for c in st), reverse=True)
+        return st, f"stories={len(st)} both_sides={len(both)} top_sizes={sizes[:12]} singles={sum(1 for c in cl if len(c) == 1)}"
+    base = cluster(arts)
+    bst, bs = stats(base); print("WORDS ONLY   ", bs)
+    key = lambda c: frozenset(a["url"] for a in c)
+    for w, lo, th in [(0.55, 0.55, 0.36), (0.55, 0.55, 0.42), (0.6, 0.5, 0.40), (0.5, 0.6, 0.34), (0.7, 0.5, 0.45)]:
+        cl = cluster(arts, embs=embs, emb_w=w, emb_lo=lo, emb_threshold=th)
+        st, ss = stats(cl); print(f"EMB w={w} lo={lo} th={th}", ss)
+    cl = cluster(arts, embs=embs)
+    st, _ = stats(cl)
+    # where the new clustering joins articles the old one kept apart (sample), and the reverse
+    old_of = {}
+    for i, c in enumerate(base):
+        for a in c:
+            old_of[a["url"]] = i
+    print("\n--- merged by meaning (new story contains articles from several old ones) ---")
+    shown = 0
+    for c in sorted(st, key=len, reverse=True):
+        olds = Counter(old_of[a["url"]] for a in c)
+        if len(olds) > 1 and shown < 15:
+            shown += 1
+            print(f"[{len(c)} art] " + " || ".join(sorted({a['title'][:70] for a in c})[:5]))
+    print("\n--- largest new stories ---")
+    for c in sorted(st, key=lambda c: -len({a['source'] for a in c}))[:12]:
+        print(f"[{len({a['source'] for a in c})} src] " + " || ".join(sorted({a['title'][:60] for a in c})[:4]))
 
 
 # ---------------------------------------------------------------- analysis + report
@@ -585,7 +707,7 @@ def build_stories(hours=36, min_sources=2):
         return total > 0 and seen / total >= min_share
 
     stories = []
-    for items in cluster(arts):
+    for items in cluster(arts, embs=embed_articles(con, arts) if os.environ.get("OBE_EMB", "1") == "1" else None):
         # one vote per outlet, so an outlet posting 5 versions doesn't dominate
         by_source = {}
         for a in sorted(items, key=lambda x: x["published"]):
@@ -1247,7 +1369,7 @@ def check():
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("cmd", choices=["collect", "report", "run", "watch", "check"])
+    p.add_argument("cmd", choices=["collect", "report", "run", "watch", "check", "evalclust"])
     p.add_argument("--hours", type=int, default=36, help="time window for the report")
     p.add_argument("--every", type=int, default=15, help="minutes between runs in watch mode")
     a = p.parse_args()
@@ -1259,6 +1381,8 @@ def main():
         collect(); write_report(a.hours)
     elif a.cmd == "check":
         check()
+    elif a.cmd == "evalclust":
+        eval_clusters(a.hours)
     elif a.cmd == "watch":
         while True:
             print(f"\n=== {datetime.now():%H:%M} ===")
