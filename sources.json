@@ -1,7 +1,7 @@
 {
   "_about": "Outlets tracked by Obe strane. 'camp' is the outlet's starting label, based on published media monitoring (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) and editorial review. It is a hypothesis to review, not a verdict. 'group' is only used to organise the Izvori page. 'feed' is optional: without it the collector finds the feed on the homepage, or reads headlines from the homepage itself. Only pro_government vs critical counts for blindspots; international outlets are shown but never count for either side. 'owner' is checked against the linked source (owner_src), last reviewed November 2026. 'paused' outlets are listed but not fetched.",
   "camps": {
-    "pro_government": {"label": "Provladini", "color": "#b4472f"},
+    "pro_government": {"label": "Režimski", "color": "#b4472f"},
     "public": {"label": "Javni servis", "color": "#7d6aa8"},
     "mixed": {"label": "Između kategorija", "color": "#aaa59d"},
     "critical": {"label": "Kritički / nezavisni", "color": "#24478f"},

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Obe strane — ista vest, dve strane</title>
-<meta name="description" content="Kako mediji u Srbiji izveštavaju o istim događajima: provladini i kritički naslovi, uporedo.">
+<meta name="description" content="Kako mediji u Srbiji izveštavaju o istim događajima: režimski i kritički naslovi, uporedo.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 29%22%3E%3Cpath d=%22M13.56 11.187C14.6147 12.543 15.142 14.0873 15.142 15.82C15.142 17.9293 14.3887 19.7373 12.882 21.244C11.4507 22.7507 9.68033 23.504 7.571 23.504C5.46167 23.504 3.65367 22.7507 2.147 21.244C.715667 19.7373 0 17.9293 0 15.82 0 12.656.979333 9.75566 2.938 7.119 4.89667 4.407 7.458 2.034 10.622 0L13.108 2.147C12.204 2.97566 11.3753 3.99266 10.622 5.198 9.944 6.328 9.52967 7.42033 9.379 8.475 11.1117 8.927 12.5053 9.831 13.56 11.187Z%22 fill=%22%23D3001A%22/%3E%3Cpath d=%22M21.56 16.187C22.6147 17.543 23.142 19.0873 23.142 20.82 23.142 22.9293 22.3887 24.7373 20.882 26.244 19.4507 27.7507 17.6803 28.504 15.571 28.504 13.4617 28.504 11.6537 27.7507 10.147 26.244 8.71567 24.7373 8 22.9293 8 20.82 8 17.656 8.97933 14.7557 10.938 12.119 12.8967 9.407 15.458 7.034 18.622 5L21.108 7.147C20.204 7.97566 19.3753 8.99266 18.622 10.198 17.944 11.328 17.5297 12.4203 17.379 13.475 19.1117 13.927 20.5053 14.831 21.56 16.187Z%22 fill=%22%230057B7%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -412,11 +412,14 @@ footer .brand-logo{color:#fff}
 <script>
 (() => {
   "use strict";
-  let D = window.NEWS_DATA;
+  const RELAB = {"":"režimski",i:"režimski",ih:"režimskih",a:"režimska",e:"režimske",im:"režimskim",og:"režimskog",om:"režimskom",u:"režimsku"};
+  const relabel = t => typeof t === "string" ? t.replace(/\b([Pp])rovladin(i|ih|a|e|im|og|om|u)?\b/g, (w, P, suf = "") => (P === "P" ? "R" : "r") + RELAB[suf].slice(1)) : t;
+  const fixAI = d => { (d.stories || []).forEach(x => { if (x.ai) for (const k in x.ai) x.ai[k] = relabel(x.ai[k]); }); ((d.briefing || {}).stories || []).forEach(x => { if (x.ai) for (const k in x.ai) x.ai[k] = relabel(x.ai[k]); }); return d; };
+  let D = fixAI(window.NEWS_DATA);
   const app = document.getElementById("app");
   const ORDER = ["pro_government", "public", "mixed", "international", "critical"];
   const VAR = {pro_government: "var(--pg)", critical: "var(--cr)", public: "var(--pub)", mixed: "var(--mix)", international: "var(--intl)"};
-  const LAB = {pro_government: "Provladini", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
+  const LAB = {pro_government: "Režimski", critical: "Kritički", public: "Javni servis", mixed: "Između kategorija", international: "Međunarodni"};
   const SECTION_ORDER = ["Politika", "Društvo", "Hronika", "Ekonomija", "Svet", "Region", "Kultura"];
   const TONES = {Politika: "#7d8a96", Društvo: "#6e7684", Hronika: "#2f3846", Ekonomija: "#5a6977", Svet: "#5d7894", Region: "#6c6a86", Kultura: "#7b8594", Vesti: "#80858c"};
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
@@ -433,7 +436,7 @@ footer .brand-logo{color:#fff}
   const mark = (n, gap = 3) => `<span class="mark" aria-hidden="true" style="width:${n}px;height:${n}px"><i></i><b style="width:${gap}px"></b><i></i></span>`;
   const bar = (s, h = 6) => `<div class="bar" style="height:${h}px">${ORDER.filter(k => s.split[k]).map(k =>
       `<i style="width:${100 * s.split[k] / s.sources}%;background:${VAR[k]}" title="${LAB[k]}: ${s.split[k]}"></i>`).join("")}</div>`;
-  const cov = s => `<div class="cov"><span class="pg"><b>${pct(s, "pro_government")}%</b> provladini</span><span>${s.sources} medija</span><span class="cr"><b>${pct(s, "critical")}%</b> kritički</span></div>`;
+  const cov = s => `<div class="cov"><span class="pg"><b>${pct(s, "pro_government")}%</b> režimski</span><span>${s.sources} medija</span><span class="cr"><b>${pct(s, "critical")}%</b> kritički</span></div>`;
   const dot = k => `<i class="dot" style="background:${VAR[k]}"></i>`;
   const kick = (t, cls = "") => `<div class="kicker ${cls}">${t}</div>`;
   const link = s => `#/vest/${s.id}`;
@@ -443,8 +446,8 @@ footer .brand-logo{color:#fff}
     const img = s.image ? `<img src="${esc(safe(s.image))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : "";
     return `<div class="ph${s.image ? " has-img" : ""}" style="aspect-ratio:${ratio};background:${tone}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
   }
-  // Serbian number agreement: 1 provladin, 2-4 provladina, 5+ provladinih (11-14 -> many)
-  const FORMS = {pro_government: ["provladin", "provladina", "provladinih"], critical: ["kritički", "kritička", "kritičkih"],
+  // Serbian number agreement: 1 režimski, 2-4 režimska, 5+ režimskih (11-14 -> many)
+  const FORMS = {pro_government: ["režimski", "režimska", "režimskih"], critical: ["kritički", "kritička", "kritičkih"],
                  public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], international: ["međunarodni", "međunarodna", "međunarodnih"], medij: ["medij", "medija", "medija"], prica: ["priča", "priče", "priča"]};
   const form = (n, k) => { const f = FORMS[k], d = n % 10, h = n % 100; return n === 1 || (d === 1 && h !== 11) ? f[0] : (d >= 2 && d <= 4 && (h < 12 || h > 14)) ? f[1] : f[2]; };
   const tidy = (t, max) => {   // calm a SHOUTED first word, optionally shorten
@@ -452,7 +455,7 @@ footer .brand-logo{color:#fff}
     return max && t.length > max ? t.slice(0, t.lastIndexOf(" ", max)) + "…" : t;
   };
   const firstOf = (s, k) => s.items.find(i => camp(i.source) === k);
-  const bsLabel = k => k === "pro_government" ? "Prećutali provladini" : "Prećutali kritički";
+  const bsLabel = k => k === "pro_government" ? "Prećutali režimski" : "Prećutali kritički";
   const secsWithNews = () => SECTION_ORDER.filter(n => D.stories.some(s => s.section === n));
   const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (_) { return ""; } };
   const initials = n => String(n).replace(/[^\p{L}\p{N} ]/gu, "").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
@@ -524,7 +527,7 @@ footer .brand-logo{color:#fff}
     const b = balanceObj();
     if (!b.sources) return "Prototip";
     const o = 100 - share(b, "pro_government") - share(b, "critical");
-    return `<a href="#/o-nama/balans">Naš balans</a>: prikazali smo ${share(b, "pro_government")}% provladinih, ${share(b, "critical")}% kritičkih i ${o}% ostalih objava`;
+    return `<a href="#/o-nama/balans">Naš balans</a>: prikazali smo ${share(b, "pro_government")}% režimskih, ${share(b, "critical")}% kritičkih i ${o}% ostalih objava`;
   }
   const newsletter = () => `<section class="news" aria-label="Bilten">
       <div style="flex:1 1 360px;min-width:0">${kick(EYE + "Jutarnji brifing · e-poštom uskoro", "amber")}
@@ -537,7 +540,7 @@ footer .brand-logo{color:#fff}
   const silence = s => {
     const quiet = s.blindspot, loud = quiet === "pro_government" ? "critical" : "pro_government", n = s.split[loud] || 0;
     const half = k => k === quiet ? `<span class="gone" style="border-color:${VAR[k]}"></span>` : `<span style="background:${VAR[k]}"></span>`;
-    const lab = k => k === quiet ? `<span style="color:${VAR[k]}">0 ${k === "pro_government" ? "provladinih" : "kritičkih"}</span>` : `<span style="color:${VAR[k]}">${n} ${form(n, k)}</span>`;
+    const lab = k => k === quiet ? `<span style="color:${VAR[k]}">0 ${k === "pro_government" ? "režimskih" : "kritičkih"}</span>` : `<span style="color:${VAR[k]}">${n} ${form(n, k)}</span>`;
     return `<div class="sil">${half("pro_government")}${half("critical")}</div><div class="sil-lab">${lab("pro_government")}${lab("critical")}</div>`;
   };
   const railItem = s => `<a class="rail-item" href="${link(s)}"><div class="hl">${esc(s.headline)}</div>${silence(s)}</a>`;
@@ -612,7 +615,7 @@ footer .brand-logo{color:#fff}
           <div class="bs-panel">
             <a href="#/slepe-tacke" class="bs-panel-head">${EYE}Slepe tačke</a>
             <p class="bs-panel-dek">Vesti koje je objavila samo jedna strana. Druga strana ih je prećutala.</p>
-            ${group(quietPg, nPg, "pro_government", "Provladini nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
+            ${group(quietPg, nPg, "pro_government", "Režimski nisu objavili")}${group(quietCr, nCr, "critical", "Kritički nisu objavili")}
             ${bs.length ? `<a class="all" href="#/slepe-tacke">Sve slepe tačke (${bs.length}) →</a>` : `<p class="meta" style="margin-top:12px">Trenutno nema slepih tačaka.</p>`}
           </div>
           <div class="chk"><h3>Proveri link</h3><p>Nalepite link članka i vidite čiji je medij i kako je istu vest prenela druga strana.</p>${chkForm()}</div>
@@ -635,7 +638,7 @@ footer .brand-logo{color:#fff}
     const silent = s.blindspot, loud = silent === "pro_government" ? "critical" : "pro_government";
     const n = s.split[loud] || 0, others = s.sources - n;
     const items = s.items.filter(i => camp(i.source) === loud).slice(0, 4);
-    const sideWord = k => k === "pro_government" ? "provladin" : "kritički";
+    const sideWord = k => k === "pro_government" ? "režimski" : "kritički";
     const ai = s.ai && s.ai.ukratko ? s.ai : null;
     const loudFrame = ai && (loud === "pro_government" ? ai.provladini : ai.kriticki);
     const big = k => k === silent
@@ -647,7 +650,7 @@ footer .brand-logo{color:#fff}
         <a href="${link(s)}"><h2 class="bd-h">${esc(s.headline)}</h2></a>
         <p class="bd-dek">Ovu vest ${n === 1 ? "objavio je" : "objavilo je"} ${n} ${form(n, loud)} ${form(n, "medij")}${others ? ` (i još ${others} ${others === 1 ? "drugi" : "drugih"})` : ""}. <b>Nijedan ${sideWord(silent)} medij je nije preneo.</b></p>
         <div class="bd-meter">${big("pro_government")}${big("critical")}</div>
-        ${ai ? `<div class="bd-ai"><div class="bd-sub">Ukratko</div><p>${esc(ai.ukratko)}</p>${loudFrame ? `<p class="bd-frame" style="border-left-color:${VAR[loud]}"><b style="color:${VAR[loud]}">Kako su je preneli ${loud === "pro_government" ? "provladini" : "kritički"}:</b> ${esc(loudFrame)}</p>` : ""}<p class="bd-note">Sažetak je napisao AI model na osnovu naslova i uvoda.</p></div>` : ""}
+        ${ai ? `<div class="bd-ai"><div class="bd-sub">Ukratko</div><p>${esc(ai.ukratko)}</p>${loudFrame ? `<p class="bd-frame" style="border-left-color:${VAR[loud]}"><b style="color:${VAR[loud]}">Kako su je preneli ${loud === "pro_government" ? "režimski" : "kritički"}:</b> ${esc(loudFrame)}</p>` : ""}<p class="bd-note">Sažetak je napisao AI model na osnovu naslova i uvoda.</p></div>` : ""}
         <a class="btn dark" href="${link(s)}" style="margin-top:22px">Cela priča</a>
       </div>
       <div class="bd-side-col">
@@ -660,7 +663,7 @@ footer .brand-logo{color:#fff}
   function aiBox(s) {
     const a = s.ai;
     if (!a || !a.ukratko) return "";
-    const side = (k, text) => text && s.split[k] ? `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">Kako su uokvirili ${k === "pro_government" ? "provladini" : "kritički"}</h3><p>${esc(text)}</p></div>` : "";
+    const side = (k, text) => text && s.split[k] ? `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">Kako su uokvirili ${k === "pro_government" ? "režimski" : "kritički"}</h3><p>${esc(text)}</p></div>` : "";
     return `<section id="ukratko" class="col" style="margin-top:36px" aria-label="Ukratko"><div class="ai">
       <div class="kicker" style="color:var(--ink2)">Ukratko</div><p class="ai-sum">${esc(a.ukratko)}</p>
       ${a.provladini || a.kriticki ? `<div class="ai-two">${side("pro_government", a.provladini)}${side("critical", a.kriticki)}</div>` : ""}
@@ -675,10 +678,10 @@ footer .brand-logo{color:#fff}
     const pg = its.filter(i => i.camp === "pro_government"), cr = its.filter(i => i.camp === "critical");
     const side = (list, k, title) => `<div class="side" style="border-top-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${title} · ${list.length}</h3>
       ${list.length ? list.map(i => `<a href="${esc(safe(i.url))}" target="_blank" rel="noopener" data-s="${esc(i.source)}"><div class="t">${esc(i.title)}</div><div class="meta" style="margin-top:4px">${logo(i.source, 16)}${esc(src(i.source).name)} · ${clock(i.published)}</div></a>`).join("")
-        : `<div class="none">Nijedan ${k === "critical" ? "kritički" : "provladin"} medij nije objavio ovu vest.</div>`}</div>`;
+        : `<div class="none">Nijedan ${k === "critical" ? "kritički" : "režimski"} medij nije objavio ovu vest.</div>`}</div>`;
     const p = s.split.pro_government || 0, c = s.split.critical || 0;
     const rest = ["public", "mixed", "international"].filter(k => s.split[k]).map(k => `${s.split[k]} ${form(s.split[k], k)}`).join(" i ");
-    const lead = p && c ? (Math.abs(p - c) <= 1 ? "Vest je ravnomerno pokrivena" : p > c ? "Vest više prate provladini mediji" : "Vest više prate kritički mediji") : "Vest prati samo jedna strana";
+    const lead = p && c ? (Math.abs(p - c) <= 1 ? "Vest je ravnomerno pokrivena" : p > c ? "Vest više prate režimski mediji" : "Vest više prate kritički mediji") : "Vest prati samo jedna strana";
     const sentence = `${lead}: <b>${p}</b> ${form(p, "pro_government")} i <b>${c}</b> ${form(c, "critical")} ${form(c || p, "medij")}${rest ? `, uz ${rest}` : ""}.`;
     const more = D.stories.filter(x => x.section === s.section && x.id !== s.id).slice(0, 3);
     return `${compactHeader(s.section)}
@@ -703,7 +706,7 @@ footer .brand-logo{color:#fff}
       <section id="poredjenje" class="wide" style="margin-top:44px" aria-label="Kako su naslovili">
         <h2 class="h2">Kako su naslovili</h2>
         <p style="margin:0 0 20px;color:var(--ink2)">Isti događaj, naslovi iz dva tabora, po vremenu objave. Naslovi vode na izvorni članak.</p>
-        <div class="sides">${side(pg, "pro_government", "Provladini mediji")}${side(cr, "critical", "Kritički mediji")}</div>
+        <div class="sides">${side(pg, "pro_government", "Režimski mediji")}${side(cr, "critical", "Kritički mediji")}</div>
       </section>
       <section id="hronologija" class="col" style="margin-top:48px" aria-label="Hronologija">
         <h2 class="h2">Hronologija</h2>
@@ -729,18 +732,18 @@ footer .brand-logo{color:#fff}
       <div class="grid3">${list.map(s => listItem(s, true)).join("")}</div></main>${footer()}`;
   }
   function blindspots(filter) {
-    const want = filter === "provladini" ? "pro_government" : filter === "kriticki" ? "critical" : "";
+    const want = (filter === "rezimski" || filter === "provladini") ? "pro_government" : filter === "kriticki" ? "critical" : "";
     const sec = decodeURIComponent((location.hash.split("?r=")[1] || ""));
     const all = D.stories.filter(s => s.blindspot);
     const bySide = all.filter(s => !want || s.blindspot === want);
     const list = bySide.filter(s => !sec || s.section === sec).slice().sort((a, b) => b.sources - a.sources || (b.score || 0) - (a.score || 0));
     const loudOf = s => s.blindspot === "pro_government" ? "critical" : "pro_government";
-    const label = s => `<span class="bs-label">${EYE}Slepa tačka · <span class="bs-side" style="color:${VAR[s.blindspot]}">0% ${s.blindspot === "pro_government" ? "provladinih" : "kritičkih"}</span> · ${s.sources} ${form(s.sources, "medij")}</span>`;
+    const label = s => `<span class="bs-label">${EYE}Slepa tačka · <span class="bs-side" style="color:${VAR[s.blindspot]}">0% ${s.blindspot === "pro_government" ? "režimskih" : "kritičkih"}</span> · ${s.sources} ${form(s.sources, "medij")}</span>`;
     const who = s => {
       const names = [...new Set(s.items.filter(i => camp(i.source) === loudOf(s)).map(i => src(i.source).name))];
       return `<div class="who">Objavili: <b>${esc(names.slice(0, 3).join(", "))}</b>${names.length > 3 ? ` i još ${names.length - 3}` : ""}</div>`;
     };
-    const covPct = s => `<div class="cov"><span class="pg"><b>${pct(s, "pro_government")}%</b> provladini</span><span class="cr"><b>${pct(s, "critical")}%</b> kritički</span></div>`;
+    const covPct = s => `<div class="cov"><span class="pg"><b>${pct(s, "pro_government")}%</b> režimski</span><span class="cr"><b>${pct(s, "critical")}%</b> kritički</span></div>`;
     const card = s => `<a class="bs-card" href="${link(s)}">${photo(s)}<div style="margin-top:12px">${label(s)}</div><div class="hl">${esc(s.headline)}</div>${bar(s)}${covPct(s)}${who(s)}</a>`;
     const tab = (key, text, n) => `<a href="#/slepe-tacke${key ? "/" + key : ""}" class="${(filter || "") === key ? "on" : ""}">${text} <b>${n}</b></a>`;
     const secs = SECTION_ORDER.filter(n => bySide.some(s => s.section === n));
@@ -762,14 +765,14 @@ footer .brand-logo{color:#fff}
       return {s, quiet, q, share: q / s.sources};
     }).filter(x => x.q > 0 && x.share <= 0.15 && (!want || x.quiet === want) && (!sec || x.s.section === sec))
       .sort((a, b) => a.share - b.share || b.s.sources - a.s.sources).slice(0, 6);
-    const nearCard = x => `<a class="bs-card" href="${link(x.s)}">${photo(x.s)}<div style="margin-top:12px"><span class="bs-label" style="background:#eef1f5;color:var(--ink2)">Skoro slepa tačka · <span class="bs-side" style="color:${VAR[x.quiet]}">samo ${Math.round(100 * x.share)}% ${x.quiet === "pro_government" ? "provladinih" : "kritičkih"}</span></span></div><div class="hl">${esc(x.s.headline)}</div>${bar(x.s)}${covPct(x.s)}</a>`;
+    const nearCard = x => `<a class="bs-card" href="${link(x.s)}">${photo(x.s)}<div style="margin-top:12px"><span class="bs-label" style="background:#eef1f5;color:var(--ink2)">Skoro slepa tačka · <span class="bs-side" style="color:${VAR[x.quiet]}">samo ${Math.round(100 * x.share)}% ${x.quiet === "pro_government" ? "režimskih" : "kritičkih"}</span></span></div><div class="hl">${esc(x.s.headline)}</div>${bar(x.s)}${covPct(x.s)}</a>`;
     return `${header("bs")}<main class="wrap">
       <h1 class="page-h" style="display:flex;align-items:center;gap:12px"><span style="color:var(--amber);display:inline-flex">${EYE.replace('class="eye"', 'style="width:36px;height:36px"')}</span>Slepe tačke</h1>
       <p class="page-p">Vesti koje je objavilo više medija jedne strane, a nijedan medij druge. Računa se samo kada su mediji te strane u to vreme bili praćeni i objavljivali druge vesti.</p>
-      <nav class="bs-tabs" aria-label="Filter">${tab("", "Sve", all.length)}${tab("provladini", "Prećutali provladini", all.filter(s => s.blindspot === "pro_government").length)}${tab("kriticki", "Prećutali kritički", all.filter(s => s.blindspot === "critical").length)}</nav>
+      <nav class="bs-tabs" aria-label="Filter">${tab("", "Sve", all.length)}${tab("rezimski", "Prećutali režimski", all.filter(s => s.blindspot === "pro_government").length)}${tab("kriticki", "Prećutali kritički", all.filter(s => s.blindspot === "critical").length)}</nav>
       ${chips}
       ${heroHtml}
-      ${rest.length ? `<div class="sec-head"><h2>${want ? (want === "pro_government" ? "Prećutali provladini mediji" : "Prećutali kritički mediji") : "Sve slepe tačke"}</h2><span class="meta">${list.length}</span></div><div class="bs-grid">${rest.map(card).join("")}</div>` : ""}
+      ${rest.length ? `<div class="sec-head"><h2>${want ? (want === "pro_government" ? "Prećutali režimski mediji" : "Prećutali kritički mediji") : "Sve slepe tačke"}</h2><span class="meta">${list.length}</span></div><div class="bs-grid">${rest.map(card).join("")}</div>` : ""}
       ${near.length ? `<div class="sec-head"><h2>Skoro slepe tačke</h2><span class="meta">jedna strana je jedva prisutna</span></div><div class="bs-grid">${near.map(nearCard).join("")}</div>` : ""}
       ${newsletter()}
     </main>${footer()}`;
@@ -794,7 +797,7 @@ footer .brand-logo{color:#fff}
   function about() {
     const b = D.balance || {};
     const mk = o => ({split: o || {}, sources: Object.values(o || {}).reduce((a, x) => a + x, 0)});
-    const row = (label, o) => `<div class="bal-row"><span>${label}</span><div>${bar(o, 12)}</div><span class="pp"><span class="c-pg">${share(o, "pro_government")}% provladini</span> · <span class="c-cr">${share(o, "critical")}% kritički</span></span></div>`;
+    const row = (label, o) => `<div class="bal-row"><span>${label}</span><div>${bar(o, 12)}</div><span class="pp"><span class="c-pg">${share(o, "pro_government")}% režimski</span> · <span class="c-cr">${share(o, "critical")}% kritički</span></span></div>`;
     const shown = mk(b.shown), coll = mk(b.collected), outl = mk(b.outlets);
     const op = outl.split.pro_government || 0, oc = outl.split.critical || 0;
     const live = D.sources.filter(s => !s.paused).length;
@@ -802,13 +805,13 @@ footer .brand-logo{color:#fff}
     return `${header("about")}<main class="wrap"><div class="prose">
       <h1 class="page-h">O nama</h1>
       <p class="dek" style="font-size:21px">Obe strane pokazuje kako mediji u Srbiji izveštavaju o istim događajima. Na jednom mestu vidite ko je vest objavio, kako ju je naslovio i šta je ko prećutao.</p>
-      <p>U Srbiji ista vest često izgleda potpuno drugačije, u zavisnosti od toga koji medij čitate. Provladini i kritički mediji biraju različite teme, reči i sagovornike, a neke događaje jedna strana uopšte ne objavi. Mi ne pišemo vesti i ne govorimo vam šta da mislite. Povezujemo članke o istom događaju, pokazujemo ih uporedo i uz svaki dajemo link na izvorni tekst.</p>
+      <p>U Srbiji ista vest često izgleda potpuno drugačije, u zavisnosti od toga koji medij čitate. Režimski i kritički mediji biraju različite teme, reči i sagovornike, a neke događaje jedna strana uopšte ne objavi. Mi ne pišemo vesti i ne govorimo vam šta da mislite. Povezujemo članke o istom događaju, pokazujemo ih uporedo i uz svaki dajemo link na izvorni tekst.</p>
       <p>Projekat je nezavisan, neprofitan i u fazi prototipa. Kod je javan na ${u("https://github.com/SrdjanKn/obe-strane\" target=\"_blank\" rel=\"noopener", "GitHubu")}, pa svako može da proveri kako radi.</p>
       <h2 id="metodologija">Kako radimo</h2>
       <ol>
         <li><b>Prikupljanje.</b> Više puta dnevno čitamo RSS izvore i naslovne strane ${live} medija i čuvamo naslov, uvod, vreme objave i link. Sport, zabavu i lifestyle preskačemo.</li>
         <li><b>Grupisanje u priče.</b> Program poredi reči u naslovima i uvodima, na ćirilici i latinici, i spaja članke o istom događaju objavljene u razmaku do 30 sati. Prikazujemo samo priče koje je objavilo najmanje dva medija. Naslov priče je onaj koji je najsličniji svim ostalima, bez obzira iz kog je tabora.</li>
-        <li><b>Oznake medija.</b> Svaki medij ima početnu oznaku: provladin, kritički, javni servis, između kategorija ili međunarodni. Oznake se zasnivaju na javnim analizama (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i na podacima o vlasništvu. To su pretpostavke koje proveravamo, a ne presude. Ceo spisak je na stranici ${u("#/izvori", "Izvori")}.</li>
+        <li><b>Oznake medija.</b> Svaki medij ima početnu oznaku: režimski, kritički, javni servis, između kategorija ili međunarodni. Oznake se zasnivaju na javnim analizama (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i na podacima o vlasništvu. To su pretpostavke koje proveravamo, a ne presude. Do izbora 25. oktobra 2026. prvu grupu smo zvali „provladini“. Posle promene vlasti zovemo je „režimski“: to su mediji koji su tokom 14 godina vladavine SNS-a dosledno zastupali tadašnju vlast. Oznaka opisuje njihovu uređivačku prošlost, ne odnos prema novoj vlasti, i redovno je preispitujemo. Ceo spisak je na stranici ${u("#/izvori", "Izvori")}.</li>
         <li><b>Slepe tačke.</b> Priča je slepa tačka kada ju je objavilo najmanje tri medija, od toga bar dva sa jedne strane, a nijedan sa druge. Računa se samo ako su mediji te druge strane u to vreme bili praćeni i objavljivali druge vesti, da kvar u prikupljanju ne bi izgledao kao prećutkivanje.</li>
         <li><b>Redosled vesti.</b> Priča je viša što je više medija prati i što je svežija: njena težina se prepolovi za svakih osam sati bez novog članka.</li>
         <li><b>AI sažeci.</b> Za najveće priče AI model (${esc(D.ai_model || "Claude")}) piše kratak neutralan sažetak i opis toga kako je koja strana uokvirila vest. Model dobija samo naslove i uvode članaka, uz uputstvo da ne ocenjuje ko je u pravu i da ne dodaje činjenice. Sažeci su uvek označeni i mogu da sadrže greške.</li>
@@ -886,7 +889,7 @@ footer .brand-logo{color:#fff}
     const live = id => D.stories.some(s => s.id === id);
     const q = (i, cls) => i ? `<a class="${cls}" ${out(i.url, i.source)}><div class="quote" style="font-size:16px">„${esc(i.title)}“</div><div class="meta" style="margin-top:3px">${logo(i.source, 14)}${esc(src(i.source).name)}</div></a>` : "";
     const framing = s => [["pro_government", s.ai.provladini], ["critical", s.ai.kriticki]].filter(x => x[1] && s.split[x[0]]).map(([k, t]) =>
-      `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${k === "pro_government" ? "Provladini" : "Kritički"}</h3><p style="font-size:15.5px">${esc(t)}</p></div>`).join("");
+      `<div class="ai-side" style="border-left-color:${VAR[k]}"><h3 style="color:${VAR[k]}">${k === "pro_government" ? "Režimski" : "Kritički"}</h3><p style="font-size:15.5px">${esc(t)}</p></div>`).join("");
     const full = id => D.stories.find(x => x.id === id) || {};
     const img = s => s.image || full(s.id).image || "";
     const credit = s => { const k = s.image_source || full(s.id).image_source; return k ? `<div class="brief-credit">Fotografija: ${esc(src(k).name)}</div>` : ""; };
@@ -912,8 +915,8 @@ footer .brand-logo{color:#fff}
   }
 
   // ---------------------------------------------------------------- profil medija
-  const CAMP_WHY = {pro_government: "Prema javnim analizama medijske scene, ovaj medij uglavnom prenosi stavove vlasti i retko je kritikuje.",
-    critical: "Prema javnim analizama medijske scene, ovaj medij redovno kritički izveštava o vlasti.",
+  const CAMP_WHY = {pro_government: "Prema javnim analizama medijske scene, ovaj medij je tokom vladavine SNS-a uglavnom prenosio stavove te vlasti i retko je kritikovao.",
+    critical: "Prema javnim analizama medijske scene, ovaj medij je tokom vladavine SNS-a redovno kritički izveštavao o vlasti.",
     public: "Javni medijski servis, finansiran iz takse i budžeta. Ne računa se ni na jednu stranu.",
     mixed: "Ne pripada jasno nijednoj strani: uređivački je hibridan, poslovni ili specijalizovan.",
     international: "Međunarodni medij na srpskom jeziku. Prikazuje se, ali se ne računa ni na jednu stranu."};
@@ -952,12 +955,12 @@ footer .brand-logo{color:#fff}
     if (!t || !list.length) return `${header("topic")}<div class="wrap empty">Trenutno nema vesti na ovu temu. <a href="#/" style="text-decoration:underline">Nazad na naslovnu</a></div>${footer()}`;
     const agg = sumSplit(list), bs = list.filter(s => s.blindspot).length;
     const p = agg.split.pro_government || 0, c = agg.split.critical || 0;
-    const who = p && c ? (Math.abs(p - c) <= Math.max(1, (p + c) * .1) ? "Obe strane podjednako prate ovu temu" : p > c ? "Ovu temu više prate provladini mediji" : "Ovu temu više prate kritički mediji") : "Ovu temu prati samo jedna strana";
+    const who = p && c ? (Math.abs(p - c) <= Math.max(1, (p + c) * .1) ? "Obe strane podjednako prate ovu temu" : p > c ? "Ovu temu više prate režimski mediji" : "Ovu temu više prate kritički mediji") : "Ovu temu prati samo jedna strana";
     const bsWord = bs === 1 ? "slepa tačka" : bs < 5 ? "slepe tačke" : "slepih tačaka";
     return `${header("topic")}<main class="wrap">
       <div style="padding-top:22px">${kick("Tema")}</div><h1 class="page-h" style="margin-top:0">${esc(t.name)}</h1>
       <p class="page-p">${list.length} ${form(list.length, "prica")} u poslednjih ${D.hours} sati. ${who}: ${p} ${form(p, "pro_government")} i ${c} ${form(c, "critical")} ${form(c || p, "medij")}${bs ? `, uz ${bs} ${bsWord}` : ""}.</p>
-      <div style="max-width:720px">${bar(agg, 12)}<div class="cov"><span class="pg"><b>${share(agg, "pro_government")}%</b> provladini</span><span>${agg.sources} objava</span><span class="cr"><b>${share(agg, "critical")}%</b> kritički</span></div></div>
+      <div style="max-width:720px">${bar(agg, 12)}<div class="cov"><span class="pg"><b>${share(agg, "pro_government")}%</b> režimski</span><span>${agg.sources} objava</span><span class="cr"><b>${share(agg, "critical")}%</b> kritički</span></div></div>
       <div class="strip" style="margin-top:30px">${list.slice(0, 4).map(stripCard).join("")}</div>
       ${list.length > 4 ? `<div class="grid3" style="margin-top:28px">${list.slice(4).map(s => listItem(s, true)).join("")}</div>` : ""}
     </main>${footer()}`;
@@ -971,19 +974,19 @@ footer .brand-logo{color:#fff}
     const o = {split, sources: reads.length};
     const top = Object.entries(reads.reduce((m, r) => (m[r.s] = (m[r.s] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const p = share(o, "pro_government"), c = share(o, "critical");
-    const lean = Math.abs(p - c) <= 15 ? "Čitate obe strane približno podjednako." : p > c ? "Više čitate provladine medije." : "Više čitate kritičke medije.";
+    const lean = Math.abs(p - c) <= 15 ? "Čitate obe strane približno podjednako." : p > c ? "Više čitate režimske medije." : "Više čitate kritičke medije.";
     const weak = p > c ? "critical" : "pro_government";
     const sugg = D.stories.filter(s => (s.split[weak] || 0) >= 1).slice(0, 6);
     const bsViews = new Set(views.filter(v => v.bs).map(v => v.id)).size;
     const n = reads.length, word = n % 10 === 1 && n % 100 !== 11 ? "otvorenog članka" : "otvorenih članaka";
     const body = !n ? `<div class="box"><h2>Još nema podataka</h2><p>Kada otvorite članke iz priča (naslove koji vode na izvorne medije), ovde ćete videti sa koje strane najviše čitate.</p><a class="btn dark" href="#/">Na naslovnu</a></div>` : `
-      <div class="box"><h2>Šta čitate</h2><p style="font-size:20px">${lean} Od ${n} ${word}, ${p}% je iz provladinih, a ${c}% iz kritičkih medija.</p>${bar(o, 14)}
+      <div class="box"><h2>Šta čitate</h2><p style="font-size:20px">${lean} Od ${n} ${word}, ${p}% je iz režimskih, a ${c}% iz kritičkih medija.</p>${bar(o, 14)}
         <div style="margin-top:12px">${ORDER.filter(k => split[k]).map(k => `<div class="src-row"><span>${dot(k)}${LAB[k]}</span><b>${split[k]}</b></div>`).join("")}</div></div>
       <div class="two" style="gap:24px">
         <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Najčešći izvori</h2>${top.map(([sid, k]) => `<div class="src-row"><a href="#/izvor/${encodeURIComponent(sid)}">${logo(sid, 18)}${esc(src(sid).name)}</a><span class="count">${k}</span></div>`).join("")}</div></section>
         <section style="flex:1 1 360px;min-width:0"><div class="box"><h2>Slepe tačke</h2><p>Otvorili ste ${bsViews} ${bsViews === 1 ? "priču koja je slepa tačka" : "priča koje su slepe tačke"}.</p><a class="src-link" href="#/slepe-tacke">Šta je koja strana prećutala →</a></div></section>
       </div>
-      ${sugg.length ? `<div class="sec-head"><h2>Proširite vidike</h2><span class="meta">kako su iste priče preneli ${weak === "critical" ? "kritički" : "provladini"} mediji</span></div><div class="grid3">${sugg.map(s => {
+      ${sugg.length ? `<div class="sec-head"><h2>Proširite vidike</h2><span class="meta">kako su iste priče preneli ${weak === "critical" ? "kritički" : "režimski"} mediji</span></div><div class="grid3">${sugg.map(s => {
         const i = s.items.find(x => camp(x.source) === weak);
         return `<div class="li"><a href="${link(s)}"><div class="hl">${esc(s.headline)}</div></a>${i ? `<a ${out(i.url, i.source)} class="meta" style="display:block;margin-top:6px">${logo(i.source, 14)}${esc(src(i.source).name)}: „${esc(tidy(i.title, 90))}“ ↗</a>` : ""}</div>`;
       }).join("")}</div>` : ""}
@@ -1037,7 +1040,7 @@ footer .brand-logo{color:#fff}
   setInterval(() => {
     const s = document.createElement("script");
     s.src = "data.js?t=" + Date.now();
-    s.onload = () => { const y = window.scrollY; D = window.NEWS_DATA; render(); window.scrollTo(0, y); s.remove(); };
+    s.onload = () => { const y = window.scrollY; D = fixAI(window.NEWS_DATA); render(); window.scrollTo(0, y); s.remove(); };
     document.body.appendChild(s);
   }, 5 * 60 * 1000);
   render(true);

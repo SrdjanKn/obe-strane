@@ -687,11 +687,11 @@ Return only JSON with these keys:
 reported or there is no real difference.
 
 Rules: be strictly neutral; describe framing, never judge which side is right; attribute claims
-("provladini mediji navode..."); use only what is in the text below; no facts from elsewhere.
+("režimski mediji navode..."); use only what is in the text below; no facts from elsewhere.
 
 ARTICLES:
 {articles}"""
-AI_LABEL = {"pro_government": "PROVLADINI", "critical": "KRITIČKI", "public": "JAVNI SERVIS",
+AI_LABEL = {"pro_government": "REŽIMSKI", "critical": "KRITIČKI", "public": "JAVNI SERVIS",
             "mixed": "IZMEĐU KATEGORIJA", "international": "MEĐUNARODNI"}
 
 
