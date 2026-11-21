@@ -485,7 +485,7 @@ footer .brand-logo{color:#fff}
   }
   // Serbian number agreement: 1 režimski, 2-4 režimska, 5+ režimskih (11-14 -> many)
   const FORMS = {pro_government: ["režimski", "režimska", "režimskih"], critical: ["kritički", "kritička", "kritičkih"],
-                 public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], international: ["međunarodni", "međunarodna", "međunarodnih"], medij: ["medij", "medija", "medija"], prica: ["priča", "priče", "priča"]};
+                 public: ["javni servis", "javna servisa", "javnih servisa"], mixed: ["mešoviti", "mešovita", "mešovitih"], international: ["međunarodni", "međunarodna", "međunarodnih"], medij: ["medij", "medija", "medija"], prica: ["priča", "priče", "priča"], ostali: ["ostali", "ostala", "ostalih"]};
   const form = (n, k) => { const f = FORMS[k], d = n % 10, h = n % 100; return n === 1 || (d === 1 && h !== 11) ? f[0] : (d >= 2 && d <= 4 && (h < 12 || h > 14)) ? f[1] : f[2]; };
   const tidy = (t, max) => {   // calm a SHOUTED first word, optionally shorten
     t = String(t || "").replace(/^([A-ZČĆŽŠĐ]{3,})(?=[\s,])/, w => w[0] + w.slice(1).toLowerCase());
@@ -1038,7 +1038,7 @@ footer .brand-logo{color:#fff}
 
   const qCard = (x, withStory = true) => { const one = x.c.pro_government && !x.c.critical ? "pro_government" : x.c.critical && !x.c.pro_government ? "critical" : "";
     return `<article class="q-card"${one ? ` style="border-left-color:${VAR[one]}"` : ""}><div class="q-who">${esc(x.who)}</div><blockquote class="q-text">„${esc(x.q)}“</blockquote>
-      <div class="q-meta"><span>Preneli: <b>${x.n}</b> ${form(x.n, "medij")}</span><span style="color:var(--pg)">${x.c.pro_government} ${form(x.c.pro_government, "pro_government")}</span><span style="color:var(--cr)">${x.c.critical} ${form(x.c.critical, "critical")}</span>${x.c.other ? `<span>${x.c.other} ostalih</span>` : ""}
+      <div class="q-meta"><span>Preneli: <b>${x.n}</b> ${form(x.n, "medij")}</span><span style="color:var(--pg)">${x.c.pro_government} ${form(x.c.pro_government, "pro_government")}</span><span style="color:var(--cr)">${x.c.critical} ${form(x.c.critical, "critical")}</span>${x.c.other ? `<span>${x.c.other} ${form(x.c.other, "ostali")}</span>` : ""}
       ${one ? `<span class="q-one" style="background:${VAR[one]}">Samo ${one === "pro_government" ? "režimski" : "kritički"}</span>` : ""}</div>
       ${withStory ? `<a class="q-story" href="#/vest/${x.s.id}">Iz priče: ${esc(x.s.headline)}</a>` : ""}</article>`; };
   function quotesPage(filter) {
