@@ -296,7 +296,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
 }
 /* ---------- Home layout: cards | lead photo with headline inside | Slepe tačke list ---------- */
 .lv{padding-top:20px}
-@media (min-width:1000px){.lv-hero>.lv-over .ph{max-height:max(360px,calc(100vh - 275px))}}
+@media (min-width:1000px){.lv-hero>.lv-over .ph{max-height:max(360px,calc(100vh - 318px))}}
 .lv-top{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 28px;align-items:start}
 .lv-left{grid-column:1/4;grid-row:1;min-width:0}
 .lv-hero{grid-column:4/10;grid-row:1;min-width:0}
@@ -501,6 +501,25 @@ footer .brand-logo{color:#fff}
 .w-chip{border-radius:999px}
 .ep-tile-top{border-radius:0}
 @media (max-width:760px){.lv-hero>.lv-over,.story-fig .ph{border-radius:0}}
+.tk{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:#fff;margin-top:10px}
+.tk-in{display:flex;align-items:stretch;gap:0;min-height:42px}
+.tk-lab{display:flex;align-items:center;gap:8px;flex:none;padding-right:16px;margin-right:4px;border-right:1px solid var(--rule);font:700 12px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+.tk-live{width:8px;height:8px;border-radius:50%;background:var(--pg);box-shadow:0 0 0 0 rgba(208,2,27,.5);animation:tkp 1.8s infinite}
+@keyframes tkp{0%{box-shadow:0 0 0 0 rgba(208,2,27,.45)}70%{box-shadow:0 0 0 7px rgba(208,2,27,0)}100%{box-shadow:0 0 0 0 rgba(208,2,27,0)}}
+.tk-win{flex:1;min-width:0;overflow:hidden;display:flex;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent)}
+.tk-track{display:flex;align-items:stretch;width:max-content;animation:tks linear infinite}
+.tk-dup{display:flex;align-items:stretch}
+.tk-win:hover .tk-track,.tk-win:focus-within .tk-track{animation-play-state:paused}
+@keyframes tks{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk-i{display:flex;align-items:center;gap:8px;padding:0 22px;white-space:nowrap;font:400 14px/1 var(--sans);color:var(--ink2);border-right:1px solid var(--rule)}
+.tk-i b{color:var(--ink);font-weight:700}
+.tk-i time{font-size:12px;color:var(--ink3)}
+.tk-i:hover span{color:var(--ink);text-decoration:underline}
+.tk-dot{width:7px;height:7px;border-radius:50%;flex:none}
+.util .u-stats{color:var(--ink3)}
+@media (prefers-reduced-motion:reduce){.tk-track{animation:none}.tk-win{overflow-x:auto}.tk-dup{display:none}.tk-live{animation:none}}
+@media (max-width:760px){.tk{margin-top:0}.tk-in{padding-left:16px;padding-right:0}.tk-lab{font-size:11px;padding-right:10px}.tk-i{font-size:13.5px;padding:0 16px}}
+@media (max-width:1080px){.util .u-stats{display:none}}
 </style>
 </head>
 <body>
@@ -584,7 +603,7 @@ footer .brand-logo{color:#fff}
   function header(active) {
     return `
     <div class="util"><div class="wrap">
-      <span class="date">${esc(day(D.generated))} · ažurirano u ${clock(D.generated)}</span>
+      <span class="date">${esc(day(D.generated))} · ažurirano u ${clock(D.generated)}<span class="u-stats"> · ${D.articles.toLocaleString("sr-RS")} članaka · ${D.sources.filter(x => !x.paused).length} medija · ${D.stories.length} priča</span></span>
       <form id="search" role="search"><label class="vh" for="q">Pretraga</label><input id="q" type="search" placeholder="Pretraži vesti…"><button class="btn dark" type="submit">Traži</button></form>
     </div></div>
     <header class="wrap mast"><a href="#/" class="mast-logo">${brand(56)}</a><button class="s-tog" type="button" aria-label="Pretraga" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
@@ -600,7 +619,17 @@ footer .brand-logo{color:#fff}
         <a href="#/izvori" class="${active === "src" ? "on" : ""}">Izvori</a>
       </nav>
       ${active === "home" || active === "topic" ? focusBar() : ""}
-    </div>`;
+    </div>
+    ${ticker()}`;
+  }
+  function ticker() {
+    const latest = D.stories.map(st => { const it = st.items.slice().sort((a, b) => b.published.localeCompare(a.published))[0]; return {st, it}; })
+      .sort((a, b) => b.it.published.localeCompare(a.it.published)).slice(0, 28);
+    if (latest.length < 4) return "";
+    const ago = t => { const m = Math.max(1, Math.round((Date.now() - new Date(t)) / 6e4)); return m < 60 ? `${m} min` : `${Math.round(m / 60)} h`; };
+    const items = latest.map(({st, it}) => `<a class="tk-i" href="${link(st)}"><span class="tk-dot" style="background:${VAR[camp(it.source)] || "var(--mix)"}"></span><b>${esc(src(it.source).name)}</b><span>${esc(it.title)}</span><time>${ago(it.published)}</time></a>`).join("");
+    return `<div class="tk" aria-label="Najnovije vesti"><div class="wrap tk-in"><span class="tk-lab"><span class="tk-live" aria-hidden="true"></span>Najnovije</span>
+      <div class="tk-win"><div class="tk-track" style="animation-duration:${latest.length * 7}s">${items}<span aria-hidden="true" class="tk-dup">${items}</span></div></div></div></div>`;
   }
   function focusBar() {
     const t = (D.topics || []).filter(x => x.stories >= 2).sort((a, b) => b.stories - a.stories).slice(0, 8);
@@ -612,7 +641,7 @@ footer .brand-logo{color:#fff}
     return `<header class="compact-head"><div class="wrap">
       <a class="logo" href="#/">${brand(34)}</a>
       <nav aria-label="Rubrike"><a href="#/slepe-tacke" style="color:var(--ink);background:var(--sig);padding:3px 9px;border-radius:3px">${EYE}Slepe tačke</a>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}" style="${n === sec ? "border-bottom:2px solid var(--ink)" : ""}">${n}</a>`).join("")}<a href="#/brifing">Brifing</a></nav>
-      <a class="btn dark" href="#/">Naslovna</a></div></header>`;
+      <a class="btn dark" href="#/">Naslovna</a></div></header>${ticker()}`;
   }
   const footer = () => `<footer><div class="wrap top">
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
