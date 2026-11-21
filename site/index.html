@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Obe strane — ista vest, dve strane</title>
-<meta name="description" content="Kako mediji u Srbiji izveštavaju o istim događajima: režimski i kritički naslovi, uporedo.">
+<meta name="description" content="Ista vest, dve strane. Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 29%22%3E%3Cpath d=%22M13.56 11.187C14.6147 12.543 15.142 14.0873 15.142 15.82C15.142 17.9293 14.3887 19.7373 12.882 21.244C11.4507 22.7507 9.68033 23.504 7.571 23.504C5.46167 23.504 3.65367 22.7507 2.147 21.244C.715667 19.7373 0 17.9293 0 15.82 0 12.656.979333 9.75566 2.938 7.119 4.89667 4.407 7.458 2.034 10.622 0L13.108 2.147C12.204 2.97566 11.3753 3.99266 10.622 5.198 9.944 6.328 9.52967 7.42033 9.379 8.475 11.1117 8.927 12.5053 9.831 13.56 11.187Z%22 fill=%22%23D3001A%22/%3E%3Cpath d=%22M21.56 16.187C22.6147 17.543 23.142 19.0873 23.142 20.82 23.142 22.9293 22.3887 24.7373 20.882 26.244 19.4507 27.7507 17.6803 28.504 15.571 28.504 13.4617 28.504 11.6537 27.7507 10.147 26.244 8.71567 24.7373 8 22.9293 8 20.82 8 17.656 8.97933 14.7557 10.938 12.119 12.8967 9.407 15.458 7.034 18.622 5L21.108 7.147C20.204 7.97566 19.3753 8.99266 18.622 10.198 17.944 11.328 17.5297 12.4203 17.379 13.475 19.1117 13.927 20.5053 14.831 21.56 16.187Z%22 fill=%22%230057B7%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -474,6 +474,15 @@ footer .brand-logo{color:#fff}
 @media (max-width:760px){.home-box{margin-top:36px}.hb-head h2{font-size:23px}.hb-quotes{grid-template-columns:minmax(0,1fr)}
   .hb-pods{display:flex;overflow-x:auto;gap:12px;margin:0 -16px;padding:0 16px;scroll-snap-type:x mandatory;scrollbar-width:none}.hb-pods::-webkit-scrollbar{display:none}
   .hb-pods .ep-tile{flex:0 0 72%;scroll-snap-align:start}}
+.intro{background:var(--soft);border-bottom:1px solid var(--rule);margin-top:12px}
+.intro-in{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2fr) auto;gap:14px 28px;align-items:center;padding-top:16px;padding-bottom:16px}
+.intro-h{font:500 16px/1.4 var(--sans);color:var(--ink)}
+.intro-l{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;font:400 14px/1.45 var(--sans);color:var(--ink2)}
+.intro-l b{display:block;color:var(--ink);font-weight:700}
+.intro-a{display:flex;align-items:center;gap:14px}
+.intro-more{font:500 14px var(--sans);text-decoration:underline;color:var(--ink2);white-space:nowrap}
+@media (max-width:1080px){.intro-in{grid-template-columns:minmax(0,1fr)}.intro-l{grid-template-columns:minmax(0,1fr);gap:8px}}
+@media (max-width:760px){.intro-in{padding:14px 16px}.intro-a .btn{min-height:44px}}
 </style>
 </head>
 <body>
@@ -561,7 +570,7 @@ footer .brand-logo{color:#fff}
       <form id="search" role="search"><label class="vh" for="q">Pretraga</label><input id="q" type="search" placeholder="Pretraži vesti…"><button class="btn dark" type="submit">Traži</button></form>
     </div></div>
     <header class="wrap mast"><a href="#/" class="mast-logo">${brand(56)}</a><button class="s-tog" type="button" aria-label="Pretraga" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
-      <div class="tag">Ista vest, dve strane. Sve što su objavili mediji u Srbiji, uporedo.</div></header>
+      <div class="tag">Ista vest, dve strane. Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.</div></header>
     <div class="wrap">
       <nav class="sections" aria-label="Rubrike">
         <a href="#/" class="${active === "home" ? "on" : ""}">Naslovna</a>
@@ -633,6 +642,14 @@ footer .brand-logo{color:#fff}
   const lvOver = (s, ratio, tag) => `<a class="lv-over" href="${link(s)}">${photo(s, ratio)}<div class="lv-over-txt">${secKick(s, s.sources + " medija")}<${tag}${tag === "h2" && s.headline.length > 80 ? ' class="long"' : ""}>${esc(s.headline)}</${tag}><div class="lv-over-meta">Prvi je objavio ${esc(src(s.broke).name)} u ${clock(s.first)}</div></div></a>`;
   const lvHead = (title, href, label) => `<div class="sec-head"><h2>${title}</h2>${href ? `<a href="${href}">${label} →</a>` : ""}</div>`;
 
+  const INTRO_KEY = "os_intro_seen";
+  const introSeen = () => { try { return localStorage.getItem(INTRO_KEY) === "1"; } catch (_) { return false; } };
+  const introStrip = () => introSeen() ? "" : `<section class="intro" aria-label="Šta je Obe strane"><div class="wrap intro-in">
+    <div class="intro-h">Prvi put ovde? <b>Obe strane</b> povezuje vesti o istom događaju iz ${D.sources.filter(x => !x.paused).length} medija.</div>
+    <ul class="intro-l"><li><b>Iste vesti, uporedo.</b> Naslovi režimskih i kritičkih medija jedni pored drugih.</li>
+      <li><b>Slepe tačke.</b> Šta je objavila samo jedna strana, a druga prećutala.</li>
+      <li><b>Bez naših tekstova.</b> Sve vodi na izvorne članke.</li></ul>
+    <div class="intro-a"><button class="btn dark" type="button" id="intro-ok">Razumem</button><a href="#/o-nama" class="intro-more">Kako radimo</a></div></div></section>`;
   function home() {
     const S = D.stories;
     if (!S.length) return `${header("home")}<div class="wrap empty">Još nema dovoljno podataka. Sledeće prikupljanje je za najviše 15 minuta.</div>${footer()}`;
@@ -667,6 +684,7 @@ footer .brand-logo{color:#fff}
     const sec2 = n2 ? secK(n2[0]) : "";
     const more = take(S, 18);
     return `${header("home")}
+    ${introStrip()}
     <main class="wrap lv">
       <h1 class="vh">Obe strane: ista vest, dve strane</h1>
       <section class="lv-top" aria-label="Glavne vesti">
@@ -1259,6 +1277,8 @@ footer .brand-logo{color:#fff}
     const f = document.getElementById("search");
     if (f) f.addEventListener("submit", e => { e.preventDefault(); const v = document.getElementById("q").value.trim(); if (v) location.hash = "#/pretraga/" + encodeURIComponent(v); });
     document.querySelectorAll(".chk-form").forEach(fm => fm.addEventListener("submit", e => { e.preventDefault(); const v = fm.u.value.trim(); location.hash = "#/proveri/" + encodeURIComponent(v); }));
+    const io = document.getElementById("intro-ok");
+    if (io) io.addEventListener("click", () => { try { localStorage.setItem(INTRO_KEY, "1"); } catch (_) {} const el = io.closest(".intro"); if (el) el.remove(); });
     const nl = document.getElementById("nl");
     if (nl) nl.addEventListener("submit", e => { e.preventDefault(); nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala na interesovanju! Prijava e-poštom još nije uključena, pa adresu nismo sačuvali. Do tada je brifing svako jutro ovde.</p>'; });
     const clr = document.getElementById("diet-clear");
