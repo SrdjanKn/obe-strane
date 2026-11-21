@@ -961,6 +961,62 @@ def tone_trends(con, sources):
     return {"terms": [[k, label] for k, label, _ in TONE_TERMS], "days": [{"d": d, "c": days[d]} for d in sorted(days)]}
 
 
+
+CYR_D = dict(zip("абвгдђежзијклљмнњопрстћуфхцчџш",
+                 ["a", "b", "v", "g", "d", "đ", "e", "ž", "z", "i", "j", "k", "l", "lj", "m", "n", "nj", "o",
+                  "p", "r", "s", "t", "ć", "u", "f", "h", "c", "č", "dž", "š"]))
+WORD_STOP = STOP | set("""ponovo nova novu nove novog novom novim novi dve dva tri prvi prva prvo ima imaju sada sad zato posto
+takodje jer posle pred kroz nakon ovog njegov njena njihov jedan jedna jedno dana sada ipak beograd beogradu
+veliki velika veliko evo""".split())
+
+
+def chosen_words(con, sources, top=25, min_n=8, ZMIN=2.5):
+    """Words one side's headlines use much more than the other's, over everything in the database (about 14 days).
+    Weighted log-odds with an informative prior (Monroe, Colaresi & Quinn, 'Fightin' Words')."""
+    camp_of = {s["id"]: s["camp"] for s in sources}
+    cnt = {"pro_government": Counter(), "critical": Counter()}
+    forms, ex = defaultdict(Counter), defaultdict(lambda: {"pro_government": [], "critical": []})
+    for sid, title, url, pub in con.execute("SELECT source_id, title, url, published FROM articles ORDER BY published DESC"):
+        camp = camp_of.get(sid)
+        if camp not in cnt:
+            continue
+        seen = set()
+        low = "".join(CYR_D.get(ch, ch) for ch in (title or "").lower())
+        for w in re.findall(r"[a-zčćšžđ0-9]+", low):
+            k = normalise(w)
+            if len(k) < 4 or k in WORD_STOP or k.isdigit():
+                continue
+            st = k[:6]
+            if st in seen:
+                continue
+            seen.add(st)
+            cnt[camp][st] += 1
+            forms[st][w] += 1
+            if len(ex[st][camp]) < 2:
+                ex[st][camp].append({"t": title, "s": sid, "u": url})
+    a, b = cnt["pro_government"], cnt["critical"]
+    na, nb = sum(a.values()), sum(b.values())
+    if not na or not nb:
+        return None
+    prior = a + b
+    a0 = sum(prior.values()) * 0.5     # prior: half the pooled counts
+    out = []
+    for st, total in prior.items():
+        if total < min_n:
+            continue
+        aw = prior[st] * 0.5
+        ya, yb = a[st], b[st]
+        d = math.log((ya + aw) / (na + a0 - ya - aw)) - math.log((yb + aw) / (nb + a0 - yb - aw))
+        z = d / math.sqrt(1 / (ya + aw) + 1 / (yb + aw))
+        out.append((z, st, ya, yb))
+    out.sort()
+    pack = lambda z, st, ya, yb: {"w": forms[st].most_common(1)[0][0], "z": round(z, 1), "pg": ya, "cr": yb,
+                                  "pg_per": round(ya / na * 1000, 1), "cr_per": round(yb / nb * 1000, 1), "ex": ex[st]}
+    return {"pg": [pack(*x) for x in reversed(out[-top:]) if x[0] > ZMIN],
+            "cr": [pack(*x) for x in out[:top] if x[0] < -ZMIN],
+            }
+
+
 def export_site(hours=36):
     """Write site/data.js for the website (a JS file, so the site also works opened straight from disk)."""
     camps, stories, n_articles = build_stories(hours)
@@ -970,6 +1026,7 @@ def export_site(hours=36):
     ai_summaries(con, stories)
     brief, brief_days = briefing(con, stories, n_articles)
     tone = tone_trends(con, sources)
+    words = chosen_words(con, sources)
     now = datetime.now(timezone.utc)
     iso = lambda d: d.astimezone(timezone.utc).isoformat()
     for s in stories:
@@ -1017,7 +1074,7 @@ def export_site(hours=36):
         "camps": camps, "ai_model": AI_MODEL,
         "balance": {"shown": dict(shown), "collected": dict(collected), "outlets": dict(outlets)},
         "topics": [{"slug": slug, "name": name, "stories": topic_counts[slug]} for slug, name, _ in TOPICS if topic_counts[slug]],
-        "briefing": brief, "briefing_days": brief_days, "tone": tone,
+        "briefing": brief, "briefing_days": brief_days, "tone": tone, "words": words,
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "owner": s.get("owner", ""), "owner_src": s.get("owner_src", ""),
                      "public_money": s.get("public_money", ""), "public_money_src": s.get("public_money_src", ""),

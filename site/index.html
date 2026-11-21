@@ -976,22 +976,21 @@ footer .brand-logo{color:#fff}
   }
   const markWord = (title, st) => esc(title).replace(/[\p{L}\d]+/gu, w => stemOf(toLat(w)) === st ? `<b class="w-hit">${w}</b>` : w);
   function wordsPage() {
-    const agg = {pg: new Map(), cr: new Map()};
-    D.stories.forEach(s => { const r = storyWords(s); if (!r) return; ["pg", "cr"].forEach(side => r[side].forEach(w => { const e = agg[side].get(w.st) || {forms: {}, ex: []}; e.forms[w.word] = (e.forms[w.word] || 0) + 1;
-      e.ex.push({s, hit: w.items[0], other: (side === "pg" ? r.crItems : r.pgItems)[0]}); agg[side].set(w.st, e); })); });
-    const list = (side, camp, otherCamp) => { const rows = [...agg[side]].sort((a, b) => b[1].ex.length - a[1].ex.length).slice(0, 18);
-      if (!rows.length) return `<p class="meta">Za sada nema dovoljno priča koje su pratile obe strane.</p>`;
-      return rows.map(([st, e]) => { const word = Object.entries(e.forms).sort((a, b) => b[1] - a[1])[0][0];
-        return `<details class="w-row"><summary><span class="w-word" style="color:${VAR[camp]}">${esc(word)}</span><span class="meta">${e.ex.length} ${form(e.ex.length, "prica")}</span></summary>
-          ${e.ex.slice(0, 3).map(x => `<div class="w-ex"><a class="w-story" href="#/vest/${x.s.id}">${esc(x.s.headline)}</a>
-            <div class="w-q" style="border-left-color:${VAR[camp]}">„${markWord(x.hit.title, st)}“ <span class="meta">${esc(src(x.hit.source).name)}</span></div>
-            <div class="w-q" style="border-left-color:${VAR[otherCamp]}">„${esc(x.other.title)}“ <span class="meta">${esc(src(x.other.source).name)}</span></div></div>`).join("")}</details>`; }).join(""); };
-    const nStories = D.stories.filter(s => storyWords(s)).length;
+    const W = D.words;
+    const exq = (x, k) => `<div class="w-q" style="border-left-color:${VAR[k]}">„${esc(x.t)}“ <span class="meta">${esc(src(x.s).name)}</span></div>`;
+    const list = (rows, camp, other) => rows && rows.length ? rows.slice(0, 20).map(r => {
+      const mine = camp === "pro_government" ? r.pg_per : r.cr_per, theirs = camp === "pro_government" ? r.cr_per : r.pg_per;
+      const times = theirs ? (mine / theirs) : 0;
+      return `<details class="w-row"><summary><span class="w-word" style="color:${VAR[camp]}">${esc(r.w)}</span>
+        <span class="meta">${times >= 1.5 ? `${times >= 10 ? Math.round(times) : times.toFixed(1).replace(".", ",")}× češće` : ""}${!theirs ? "samo ova strana" : ""}</span></summary>
+        <div class="w-ex"><div class="meta" style="margin-bottom:6px">${String(mine).replace(".", ",")} na 1.000 naslova ove strane · ${String(theirs).replace(".", ",")} kod druge</div>
+        ${(r.ex[camp] || []).map(x => exq(x, camp)).join("")}${(r.ex[other] || []).slice(0, 1).map(x => exq(x, other)).join("")}</div></details>`; }).join("")
+      : `<p class="meta">Za sada nema dovoljno naslova.</p>`;
     return `${compactHeader()}<main class="wrap reci"><h1 class="page-h">Reči koje biraju</h1>
-      <p class="page-p">Isti događaj, različite reči. Za svaku priču koju su pratile obe strane upoređujemo naslove i izdvajamo reči koje koristi većina naslova jedne strane, a retko druga. Ovde su reči koje se najčešće izdvajaju u poslednjih ${D.hours} sati, iz ${nStories} ${form(nStories, "prica")}. Kliknite na reč da vidite primere.</p>
-      <div class="w-cols"><section><h2 style="color:var(--pg)">Režimski pišu</h2>${list("pg", "pro_government", "critical")}</section>
-      <section><h2 style="color:var(--cr)">Kritički pišu</h2>${list("cr", "critical", "pro_government")}</section></div>
-      <p class="meta ton-note">Reč se računa kad je koristi najmanje dva naslova jedne strane i bar polovina naslova te strane više nego druga. Različiti oblici iste reči se spajaju. Za promene kroz duže vreme pogledajte ${`<a href="#/ton" style="text-decoration:underline">Kako se menja ton</a>`}.</p></main>${footer()}`;
+      <p class="page-p">Reči koje se u naslovima jedne strane pojavljuju mnogo češće nego u naslovima druge, u svim vestima iz poslednjih 14 dana. Kliknite na reč da vidite primere naslova. Za reči jedne priče pogledajte okvir „Reči koje biraju“ na stranici te vesti.</p>
+      <div class="w-cols"><section><h2 style="color:var(--pg)">Režimski pišu</h2>${list(W && W.pg, "pro_government", "critical")}</section>
+      <section><h2 style="color:var(--cr)">Kritički pišu</h2>${list(W && W.cr, "critical", "pro_government")}</section></div>
+      <p class="meta ton-note">Poredimo koliko često se svaka reč javlja u naslovima režimskih i kritičkih medija, uzimajući u obzir da režimskih naslova ima više. Prikazujemo samo reči sa jasnom razlikom (statistička mera „log-odds“). Različiti oblici iste reči se spajaju, ćirilica se prebacuje u latinicu. Za promene kroz vreme pogledajte <a href="#/ton" style="text-decoration:underline">Kako se menja ton</a>.</p></main>${footer()}`;
   }
   function briefingPage() {
     const B = D.briefing;
