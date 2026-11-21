@@ -437,7 +437,7 @@ footer .brand-logo{color:#fff}
 .w-chip small{font-weight:400;color:var(--ink3)}
 @media (max-width:760px){.w-cols{grid-template-columns:1fr;gap:28px}.w-lab{display:block;width:auto;margin-bottom:2px}}
 .citati .page-p{max-width:760px}
-.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
 .q-card{background:var(--soft);border-left:4px solid var(--rule);padding:16px 18px}
 .q-who{font:700 13px/1.2 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
 .q-text{margin:0 0 12px;font:600 19px/1.3 var(--head);color:var(--ink)}
@@ -464,7 +464,7 @@ footer .brand-logo{color:#fff}
 .hb-head h2{margin:0;font:700 28px/1.1 var(--head)}
 .hb-head h2 span{color:var(--ink3);font-weight:600}
 .hb-quotes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.hb-quotes .q-card{display:flex;flex-direction:column}.hb-quotes .q-story{margin-top:auto;padding-top:10px}
+.hb-quotes{gap:18px}
 .hb-pods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .ep-tile{position:relative;display:block;aspect-ratio:4/5;background:#2f3846;overflow:hidden;color:#fff}
 .ep-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -546,6 +546,22 @@ footer .brand-logo{color:#fff}
 @media (max-width:1080px){.pf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:760px){.pf-box{grid-template-columns:minmax(0,1fr);justify-items:center}.pf-row{grid-template-columns:96px 70px minmax(0,1fr);font-size:13px}
   .pf-grid{display:flex;overflow-x:auto;margin:0 -16px;padding:0 16px;scroll-snap-type:x mandatory;scrollbar-width:none}.pf-card{flex:0 0 62%;scroll-snap-align:start}}
+.q-card2{display:flex;flex-direction:column;gap:12px;background:var(--soft);border-radius:14px;padding:20px 22px}
+.q-head{display:flex;align-items:center;gap:12px}
+.q-ava{flex:none;width:42px;height:42px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;color:#fff;font:700 15px/1 var(--sans);letter-spacing:.02em}
+.q-name{font:700 15px/1.2 var(--sans);color:var(--ink)}
+.q-role{font:400 13px/1.3 var(--sans);color:var(--ink3);margin-top:2px}
+.q-head .q-one{margin-left:auto}
+.q-big{position:relative;margin:0;padding-left:34px;font:600 22px/1.3 var(--head);color:var(--ink);letter-spacing:-.005em}
+.q-mark{position:absolute;left:-2px;top:-6px;font:800 52px/1 Georgia,serif}
+.q-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:auto}
+.q-pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:4px 12px 4px 6px;font:600 13.5px var(--sans);color:var(--ink2);box-shadow:0 0 0 1px var(--rule)}
+.q-stack{display:inline-flex}.q-lg{display:inline-flex;margin-left:-6px;border-radius:50%;box-shadow:0 0 0 2px #fff;background:#fff;overflow:hidden}.q-lg:first-child{margin-left:0}
+.q-lg .lg{border-radius:50%!important}
+.q-split{display:flex;gap:2px;width:90px;height:6px;border-radius:3px;overflow:hidden;background:#e3e6ea}.q-split i{display:block;height:100%}
+.q-counts{font:500 13px var(--sans);color:var(--ink2)}
+.q-card2 .q-story{margin-top:0;padding-top:10px;border-top:1px solid var(--rule)}
+@media (max-width:760px){.q-big{font-size:19px;padding-left:24px}.q-mark{font-size:46px;top:-10px}}
 </style>
 </head>
 <body>
@@ -1198,10 +1214,21 @@ footer .brand-logo{color:#fff}
     }).sort((a, b) => b.n - a.n);
   }
 
-  const qCard = (x, withStory = true) => { const one = x.c.pro_government && !x.c.critical ? "pro_government" : x.c.critical && !x.c.pro_government ? "critical" : "";
-    return `<article class="q-card"${one ? ` style="border-left-color:${VAR[one]}"` : ""}><div class="q-who">${esc(x.who)}</div><blockquote class="q-text">„${esc(x.q)}“</blockquote>
-      <div class="q-meta"><span>Preneli: <b>${x.n}</b> ${form(x.n, "medij")}</span><span style="color:var(--pg)">${x.c.pro_government} ${form(x.c.pro_government, "pro_government")}</span><span style="color:var(--cr)">${x.c.critical} ${form(x.c.critical, "critical")}</span>${x.c.other ? `<span>${x.c.other} ${form(x.c.other, "ostali")}</span>` : ""}
-      ${one ? `<span class="q-one" style="background:${VAR[one]}">Samo ${one === "pro_government" ? "režimski" : "kritički"}</span>` : ""}</div>
+  const speakerInfo = who => { const S = D.speakers || {}; const k = Object.keys(S).find(k => k !== "Primer" && fold(toLat(k)) === fold(toLat(who.split(" ").slice(-1)[0]))); return k ? S[k] : {}; };
+  const qCard = (x, withStory = true) => {
+    const one = x.c.pro_government && !x.c.critical ? "pro_government" : x.c.critical && !x.c.pro_government ? "critical" : "";
+    const lean = x.c.pro_government > x.c.critical ? "pro_government" : x.c.critical > x.c.pro_government ? "critical" : "";
+    const info = speakerInfo(x.who), name = info.name || x.who;
+    const ini = name.split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+    const ava = info.photo ? `<img class="q-ava" src="${esc(safe(info.photo))}" alt="" loading="lazy">` : `<span class="q-ava" style="background:${lean ? VAR[lean] : "var(--ink2)"}" aria-hidden="true">${esc(ini)}</span>`;
+    const outlets = [...new Set(x.items.map(i => i.source))];
+    const tot = x.c.pro_government + x.c.critical + x.c.other || 1;
+    return `<article class="q-card2">
+      <div class="q-head">${ava}<div><div class="q-name">${esc(name)}</div>${info.role ? `<div class="q-role">${esc(info.role)}</div>` : ""}</div>${one ? `<span class="q-one" style="background:${VAR[one]}">Samo ${one === "pro_government" ? "režimski" : "kritički"}</span>` : ""}</div>
+      <blockquote class="q-big"><span class="q-mark" style="color:${lean ? VAR[lean] : "var(--ink3)"}" aria-hidden="true">“</span>„${esc(x.q)}“</blockquote>
+      <div class="q-foot"><span class="q-pill"><span class="q-stack">${outlets.slice(0, 5).map(id => `<span class="q-lg">${logo(id, 18)}</span>`).join("")}</span>${x.n} ${form(x.n, "medij")}</span>
+        <span class="q-split" title="${x.c.pro_government} ${form(x.c.pro_government, "pro_government")}, ${x.c.critical} ${form(x.c.critical, "critical")}, ${x.c.other} ${form(x.c.other, "ostali")}"><i style="flex:${x.c.pro_government};background:var(--pg)"></i><i style="flex:${x.c.other};background:var(--mix)"></i><i style="flex:${x.c.critical};background:var(--cr)"></i></span>
+        <span class="q-counts"><b style="color:var(--pg)">${x.c.pro_government}</b> režimski · <b style="color:var(--cr)">${x.c.critical}</b> kritički</span></div>
       ${withStory ? `<a class="q-story" href="#/vest/${x.s.id}">Iz priče: ${esc(x.s.headline)}</a>` : ""}</article>`; };
   function quotesPage(filter) {
     const all = D.stories.flatMap(storyQuotes).sort((a, b) => b.n - a.n);

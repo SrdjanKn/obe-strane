@@ -1,0 +1,6 @@
+{
+  "_note": "Optional details for people quoted on the site. Key: the speaker's surname as it appears in headlines (any case). role: short title shown under the name. photo: URL of a photo you have the right to use (leave empty to show initials).",
+  "speakers": {
+    "Primer": {"name": "Ime Prezime", "role": "funkcija", "photo": ""}
+  }
+}

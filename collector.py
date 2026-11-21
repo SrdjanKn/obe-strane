@@ -1303,7 +1303,7 @@ def export_site(hours=36):
         "camps": camps, "ai_model": AI_MODEL,
         "balance": {"shown": dict(shown), "collected": dict(collected), "outlets": dict(outlets)},
         "topics": [{"slug": slug, "name": name, "stories": topic_counts[slug]} for slug, name, _ in TOPICS if topic_counts[slug]],
-        "briefing": brief, "briefing_days": brief_days, "tone": tone, "words": words, "podcasts": pods,
+        "briefing": brief, "briefing_days": brief_days, "tone": tone, "words": words, "podcasts": pods, "speakers": (json.loads(Path(__file__).with_name("speakers.json").read_text(encoding="utf-8")).get("speakers", {}) if Path(__file__).with_name("speakers.json").exists() else {}),
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "owner": s.get("owner", ""), "owner_src": s.get("owner_src", ""),
                      "public_money": s.get("public_money", ""), "public_money_src": s.get("public_money_src", ""),
