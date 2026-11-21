@@ -1018,17 +1018,36 @@ def choose_images(con, stories, top=120):
             con.execute("INSERT OR REPLACE INTO og_img VALUES (?,?)", (a["url"], og[a["url"]]))
     measure([og.get(a["url"]) for s in shown for a in s["items"][:3]])
 
-    kept = 0
+    # an outlet's default picture (logo card, "najnovija vest" banner) is sharp but is not a photo of the story:
+    # it shows up on many different articles. A picture on 3+ articles, or in 3+ stories, is treated as a default.
+    norm = lambda u: WP_SIZE.sub("", u or "").split("?")[0]
+    arts = Counter()
+    for (u,) in con.execute("SELECT image FROM articles WHERE image != '' AND fetched > ?",
+                            ((datetime.now(timezone.utc) - timedelta(days=3)).isoformat(),)):
+        arts[norm(u)] += 1
+    for u in og.values():
+        if u:
+            arts[norm(u)] += 1
+    in_stories = Counter()
+    for s in shown:
+        for u in {norm(u) for u, _ in cands(s)} | {norm(og.get(a["url"])) for a in s["items"][:3] if og.get(a["url"])}:
+            in_stories[u] += 1
+    defaults = {u for u, n in arts.items() if n >= 3} | {u for u, n in in_stories.items() if n >= 3}
+
+    kept, taken = 0, set()
     for i, s in enumerate(stories):
         s["image"], s["image_source"] = "", ""
         if i >= top:
             continue
         pool = cands(s) + [(og[a["url"]], a["source"]) for a in s["items"][:3] if og.get(a["url"])]
-        good = [(u, src) for u, src in pool if good_image(known.get(u, (0, 0, 1)))]
+        # stories are ranked, so a photo shared by two stories goes to the bigger one; the other takes its next best
+        good = [(u, src) for u, src in pool if good_image(known.get(u, (0, 0, 1))) and norm(u) not in defaults and norm(u) not in taken]
         if good:   # biggest sharp one wins
             u, src = max(good, key=lambda x: (min(known[x[0]][0], 1600), -known[x[0]][2]))
             s["image"], s["image_source"] = u, src
+            taken.add(norm(u))
             kept += 1
+    print(f"  Default pictures skipped: {len(defaults)}")
     con.execute("DELETE FROM img_q WHERE checked < ?", ((datetime.now(timezone.utc) - timedelta(days=3)).isoformat(),))
     con.commit()
     used = [known[u] for s in shown for u, _ in cands(s) + [(og.get(a["url"]), "") for a in s["items"][:3]] if u in known]
