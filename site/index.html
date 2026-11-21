@@ -455,6 +455,25 @@ footer .brand-logo{color:#fff}
 .ep-c .ep-play{width:26px;height:26px;font-size:10px;left:6px;bottom:6px}
 .rail-pods{margin-top:22px;border-top:3px solid var(--ink);padding-top:12px;display:grid;gap:14px}
 .rail-pods .lab{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.home-box{margin:48px 0 8px}
+.hb-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:3px solid var(--ink);padding-top:14px;margin-bottom:18px}
+.hb-head h2{margin:0;font:700 28px/1.1 var(--head)}
+.hb-head h2 span{color:var(--ink3);font-weight:600}
+.hb-quotes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.hb-quotes .q-card{display:flex;flex-direction:column}.hb-quotes .q-story{margin-top:auto;padding-top:10px}
+.hb-pods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.ep-tile{position:relative;display:block;aspect-ratio:4/5;background:#2f3846;overflow:hidden;color:#fff}
+.ep-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ep-tile-in{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;background:linear-gradient(180deg,rgba(18,18,18,0) 30%,rgba(18,18,18,.88) 72%)}
+.ep-tile-top{display:flex;justify-content:space-between;gap:8px;font:600 11.5px/1.2 var(--sans);letter-spacing:.06em;text-transform:uppercase;opacity:.9;margin-bottom:8px}
+.ep-tile-t{font:700 19px/1.22 var(--head);margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.ep-tile-b{display:flex;justify-content:space-between;align-items:center}
+.ep-tile-play{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px}
+.ep-tile:hover .ep-tile-t{text-decoration:underline}
+@media (max-width:1080px){.hb-pods{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.home-box{margin-top:36px}.hb-head h2{font-size:23px}.hb-quotes{grid-template-columns:minmax(0,1fr)}
+  .hb-pods{display:flex;overflow-x:auto;gap:12px;margin:0 -16px;padding:0 16px;scroll-snap-type:x mandatory;scrollbar-width:none}.hb-pods::-webkit-scrollbar{display:none}
+  .hb-pods .ep-tile{flex:0 0 72%;scroll-snap-align:start}}
 </style>
 </head>
 <body>
@@ -671,7 +690,6 @@ footer .brand-logo{color:#fff}
           </div>
           <div class="chk"><h3>Proveri link</h3><p>Nalepite link članka i vidite čiji je medij i kako je istu vest prenela druga strana.</p>${chkForm()}</div>
           ${D.briefing ? `<a href="#/brifing" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Jutarnji brifing</div><div class="hl">Obe strane u 5 minuta</div><div class="meta">${(D.briefing.stories || []).length} vesti · izdanje u ${clock(D.briefing.made)}</div></a>` : ""}
-          ${D.podcasts && D.podcasts.episodes.length ? `<div class="rail-pods"><a href="#/podkasti" class="lab">Podkasti i emisije</a>${D.podcasts.episodes.slice(0, 3).map(e => epCard(e, true)).join("")}</div>` : ""}
           ${D.tone && D.tone.days.filter(d => (d.c.pro_government || [0])[0] >= 150).length > 1 ? `<a href="#/ton" class="rail-item" style="margin-top:22px;border-top:3px solid var(--ink)"><div class="lab">Posle izbora</div><div class="hl">Kako se menja ton</div><div class="meta">Reči u naslovima obe strane, dan po dan</div></a>` : ""}
         </aside>
       </section>
@@ -682,10 +700,35 @@ footer .brand-logo{color:#fff}
     </main>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
+      ${homeQuotes()}
+      ${homePods()}
       ${sec2}
       ${more.length ? `<section aria-label="Još vesti"><div class="sec-head"><h2>Još vesti</h2><span class="meta">${S.length} priča sa 2+ medija</span></div><div class="grid3">${more.map(s => listItem(s, true)).join("")}</div></section>` : ""}
       ${newsletter()}
     </div>${footer()}`;
+  }
+
+  function homeQuotes() {
+    const all = D.stories.flatMap(storyQuotes).sort((a, b) => b.n - a.n);
+    if (all.length < 2) return "";
+    const one = k => all.find(x => x.c[k] >= 2 && !x.c[k === "pro_government" ? "critical" : "pro_government"]);
+    const pick = [];
+    [all[0], one("pro_government"), one("critical"), ...all].forEach(x => { if (x && !pick.includes(x) && !pick.some(p => p.s.id === x.s.id) && pick.length < 4) pick.push(x); });
+    if (pick.length % 2 && pick.length > 1) pick.pop();
+    return `<section class="home-box" aria-label="Citati"><div class="hb-head"><h2>Citati <span>${all.length}</span></h2><a class="btn" href="#/citati">Svi citati</a></div>
+      <div class="hb-quotes">${pick.map(x => qCard(x)).join("")}</div></section>`;
+  }
+  function homePods() {
+    const P = D.podcasts; if (!P || !P.episodes.length) return "";
+    const seen = new Set(), pick = [];
+    P.episodes.forEach(e => { if (!seen.has(e.show) && pick.length < 4) { seen.add(e.show); pick.push(e); } });
+    P.episodes.forEach(e => { if (!pick.includes(e) && pick.length < 4) pick.push(e); });
+    const tile = e => { const sh = P.shows.find(x => x.id === e.show) || {};
+      return `<a class="ep-tile" href="${esc(safe(e.url))}" target="_blank" rel="noopener">${e.img ? `<img src="${esc(safe(e.img))}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+        <div class="ep-tile-in"><div class="ep-tile-top"><span>${esc(sh.name || "")} · ${esc(sh.by || "")}</span><span>${e.date ? epAgo(e.date) : ""}</span></div>
+        <div class="ep-tile-t">${esc(e.title)}</div><div class="ep-tile-b"><span class="ep-lab" style="background:${PODCOL(sh.camp)};margin:0">${PODLAB(sh.camp)}</span><span class="ep-tile-play" aria-hidden="true">▶</span></div></div></a>`; };
+    return `<section class="home-box" aria-label="Podkasti i emisije"><div class="hb-head"><h2>Podkasti i emisije <span>${P.episodes.length}</span></h2><a class="btn" href="#/podkasti">Sve epizode</a></div>
+      <div class="hb-pods">${pick.map(tile).join("")}</div></section>`;
   }
   function bsBand(s) {
     const silent = s.blindspot, loud = silent === "pro_government" ? "critical" : "pro_government";
