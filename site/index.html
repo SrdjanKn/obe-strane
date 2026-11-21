@@ -533,6 +533,19 @@ footer .brand-logo{color:#fff}
 .sp-lab{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
 .sp-col .w-q{display:block;background:#fff;border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;margin:8px 0}
 @media (max-width:760px){.pp-grid,.sp-cols{grid-template-columns:minmax(0,1fr)}.sp-h{font-size:20px}}
+.pf-box{display:grid;grid-template-columns:288px minmax(0,1fr);gap:16px;align-items:center;background:var(--soft);border-radius:var(--r);padding:18px 22px;margin-top:16px}
+.pf-row{display:grid;grid-template-columns:104px 80px minmax(0,1fr);gap:12px;align-items:center;padding:6px 0;border-top:1px solid var(--rule);font:500 14px var(--sans)}
+.pf-l{font-weight:700}
+.pf-bar{height:6px;background:#e3e6ea;border-radius:3px;overflow:hidden}.pf-bar i{display:block;height:100%;border-radius:3px}
+.pf-t{color:var(--ink2)}
+.pf-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.pf-card{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--soft);border-radius:var(--r);padding:14px 14px 16px}
+.pf-h{font:700 15.5px/1.25 var(--head);color:var(--ink);margin:6px 0 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pf-sw{display:flex;flex-direction:column;gap:2px;margin-top:8px;font:500 12.5px var(--sans);color:var(--ink2)}
+.pf-card:hover .pf-h{text-decoration:underline}
+@media (max-width:1080px){.pf-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){.pf-box{grid-template-columns:minmax(0,1fr);justify-items:center}.pf-row{grid-template-columns:96px 70px minmax(0,1fr);font-size:13px}
+  .pf-grid{display:flex;overflow-x:auto;margin:0 -16px;padding:0 16px;scroll-snap-type:x mandatory;scrollbar-width:none}.pf-card{flex:0 0 62%;scroll-snap-align:start}}
 </style>
 </head>
 <body>
@@ -778,6 +791,7 @@ footer .brand-logo{color:#fff}
     </main>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
+      ${homeProfiles()}
       ${homeSpin()}
       ${homeQuotes()}
       ${homePods()}
@@ -886,6 +900,7 @@ footer .brand-logo{color:#fff}
         <div><div class="kicker" style="color:var(--ink2)">Ko je objavio</div><div class="sent">${sentence}</div>${bar(s, 14)}${cov(s)}</div>
         <div>${ORDER.map(k => `<div class="row"><span>${dot(k)}${LAB[k]}</span><b>${s.split[k] || 0}</b></div>`).join("")}</div>
       </div>
+      ${profileBox(s)}
       ${s.blindspot ? `<div class="bs-note">${EYE}<b>Slepa tačka.</b> ${bsLabel(s.blindspot)} mediji nisu objavili ovu vest, iako su u to vreme objavljivali druge vesti.</div>` : ""}</section>
       <section id="poredjenje" class="wide" style="margin-top:44px" aria-label="Kako su naslovili">
         <h2 class="h2">Kako su naslovili</h2>
@@ -1272,6 +1287,50 @@ footer .brand-logo{color:#fff}
       <p class="page-p">Priče u kojima se naslovi režimskih i kritičkih medija najviše razlikuju, iako govore o istom događaju. Merimo koliko se reči u naslovima poklapaju unutar jedne strane, a koliko između strana. Istaknute su reči koje koristi samo jedna strana.</p>
       ${list.map(({st, sp}) => `<section class="sp-box" style="margin-top:22px"><a class="sp-story" href="${link(st)}"><span class="kicker">${esc(st.section || "")} · ${st.sources} medija · razlika ${Math.round(sp.score * 100)}</span><span class="sp-h">${esc(st.headline)}</span></a>${spinCard(st)}</section>`).join("") || `<p class="meta">Za sada nema priča koje su obe strane dovoljno pratile.</p>`}
       </main>${footer()}`;
+  }
+
+  // ---- profil priče (radar)
+  const PAX = [["doseg", "Doseg", "koliko medija je prenosi"], ["brzina", "Brzina", "koliko brzo su se javili mediji"], ["svezina", "Svežina", "koliko je skoro stigao poslednji članak"], ["trajanje", "Trajanje", "koliko dugo se o njoj piše"], ["jednostranost", "Jednostranost", "koliko pretežno je prati jedna strana"]];
+  function profile(st) {
+    const t = st.items.map(i => new Date(i.published).getTime()).sort((a, b) => a - b), t0 = t[0], t1 = t[t.length - 1];
+    const maxN = Math.max(...D.stories.slice(0, 60).map(x => x.sources), 10);
+    const fast = st.items.filter(i => new Date(i.published).getTime() - t0 <= 2 * 36e5).length;
+    const pg = st.split.pro_government || 0, cr = st.split.critical || 0;
+    const ageH = (Date.now() - t1) / 36e5, spanH = (t1 - t0) / 36e5;
+    const v = {doseg: Math.min(1, st.sources / maxN), brzina: st.items.length ? fast / st.items.length : 0, svezina: Math.max(0, 1 - ageH / 24),
+      trajanje: Math.min(1, spanH / 30), jednostranost: pg + cr ? Math.abs(pg - cr) / (pg + cr) : 0};
+    const txt = {doseg: `${st.sources} ${form(st.sources, "medij")}`, brzina: `${fast} od ${st.items.length} članaka u prva 2 sata`,
+      svezina: ageH < 1 ? `poslednji članak pre ${Math.max(1, Math.round(ageH * 60))} min` : `poslednji članak pre ${Math.round(ageH)} h`,
+      trajanje: spanH < 1 ? "manje od sat vremena" : `${Math.round(spanH)} h od prvog do poslednjeg članka`,
+      jednostranost: pg + cr ? (pg === cr ? "obe strane podjednako" : `${Math.round(Math.max(pg, cr) / (pg + cr) * 100)}% ${pg > cr ? "režimski" : "kritički"}`) : "nijedna strana"};
+    return {v, txt, tilt: pg > cr ? "pro_government" : cr > pg ? "critical" : ""};
+  }
+  function radar(p, size = 220, labels = true) {
+    const c = size / 2, R = size / 2 - (labels ? 38 : 8), n = PAX.length, ang = i => -Math.PI / 2 + i * 2 * Math.PI / n;
+    const pt = (i, r) => [c + Math.cos(ang(i)) * r, c + Math.sin(ang(i)) * r];
+    const ring = f => PAX.map((_, i) => pt(i, R * f).map(x => x.toFixed(1)).join(",")).join(" ");
+    const shape = PAX.map(([k], i) => pt(i, R * Math.max(0.06, p.v[k])).map(x => x.toFixed(1)).join(",")).join(" ");
+    const col = p.tilt ? VAR[p.tilt] : "var(--ink2)";
+    const pad = labels ? 54 : 0;
+    return `<svg viewBox="${-pad} 0 ${size + 2 * pad} ${size}" width="${size + 2 * pad}" height="${size}" style="max-width:100%;height:auto" role="img" aria-label="Profil priče: ${PAX.map(([k, l]) => `${l} ${Math.round(p.v[k] * 100)}%`).join(", ")}">
+      ${[0.33, 0.66, 1].map(f => `<polygon points="${ring(f)}" fill="none" stroke="#dfe3e9"/>`).join("")}
+      ${PAX.map((_, i) => { const [x, y] = pt(i, R); return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#dfe3e9"/>`; }).join("")}
+      <polygon points="${shape}" fill="${col}" fill-opacity=".18" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
+      ${labels ? PAX.map(([, l], i) => { const [x, y] = pt(i, R + 16); return `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="${Math.abs(x - c) < 4 ? "middle" : x < c ? "end" : "start"}" font-size="11" font-weight="600" fill="#454549" font-family="Inter, sans-serif">${l}</text>`; }).join("") : ""}</svg>`;
+  }
+  function profileBox(st) {
+    const p = profile(st);
+    return `<div class="pf-box"><div class="pf-chart">${radar(p, 180)}</div><div class="pf-list"><div class="kicker" style="color:var(--ink2)">Profil priče</div>
+      ${PAX.map(([k, l, d]) => `<div class="pf-row"><span class="pf-l">${l}</span><span class="pf-bar"><i style="width:${Math.round(p.v[k] * 100)}%;background:${p.tilt && k === "jednostranost" ? VAR[p.tilt] : "var(--ink)"}"></i></span><span class="pf-t">${esc(p.txt[k])}</span></div>`).join("")}
+      <p class="meta" style="margin:8px 0 0">Dalje od centra znači više. Doseg se poredi sa najvećim pričama dana.</p></div></div>`;
+  }
+  function homeProfiles() {
+    const top = D.stories.slice(0, 5); if (top.length < 3) return "";
+    return `<section class="home-box" aria-label="Profil najvećih priča"><div class="hb-head"><h2>Kako se porede najveće priče</h2></div>
+      <div class="pf-grid">${top.map(st => { const p = profile(st); const ks = PAX.slice().sort((a, b) => p.v[b[0]] - p.v[a[0]]);
+        return `<a class="pf-card" href="${link(st)}">${radar(p, 150, false)}<div class="pf-h">${esc(st.headline)}</div><div class="meta">${st.sources} ${form(st.sources, "medij")} · ${st.items.length} članaka</div>
+          <div class="pf-sw"><span>Najjače: <b>${ks[0][1]}</b></span><span>Najslabije: <b>${ks[ks.length - 1][1]}</b></span></div></a>`; }).join("")}</div>
+      <p class="meta" style="margin-top:10px">${PAX.map(([, l, d]) => `<b>${l}</b>: ${d}`).join(" · ")}. Dalje od centra znači više; boja pokazuje stranu koja priču više prati.</p></section>`;
   }
   function briefingPage() {
     const B = D.briefing;
