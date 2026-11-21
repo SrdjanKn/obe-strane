@@ -561,12 +561,11 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
 /* rounded corners: photos and boxes */
 :root{--r:8px;--r-sm:5px}
 .ph,.lv-over,.ep-tile,.ep-img,.story-fig .ph{border-radius:var(--r)}
-/* hover lift: photo tiles grow a little and rise off the page (pointer devices only, not with reduced motion) */
+/* hover lift on the home page podcast tiles: the tile grows a little and rises off the page (pointer devices only, not with reduced motion) */
 @media (hover:hover) and (prefers-reduced-motion:no-preference){
-  a .ph,.lv-over,.ep-tile{transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s cubic-bezier(.2,.7,.2,1);will-change:transform}
-  a:hover .ph,a:focus-visible .ph,.ep-tile:hover,.ep-tile:focus-visible{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 30px -14px rgba(18,26,34,.5);z-index:1}
-  .lv-over:hover,.lv-over:focus-visible{transform:translateY(-3px) scale(1.012);box-shadow:0 22px 40px -18px rgba(18,26,34,.55);z-index:1}
-  .story-fig .ph{transition:none}
+  .ep-tile{transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s cubic-bezier(.2,.7,.2,1)}
+  .ep-tile:hover,.ep-tile:focus-visible{transform:translateY(-4px) scale(1.03);box-shadow:0 18px 32px -14px rgba(18,26,34,.55);z-index:1}
+}
 }
 .lv-row .ph,.ep-c .ep-img{border-radius:var(--r-sm)}
 .lv-over .ph{border-radius:0}
