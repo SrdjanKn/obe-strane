@@ -1237,7 +1237,7 @@ footer .brand-logo{color:#fff}
   }
 
   // ---- za medije
-  const CONTACT_EMAIL = "";   // set the public contact address here, e.g. "kontakt@obestrane.rs"
+  const CONTACT_EMAIL = "knelov@yahoo.com";   // public contact address (Za medije page)
   const contactLine = () => CONTACT_EMAIL ? `<a href="mailto:${CONTACT_EMAIL}" style="text-decoration:underline">${CONTACT_EMAIL}</a>` : `<b>(kontakt adresa uskoro)</b>`;
   function forPublishers() {
     const top = Object.entries(D.stories.reduce((m, st) => { if (st.image_source) m[st.image_source] = (m[st.image_source] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 12);
