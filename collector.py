@@ -578,7 +578,7 @@ def cluster(articles, threshold=0.28, window_h=30, embs=None, emb_w=None, emb_lo
     mode "boost" (default): word matching decides as before, and the meaning score can only add a join that word
     matching narrowly missed: word cosine >= word_min AND meaning cosine >= emb_min. This catches reworded headlines
     of the same event without merging different events on the same topic. mode "mix": weighted blend (tested, merges
-    too much).""
+    too much)."""
     emb_w = EMB_W if emb_w is None else emb_w
     emb_lo = EMB_LO if emb_lo is None else emb_lo
     docs = [tokens(a["title"]) * 3 + tokens(a["summary"]) for a in articles]
