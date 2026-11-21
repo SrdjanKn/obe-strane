@@ -249,6 +249,33 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
 .ai-diff{margin:18px 0 0;padding:12px 16px;background:var(--soft);font:400 16.5px/1.5 var(--serif)}
 .ai-note{margin:12px 0 0;font:400 12.5px/1.45 var(--sans);color:var(--ink3)}
 .ai-note a{text-decoration:underline}
+.hh{margin-top:44px;padding:40px 0 34px;background:#141a22;color:#fff}
+.hh .h2{color:#fff}.hh .ai-note{color:#aab2bd}.hh .ai-note a{color:#fff}.hh .meta{color:#aab2bd}
+.hh .hh-side,.hh .hh-words{background:#fff;color:var(--ink)}
+.hh .hh-diff{color:#d6dbe2}.hh .hh-diff b{color:#fff}
+.hh .hh-empty{background:#1d2530;color:#fff;border-color:var(--c)}.hh .hh-empty .hh-sub,.hh .hh-empty .hh-n{color:#c3cad4}
+.hh .hh-empty .hh-lab{color:#fff}
+.hh .hh-wh{color:var(--ink3)}
+.hh-diff{margin:0 0 18px;max-width:760px;color:var(--ink2);font:400 18px/1.5 var(--serif)}.hh-diff b{color:var(--ink);font-family:var(--sans);font-size:15px}
+.hh-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.hh-side{display:flex;flex-direction:column;gap:12px;padding:20px 22px;background:var(--soft);border-radius:10px;border-top:4px solid var(--c);min-width:0}
+.hh-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.hh-lab{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.hh-n{font:500 13px/1 var(--sans);color:var(--ink2)}.hh-n b{color:var(--c)}
+.hh-hl{font:600 24px/1.25 var(--head);color:var(--ink)}.hh-hl:hover{text-decoration:underline;text-underline-offset:3px}
+.hh-src{display:flex;align-items:center;gap:6px;font:500 13px/1 var(--sans);color:var(--ink3)}
+.hh-emph{margin:0;padding-top:12px;border-top:1px solid var(--sig-line);font:400 16px/1.5 var(--serif);color:var(--ink2)}.hh-emph b{color:var(--ink);font-family:var(--sans);font-size:14px}
+.hh-more{align-self:flex-start;background:none;border:0;padding:4px 0;font:600 14px/1 var(--sans);color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
+.hh-empty{background:#fff;border:2px dashed var(--c);border-top-width:4px;border-top-style:solid}
+.hh-silent{margin:6px 0 0;font:600 20px/1.3 var(--head)}.hh-sub{margin:0;color:var(--ink2);font:400 15px/1.45 var(--sans)}
+.hh-words{margin-top:16px;padding:18px 22px;background:var(--soft);border-radius:10px;display:grid;gap:12px}
+.hh-wh{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.hh-w{display:grid;grid-template-columns:170px 1fr 1fr;gap:8px 22px;align-items:center;text-align:left;background:none;border:0;padding:6px 0;cursor:pointer;font:inherit;color:inherit;border-top:1px solid var(--sig-line)}
+.hh-w:hover .hh-word{text-decoration:underline}.hh-w:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.hh-word{font:700 17px/1.2 var(--head)}
+.hh-wr{display:grid;grid-template-columns:62px 1fr 58px;gap:8px;align-items:center;font:500 13px/1 var(--sans);color:var(--ink2)}
+.hh-track{height:9px;background:#e3e7ed;border-radius:3px;overflow:hidden}.hh-track i{display:block;height:100%;border-radius:3px}
+@media (max-width:760px){.hh-grid{grid-template-columns:1fr}.hh-hl{font-size:21px}.hh-w{grid-template-columns:1fr;gap:6px}}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:22px 0}
 .stats>div{background:#fff;padding:16px 18px}
 .stats b{display:block;font:700 30px/1 var(--head);margin-bottom:6px}
@@ -1012,6 +1039,42 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
       <p class="ai-note">Ovaj sažetak je automatski napisao AI model na osnovu naslova i uvoda članaka, bez sopstvene ocene. Može da sadrži greške: proverite u izvornim člancima ispod. <a href="#/o-nama/metodologija">Kako radimo</a></p>
     </div></section>`;
   }
+  // ---- Licem u lice: one representative headline per side, what each side stresses, and the words that split them
+  function h2h(s, its, sw) {
+    const pg = its.filter(i => i.camp === "pro_government"), cr = its.filter(i => i.camp === "critical");
+    if (!pg.length && !cr.length) return "";
+    const rep = list => { if (list.length < 3) return list[0]; const T = list.map(i => tokSet(i.title));
+      let best = 0, bs = -1; T.forEach((a, i) => { const sc = T.reduce((t, b, j) => t + (i === j ? 0 : jac(a, b)), 0); if (sc > bs) { bs = sc; best = i; } }); return list[best]; };
+    const a = s.ai || {}, n = s.sources;
+    const card = (k, list, emph) => { const col = VAR[k], word = k === "pro_government" ? "režimski" : "kritički";
+      if (!list.length) return `<div class="hh-side hh-empty" style="--c:${col}"><div class="hh-top"><span class="hh-lab">${LAB[k]}</span><span class="hh-n"><b>0</b> od ${n} medija</span></div>
+        <p class="hh-silent">${word[0].toUpperCase() + word.slice(1)} mediji ovu vest nisu objavili.</p><p class="hh-sub">Ako je neki ${word} medij objavi, pojaviće se ovde.</p></div>`;
+      const r = rep(list);
+      return `<div class="hh-side" style="--c:${col}"><div class="hh-top"><span class="hh-lab">${LAB[k]}</span><span class="hh-n"><b>${list.length}</b> od ${n} medija</span></div>
+        <a class="hh-hl" ${out(r.url, r.source)}>„${esc(r.title)}“</a>
+        <div class="hh-src">${logo(r.source, 16)}${esc(src(r.source).name)} · ${clock(r.published)}</div>
+        ${emph ? `<p class="hh-emph"><b>Naglašavaju:</b> ${esc(emph.replace(/^(Režimski|Kritički) mediji\s+(ističu|naglašavaju)?\s*/i, ""))}</p>` : ""}
+        ${list.length > 1 ? `<button type="button" class="hh-more" data-go="poredjenje">Svi ${word} naslovi (${list.length})</button>` : ""}</div>`; };
+    // words that one side uses and the other mostly doesn't, counted in both sides' headlines
+    let words = "";
+    if (sw && pg.length && cr.length) {
+      const has = (list, st) => list.filter(i => wordsOf(i.title).has(st)).length;
+      const rows = [...sw.pg.slice(0, 2), ...sw.cr.slice(0, 2)].slice(0, 3).map(x => ({word: x.word, st: x.st, p: has(pg, x.st), c: has(cr, x.st)}));
+      const row = r => `<button type="button" class="hh-w" data-w="${r.st}"><span class="hh-word">„${esc(r.word)}“</span>
+        <span class="hh-wr"><span>Režimski</span><span class="hh-track"><i style="width:${r.p / pg.length * 100}%;background:var(--pg)"></i></span><b style="color:var(--pg)">${r.p} od ${pg.length}</b></span>
+        <span class="hh-wr"><span>Kritički</span><span class="hh-track"><i style="width:${r.c / cr.length * 100}%;background:var(--cr)"></i></span><b style="color:var(--cr)">${r.c} od ${cr.length}</b></span></button>`;
+      if (rows.length) words = `<div class="hh-words"><div class="hh-wh">Ista vest, druge reči</div>${rows.map(row).join("")}<p class="meta" style="margin:2px 0 0">Kliknite na reč da je vidite u svim naslovima.</p></div>`;
+    }
+    const pgFirst = parseInt(s.id.slice(-2), 16) % 2 === 0;   // sides swap from story to story, so neither is always first
+    const sides = pgFirst ? card("pro_government", pg, a.provladini) + card("critical", cr, a.kriticki) : card("critical", cr, a.kriticki) + card("pro_government", pg, a.provladini);
+    return `<section id="licem" class="hh" aria-label="Licem u lice"><div class="wide">
+      <h2 class="h2">Licem u lice</h2>
+      ${a.razlika ? `<p class="hh-diff"><b>Glavna razlika:</b> ${esc(a.razlika)}</p>` : `<p class="hh-diff">Najtipičniji naslov svake strane. Strane menjaju mesta od priče do priče.</p>`}
+      <div class="hh-grid">${sides}</div>
+      ${words}
+      ${a.provladini || a.kriticki || a.razlika ? `<p class="ai-note">Rečenice „Naglašavaju“ i „Glavna razlika“ automatski piše AI model na osnovu naslova i uvoda članaka. Može da pogreši: proverite u naslovima ispod. <a href="#/o-nama/metodologija">Kako radimo</a></p>` : ""}
+    </div></section>`;
+  }
   function story(id) {
     const s = D.stories.find(x => x.id === id);
     if (!s) return `${compactHeader()}<div class="wrap empty">Ova vest više nije u izboru poslednjih ${D.hours} sati. <a href="#/" style="text-decoration:underline">Nazad na naslovnu</a></div>${footer()}`;
@@ -1029,7 +1092,7 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
     const more = D.stories.filter(x => x.section === s.section && x.id !== s.id).slice(0, 3);
     return `${compactHeader(s.section)}
     <div class="subnav"><div class="wrap"><b style="color:var(--ink)">${esc(s.section)} ›</b>
-      ${s.ai ? '<button data-go="ukratko">Ukratko</button>' : ""}<button data-go="poredjenje">Kako su naslovili</button><button data-go="hronologija">Hronologija</button><button data-go="pokrivenost">Pokrivenost</button><a href="#/izvori">Izvori</a></div></div>
+<button data-go="licem">Licem u lice</button><button data-go="poredjenje">Kako su naslovili</button><button data-go="hronologija">Hronologija</button><button data-go="pokrivenost">Pokrivenost</button><a href="#/izvori">Izvori</a></div></div>
     <article class="story">
       ${s.image ? `<figure class="wide story-fig">${photo(s, "16/9")}${s.image_source ? `<figcaption class="meta">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
       <div class="col" style="padding-top:${s.image ? 22 : 40}px">
@@ -1040,16 +1103,16 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
         <div class="byline"><div class="meta"><b style="color:var(--ink)">Priču prati ${s.sources} medija</b> · prvi objavio ${esc(src(s.broke).name)} u ${clock(s.first)} · poslednji članak u ${clock(its[its.length - 1].published)}</div>
           <button class="pill" id="share" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Podeli</span></button></div>
       </div>
-      ${aiBox(s)}
-      <section id="pokrivenost" class="col" style="margin-top:36px" aria-label="Pokrivenost"><div class="covbox">
+      <section id="pokrivenost" class="col" style="margin-top:30px" aria-label="Pokrivenost"><div class="covbox">
         <div><div class="kicker" style="color:var(--ink2)">Ko je objavio</div><div class="sent">${sentence}</div>${bar(s, 14)}${cov(s)}</div>
         <div>${ORDER.map(k => `<div class="row"><span>${dot(k)}${LAB[k]}</span><b>${s.split[k] || 0}</b></div>`).join("")}</div>
       </div>
       ${profileBox(s)}
       ${s.blindspot ? `<div class="bs-note">${EYE}<b>Slepa tačka.</b> ${bsLabel(s.blindspot)} mediji nisu objavili ovu vest, iako su u to vreme objavljivali druge vesti.</div>` : ""}</section>
+      ${h2h(s, its, sw)}
       <section id="poredjenje" class="wide" style="margin-top:44px" aria-label="Kako su naslovili">
         <h2 class="h2">Kako su naslovili</h2>
-        <p style="margin:0 0 20px;color:var(--ink2)">Isti događaj, naslovi iz dva tabora, po vremenu objave. Naslovi vode na izvorni članak.</p>
+        <p style="margin:0 0 20px;color:var(--ink2)">Svi naslovi iz oba tabora, po vremenu objave. Naslovi vode na izvorni članak.</p>
         ${(() => { const w = sw; if (!w || (!w.pg.length && !w.cr.length)) return ""; const chips = (arr, k) => arr.map(x => `<button type="button" class="w-chip" data-w="${x.st}" aria-pressed="false" style="border-color:${VAR[k]};color:${VAR[k]};--c:${VAR[k]}" title="U ${x.n} od ${x.of} ${k === "pro_government" ? "režimskih" : "kritičkih"} naslova">${esc(x.word)} <small>${x.n}/${x.of}</small></button>`).join("") || `<span class="meta">nema izdvojenih reči</span>`;
           return `<div class="w-story-box"><a href="#/reci" class="w-title">Reči koje biraju</a><div><span class="w-lab">Režimski</span>${chips(w.pg, "pro_government")}</div><div><span class="w-lab">Kritički</span>${chips(w.cr, "critical")}</div><p class="meta w-tip">Pređite preko reči ili je dodirnite da vidite gde se javlja u naslovima.</p></div>`; })()}
         <div class="sides">${side(pg, "pro_government", "Režimski mediji")}${side(cr, "critical", "Kritički mediji")}</div>
@@ -1725,6 +1788,8 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
       box.querySelectorAll(".wq").forEach(x => x.classList.toggle("lit", x.dataset.w === st));
       box.querySelectorAll(".side a").forEach(a => a.classList.toggle("has", !!st && !!a.querySelector(`.wq[data-w="${st}"]`)));
       chips.forEach(c => { c.classList.toggle("on", c.dataset.w === st); c.setAttribute("aria-pressed", c.dataset.w === pinned); }); };
+    document.querySelectorAll(".hh-w").forEach(b => b.addEventListener("click", () => { const c = chips.find(c => c.dataset.w === b.dataset.w);
+      if (c) { if (pinned !== c.dataset.w) c.click(); box.scrollIntoView({behavior: MOTION ? "smooth" : "auto", block: "start"}); } }));
     chips.forEach(c => {
       c.addEventListener("mouseenter", () => light(c.dataset.w));
       c.addEventListener("mouseleave", () => light(pinned));
