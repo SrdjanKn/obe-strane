@@ -520,6 +520,19 @@ footer .brand-logo{color:#fff}
 @media (prefers-reduced-motion:reduce){.tk-track{animation:none}.tk-win{overflow-x:auto}.tk-dup{display:none}.tk-live{animation:none}}
 @media (max-width:760px){.tk{margin-top:0}.tk-in{padding-left:16px;padding-right:0}.tk-lab{font-size:11px;padding-right:10px}.tk-i{font-size:13.5px;padding:0 16px}}
 @media (max-width:1080px){.util .u-stats{display:none}}
+.prose-page .page-p{max-width:760px}
+.pp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:26px}
+.pp-card{background:var(--soft);border-radius:var(--r);padding:20px 22px}
+.pp-card h2{margin:0 0 10px;font:700 20px/1.2 var(--head)}
+.pp-card ul{margin:0;padding-left:18px}.pp-card li,.pp-card p{font:400 15.5px/1.55 var(--sans);color:var(--ink2);margin:0 0 6px}
+.pp-top{display:flex;flex-wrap:wrap;gap:6px}
+.sp-box{background:var(--soft);border-radius:var(--r);padding:20px 22px}
+.sp-story{display:block;margin-bottom:6px}.sp-h{display:block;font:700 24px/1.2 var(--head);color:var(--ink);margin-top:6px}
+.sp-note{margin:4px 0 14px;font:400 14px/1.5 var(--sans);color:var(--ink2)}
+.sp-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.sp-lab{font:700 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.sp-col .w-q{display:block;background:#fff;border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;margin:8px 0}
+@media (max-width:760px){.pp-grid,.sp-cols{grid-template-columns:minmax(0,1fr)}.sp-h{font-size:20px}}
 </style>
 </head>
 <body>
@@ -647,7 +660,7 @@ footer .brand-logo{color:#fff}
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
     </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
   function balanceLine() {
     const b = balanceObj();
@@ -765,6 +778,7 @@ footer .brand-logo{color:#fff}
     </main>
     ${bsDay ? bsBand(bsDay) : ""}
     <div class="wrap">
+      ${homeSpin()}
       ${homeQuotes()}
       ${homePods()}
       ${sec2}
@@ -1206,6 +1220,59 @@ footer .brand-logo{color:#fff}
       <div class="ep-grid">${eps.slice(0, 40).map(e => epCard(e)).join("") || `<p class="meta">Za sada nema novih epizoda.</p>`}</div>
       <p class="meta ton-note">Epizode preuzimamo iz javnih kanala emisija (YouTube, RSS, Apple Podcasts). Sadržaj i prava pripadaju autorima.</p></main>${footer()}`;
   }
+
+  // ---- za medije
+  const CONTACT_EMAIL = "";   // set the public contact address here, e.g. "kontakt@obestrane.rs"
+  const contactLine = () => CONTACT_EMAIL ? `<a href="mailto:${CONTACT_EMAIL}" style="text-decoration:underline">${CONTACT_EMAIL}</a>` : `<b>(kontakt adresa uskoro)</b>`;
+  function forPublishers() {
+    const top = Object.entries(D.stories.reduce((m, st) => { if (st.image_source) m[st.image_source] = (m[st.image_source] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 12);
+    return `${compactHeader()}<main class="wrap prose-page"><h1 class="page-h">Za medije</h1>
+      <p class="page-p">Obe strane ne piše vesti. Povezujemo vaše tekstove sa tekstovima drugih medija o istom događaju i šaljemo čitaoce na vaš sajt. Ovde objašnjavamo šta tačno preuzimamo i kako da nas kontaktirate.</p>
+      <section class="pp-grid">
+        <div class="pp-card"><h2>Šta preuzimamo</h2><ul><li><b>Naslov</b> i <b>kratak uvod</b> (do 300 znakova) iz vašeg javnog RSS-a ili naslovne strane.</li><li><b>Link</b> na originalni tekst. Svaki naslov vodi na vaš sajt.</li><li><b>Naslovnu fotografiju</b> iz vašeg RSS-a ili oznake za deljenje (og:image), uz potpis „Fotografija: naziv medija“.</li><li>Ne preuzimamo ceo tekst i ne prikazujemo ga na našem sajtu.</li></ul></div>
+        <div class="pp-card"><h2>Kako koristimo fotografije</h2><ul><li>Fotografija se prikazuje samo uz priču u kojoj je i vaš tekst, sa vašim imenom.</li><li>Biramo samo oštre fotografije dovoljne veličine. Logotipi i grafike se odbacuju kad ih prepoznamo.</li><li>Fotografije se učitavaju sa vašeg servera; ne čuvamo kopije.</li></ul></div>
+        <div class="pp-card"><h2>Uklanjanje ili izmena</h2><p>Ako ne želite da prikazujemo vaše fotografije ili tekstove, ili je oznaka vašeg medija pogrešna, pišite nam na ${contactLine()}. Fotografije uklanjamo u najkraćem roku, a oznake preispitujemo i odgovaramo sa obrazloženjem.</p></div>
+        <div class="pp-card"><h2>Saradnja</h2><p>Rado ćemo koristiti fotografije uz vašu dozvolu, ispraviti RSS adresu ili dodati rubriku koju propuštamo. Mediji koje ne pratimo mogu da predlože uključivanje. Pišite na ${contactLine()}.</p></div>
+      </section>
+      ${top.length ? `<h2 class="h3" style="margin:36px 0 10px">Čije fotografije se trenutno najviše prikazuju</h2>
+      <div class="pp-top">${top.map(([id, n]) => `<span class="bd-logo">${logo(id, 16)}${esc(src(id).name)} <b>${n}</b></span>`).join("")}</div>` : ""}
+      <p class="meta ton-note">Oznake medija (režimski, kritički, javni servis, između kategorija, međunarodni) objašnjene su na stranici <a href="#/o-nama" style="text-decoration:underline">O nama i metodologija</a>, a vlasništvo na stranici <a href="#/izvori" style="text-decoration:underline">Izvori</a>.</p></main>${footer()}`;
+  }
+
+  // ---- najrazličitije prenesena vest
+  const tokSet = t => new Set(toLat(t).split(/[^a-z0-9čćšžđ]+/u).map(w => fold(w)).filter(w => w.length >= 4 && !STOPW.has(w)).map(w => w.slice(0, 6)));
+  const jac = (a, b) => { let i = 0; a.forEach(x => b.has(x) && i++); return i / ((a.size + b.size - i) || 1); };
+  function spinScore(st) {
+    const pg = st.items.filter(i => camp(i.source) === "pro_government").map(i => tokSet(i.title)), cr = st.items.filter(i => camp(i.source) === "critical").map(i => tokSet(i.title));
+    if (pg.length < 2 || cr.length < 2) return null;
+    const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+    const within = [], across = [];
+    [pg, cr].forEach(side => side.forEach((a, i) => side.slice(i + 1).forEach(b => within.push(jac(a, b)))));
+    pg.forEach(a => cr.forEach(b => across.push(jac(a, b))));
+    return {score: avg(within) - avg(across), within: avg(within), across: avg(across)};
+  }
+  const spunStories = () => D.stories.map(st => ({st, sp: spinScore(st)})).filter(x => x.sp && x.sp.score > 0.05).sort((a, b) => b.sp.score - a.sp.score);
+  function spinCard(st, big = false) {
+    const side = k => st.items.filter(i => camp(i.source) === k).slice(0, big ? 4 : 3);
+    const w = storyWords(st) || {pg: [], cr: []};
+    const hl = (t, arr) => { let h = esc(t); arr.forEach(x => { h = h.replace(new RegExp(`(^|[^\\p{L}])(${x.word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\p{L}]*)`, "giu"), "$1<b class=\"w-hit\">$2</b>"); }); return h; };
+    const col = (k, label, arr) => `<div class="sp-col"><div class="sp-lab" style="color:${VAR[k]}">${label}</div>${side(k).map(i => `<a class="w-q" style="border-left-color:${VAR[k]}" ${out(i.url, i.source)}>„${hl(i.title, arr)}“ <span class="meta">${esc(src(i.source).name)}</span></a>`).join("")}</div>`;
+    return `<div class="sp-cols">${col("pro_government", "Režimski naslovi", w.pg)}${col("critical", "Kritički naslovi", w.cr)}</div>`;
+  }
+  function homeSpin() {
+    const top = spunStories()[0]; if (!top) return "";
+    const st = top.st;
+    return `<section class="home-box" aria-label="Najrazličitije prenesena vest"><div class="hb-head"><h2>Ista vest, različiti naslovi</h2><a class="btn" href="#/najrazlicitije">Još primera</a></div>
+      <div class="sp-box"><a class="sp-story" href="${link(st)}"><span class="kicker">${esc(st.section || "")} · ${st.sources} medija</span><span class="sp-h">${esc(st.headline)}</span></a>
+      <p class="sp-note">Najrazličitije prenesena vest dana: naslovi jedne strane međusobno se poklapaju ${Math.round(top.sp.within * 100)}%, a sa naslovima druge strane samo ${Math.round(top.sp.across * 100)}%.</p>${spinCard(st, true)}</div></section>`;
+  }
+  function spinPage() {
+    const list = spunStories().slice(0, 8);
+    return `${compactHeader()}<main class="wrap spin-page"><h1 class="page-h">Ista vest, različiti naslovi</h1>
+      <p class="page-p">Priče u kojima se naslovi režimskih i kritičkih medija najviše razlikuju, iako govore o istom događaju. Merimo koliko se reči u naslovima poklapaju unutar jedne strane, a koliko između strana. Istaknute su reči koje koristi samo jedna strana.</p>
+      ${list.map(({st, sp}) => `<section class="sp-box" style="margin-top:22px"><a class="sp-story" href="${link(st)}"><span class="kicker">${esc(st.section || "")} · ${st.sources} medija · razlika ${Math.round(sp.score * 100)}</span><span class="sp-h">${esc(st.headline)}</span></a>${spinCard(st)}</section>`).join("") || `<p class="meta">Za sada nema priča koje su obe strane dovoljno pratile.</p>`}
+      </main>${footer()}`;
+  }
   function briefingPage() {
     const B = D.briefing;
     if (!B) return `${header("brief")}<div class="wrap empty">Prvi brifing stiže sutra u 7 ujutru.</div>${footer()}`;
@@ -1326,7 +1393,7 @@ footer .brand-logo{color:#fff}
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
       : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
       : page === "o-nama" ? about() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
-      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : home();
+      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : page === "za-medije" ? forPublishers() : page === "najrazlicitije" ? spinPage() : home();
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const tog = document.querySelector(".s-tog");
     if (tog) tog.addEventListener("click", () => { const on = document.body.classList.toggle("ss"); tog.setAttribute("aria-expanded", on); if (on) { window.scrollTo(0, 0); document.getElementById("q").focus(); } });
