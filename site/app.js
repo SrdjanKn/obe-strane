@@ -182,7 +182,7 @@
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama i metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama</a><a href="metodologija/">Metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
     </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
   function balanceLine() {
     const b = balanceObj();
@@ -231,7 +231,7 @@
     <ul class="intro-l"><li><b>Iste vesti, uporedo.</b> Naslovi režimskih i kritičkih medija jedni pored drugih.</li>
       <li><b>Slepe tačke.</b> Šta je objavila samo jedna strana, a druga prećutala.</li>
       <li><b>Bez naših tekstova.</b> Sve vodi na izvorne članke.</li></ul>
-    <div class="intro-a"><button class="btn dark" type="button" id="intro-ok">Razumem</button><a href="#/o-nama" class="intro-more">Kako radimo</a></div></div></section>`;
+    <div class="intro-a"><button class="btn dark" type="button" id="intro-ok">Razumem</button><a href="metodologija/" class="intro-more">Kako radimo</a></div></div></section>`;
   function home() {
     const S = D.stories;
     if (!S.length) return `${header("home")}<div class="wrap empty">Još nema dovoljno podataka. Sledeće prikupljanje je za najviše 15 minuta.</div>${footer()}`;
@@ -379,7 +379,7 @@
       <div class="kicker" style="color:var(--ink2)">Ukratko</div><p class="ai-sum">${esc(a.ukratko)}</p>
       ${a.provladini || a.kriticki ? `<div class="ai-two">${side("pro_government", a.provladini)}${side("critical", a.kriticki)}</div>` : ""}
       ${a.razlika ? `<p class="ai-diff"><b class="sans" style="font-size:14px">Glavna razlika:</b> ${esc(a.razlika)}</p>` : ""}
-      <p class="ai-note">Ovaj sažetak je automatski napisao AI model na osnovu naslova i uvoda članaka, bez sopstvene ocene. Može da sadrži greške: proverite u izvornim člancima ispod. <a href="#/o-nama/metodologija">Kako radimo</a></p>
+      <p class="ai-note">Ovaj sažetak je automatski napisao AI model na osnovu naslova i uvoda članaka, bez sopstvene ocene. Može da sadrži greške: proverite u izvornim člancima ispod. <a href="metodologija/">Kako radimo</a></p>
     </div></section>`;
   }
   // ---- Licem u lice: one representative headline per side, what each side stresses, and the words that split them
@@ -415,7 +415,7 @@
       ${a.razlika ? `<p class="hh-diff"><b>Glavna razlika:</b> ${esc(a.razlika)}</p>` : `<p class="hh-diff">Najtipičniji naslov svake strane. Strane menjaju mesta od priče do priče.</p>`}
       <div class="hh-grid">${sides}</div>
       ${words}
-      ${a.provladini || a.kriticki || a.razlika ? `<p class="ai-note">Rečenice „Naglašavaju“ i „Glavna razlika“ automatski piše AI model na osnovu naslova i uvoda članaka. Može da pogreši: proverite u naslovima ispod. <a href="#/o-nama/metodologija">Kako radimo</a></p>` : ""}
+      ${a.provladini || a.kriticki || a.razlika ? `<p class="ai-note">Rečenice „Naglašavaju“ i „Glavna razlika“ automatski piše AI model na osnovu naslova i uvoda članaka. Može da pogreši: proverite u naslovima ispod. <a href="metodologija/">Kako radimo</a></p>` : ""}
     </div></section>`;
   }
   function story(id) {
@@ -619,28 +619,16 @@
       <p class="dek" style="font-size:21px">Obe strane pokazuje kako mediji u Srbiji izveštavaju o istim događajima. Na jednom mestu vidite ko je vest objavio, kako ju je naslovio i šta je ko prećutao.</p>
       <p>U Srbiji ista vest često izgleda potpuno drugačije, u zavisnosti od toga koji medij čitate. Režimski i kritički mediji biraju različite teme, reči i sagovornike, a neke događaje jedna strana uopšte ne objavi. Mi ne pišemo vesti i ne govorimo vam šta da mislite. Povezujemo članke o istom događaju, pokazujemo ih uporedo i uz svaki dajemo link na izvorni tekst.</p>
       <p>Projekat je nezavisan, neprofitan i u fazi prototipa. Kod je javan na ${u("https://github.com/SrdjanKn/obe-strane\" target=\"_blank\" rel=\"noopener", "GitHubu")}, pa svako može da proveri kako radi.</p>
-      <h2 id="metodologija">Kako radimo</h2>
-      <ol>
-        <li><b>Prikupljanje.</b> Više puta dnevno čitamo RSS izvore i naslovne strane ${live} medija i čuvamo naslov, uvod, vreme objave i link. Sport, zabavu i lifestyle preskačemo.</li>
-        <li><b>Grupisanje u priče.</b> Program poredi reči u naslovima i uvodima, na ćirilici i latinici, i spaja članke o istom događaju objavljene u razmaku do 30 sati. Prikazujemo samo priče koje je objavilo najmanje dva medija. Naslov priče je onaj koji je najsličniji svim ostalima, bez obzira iz kog je tabora.</li>
-        <li><b>Oznake medija.</b> Svaki medij ima početnu oznaku: režimski, kritički, javni servis, između kategorija ili međunarodni. Oznake se zasnivaju na javnim analizama (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i na podacima o vlasništvu. To su pretpostavke koje proveravamo, a ne presude. Do izbora 25. oktobra 2026. prvu grupu smo zvali „provladini“. Posle promene vlasti zovemo je „režimski“: to su mediji koji su tokom 14 godina vladavine SNS-a dosledno zastupali tadašnju vlast. Oznaka opisuje njihovu uređivačku prošlost, ne odnos prema novoj vlasti, i redovno je preispitujemo. Ceo spisak je na stranici ${u("#/izvori", "Izvori")}.</li>
-        <li><b>Slepe tačke.</b> Priča je slepa tačka kada ju je objavilo najmanje tri medija, od toga bar dva sa jedne strane, a nijedan sa druge. Računa se samo ako su mediji te druge strane u to vreme bili praćeni i objavljivali druge vesti, da kvar u prikupljanju ne bi izgledao kao prećutkivanje.</li>
-        <li><b>Redosled vesti.</b> Priča je viša što je više medija prati i što je svežija: njena težina se prepolovi za svakih osam sati bez novog članka.</li>
-        <li><b>AI sažeci.</b> Za najveće priče AI model (${esc(D.ai_model || "Claude")}) piše kratak neutralan sažetak i opis toga kako je koja strana uokvirila vest. Model dobija samo naslove i uvode članaka, uz uputstvo da ne ocenjuje ko je u pravu i da ne dodaje činjenice. Sažeci su uvek označeni i mogu da sadrže greške.</li>
-        <li><b>Vlasništvo.</b> Podatke o vlasnicima uzimamo iz javnih izvora (State Media Monitor, CRTA, BIRN, istraživanja medija) i uz svaki navodimo izvor. Poslednja provera: novembar 2026.</li>
-      </ol>
+      <h2 id="metodologija">Metodologija</h2>
+      <p>Kako prikupljamo vesti, grupišemo ih u priče, razvrstavamo medije i kako možete da osporite oznaku, opisano je na posebnoj stranici: ${u("metodologija/", "Metodologija")}.</p>
       <h2 id="balans">Naš balans</h2>
       <p>Proveravamo i sami sebe. Ovo su brojevi za poslednjih ${D.hours} sati i računaju se automatski pri svakom ažuriranju.</p>
     </div>
     <div style="max-width:900px">${row("Prikazano na sajtu", shown)}${row("Prikupljeni članci", coll)}${row("Mediji koje pratimo", outl)}</div>
     <div class="prose">
       <p>Pratimo ${op} ${form(op, "pro_government")} i ${oc} ${form(oc, "critical")} ${form(oc, "medij")}. Kritičkih medija je više, ali su mnogi manji i objavljuju ređe, pa je broj objava dve strane ujednačeniji od broja medija. U jednoj priči svaki medij se računa samo jednom, koliko god članaka da je objavio.</p>
-      <h2>Ograničenja</h2>
-      <ul><li>Program grupiše vesti po rečima, pa ponekad spoji dve različite vesti ili razdvoji istu.</li>
-        <li>Neki mediji blokiraju automatsko čitanje. Te blokade ne zaobilazimo: takve medije pauziramo dok ne dobijemo RSS ili dozvolu redakcije.</li>
-        <li>Manji mediji objavljuju malo vesti, pa se ređe pojavljuju u pričama.</li></ul>
       <h2>Kontakt</h2>
-      <p>Primedbe na oznake, vlasništvo ili grupisanje vesti su dobrodošle. Pišite nam preko ${u("https://github.com/SrdjanKn/obe-strane/issues\" target=\"_blank\" rel=\"noopener", "GitHuba")}.</p>
+      <p>Primedbe na oznake, vlasništvo ili grupisanje vesti su dobrodošle: ${u("mailto:knelov@yahoo.com", "knelov@yahoo.com")} ili ${u("https://github.com/SrdjanKn/obe-strane/issues\" target=\"_blank\" rel=\"noopener", "GitHub")}. Kako osporiti oznaku, pročitajte u ${u("metodologija/#osporavanje", "metodologiji")}.</p>
     </div></main>${footer()}`;
   }
 
@@ -881,7 +869,7 @@
       </section>
       ${top.length ? `<h2 class="h3" style="margin:36px 0 10px">Čije fotografije se trenutno najviše prikazuju</h2>
       <div class="pp-top">${top.map(([id, n]) => `<span class="bd-logo">${logo(id, 16)}${esc(src(id).name)} <b>${n}</b></span>`).join("")}</div>` : ""}
-      <p class="meta ton-note">Oznake medija (režimski, kritički, javni servis, između kategorija, međunarodni) objašnjene su na stranici <a href="#/o-nama" style="text-decoration:underline">O nama i metodologija</a>, a vlasništvo na stranici <a href="#/izvori" style="text-decoration:underline">Izvori</a>.</p></main>${footer()}`;
+      <p class="meta ton-note">Oznake medija (režimski, kritički, javni servis, između kategorija, međunarodni) objašnjene su na stranici <a href="metodologija/" style="text-decoration:underline">Metodologija</a>, a vlasništvo na stranici <a href="#/izvori" style="text-decoration:underline">Izvori</a>.</p></main>${footer()}`;
   }
 
   // ---- najrazličitije prenesena vest
@@ -989,7 +977,7 @@
         <p class="meta" style="font-size:14px;max-width:560px;margin:0 auto">${list.length} najvažnijih vesti iz poslednja 24 sata i kako ih je koja strana prenela. Izdanje se pravi jednom dnevno, u 7 ujutru. Čitanje: oko ${mins} minuta.</p></div>
       ${list.map((s, i) => item(s, i + 1)).join("")}
       ${bs.length ? `<div class="sec-head" style="border-top-color:var(--sig)"><h2 style="color:var(--amber);display:flex;align-items:center">${EYE}Prećutano</h2><span class="meta">objavila samo jedna strana</span></div>${bs.map((s, i) => item(s, list.length + i + 1)).join("")}` : ""}
-      ${anyAi ? `<p class="ai-note" style="margin-top:20px">Sažetke i opise uokviravanja napisao je AI model na osnovu naslova i uvoda članaka. Mogu da sadrže greške. <a href="#/o-nama/metodologija">Kako radimo</a></p>` : ""}
+      ${anyAi ? `<p class="ai-note" style="margin-top:20px">Sažetke i opise uokviravanja napisao je AI model na osnovu naslova i uvoda članaka. Mogu da sadrže greške. <a href="metodologija/">Kako radimo</a></p>` : ""}
       <div class="brief-end">To je sve za danas. Sledeće izdanje je sutra u 7.<br><a href="#/" class="sans" style="font-size:15px;font-style:normal;text-decoration:underline">Vesti tokom dana su na naslovnoj</a></div>
     </main>${footer()}`;
   }

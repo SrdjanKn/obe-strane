@@ -260,9 +260,11 @@ def ldjson(obj):
 
 def describe(rec):
     p, c, o, n, _ = coverage(rec)
-    tail = rec["razlika"] or rec["summary"]
-    base = f"{n} medija o istoj vesti: {p} {form(p, 'pro_government')} i {c} {form(c, 'critical')}."
-    return clip(f"{base} {tail}".strip(), 158)
+    counts = f"{n} medija: {p} {form(p, 'pro_government')} i {c} {form(c, 'critical')}."
+    if rec["razlika"]:          # lead with what differs between the two sides; counts only if there is room
+        main = clip(rec["razlika"], 158)
+        return clip(f"{main} {counts}", 158) if len(main) + len(counts) < 150 else main
+    return clip(f"{counts} {rec['summary']}".strip(), 158)
 
 
 def page_title(rec):
@@ -317,7 +319,7 @@ def story_html(rec, live, site, v):
 {note}
 </article>
 <div class="st-foot">Obe strane uporedo prikazuje kako različiti mediji prenose istu vest. Naslovi pripadaju izdanjima koja su ih objavila;
-ovde ih samo poredimo i vodimo ka originalu. <a href="./#/o-nama">Kako razvrstavamo medije</a></div>
+ovde ih samo poredimo i vodimo ka originalu. <a href="metodologija/">Kako razvrstavamo medije</a></div>
 </div>'''
     ld = ldjson({"@context": "https://schema.org", "@graph": [
         {"@type": "WebPage", "@id": url, "url": url, "name": rec["headline"], "description": desc, "inLanguage": "sr-Latn",
@@ -364,6 +366,86 @@ ovde ih samo poredimo i vodimo ka originalu. <a href="./#/o-nama">Kako razvrstav
 
 
 
+METHOD_UPDATED = "22. novembra 2026."
+
+
+def methodology_html(site, v, n_outlets, ai_model):
+    url = f"{site}metodologija/"
+    desc = "Kako Obe strane prikupljaju vesti, grupišu ih u priče i razvrstavaju medije, i kako možete da osporite oznaku ili podatak."
+    body = f'''<div class="wrap st"><header class="st-top"><a href="./"><img src="logo.svg" alt="Obe strane" width="174" height="40"></a>
+<nav aria-label="Glavni meni"><a href="./">Naslovna</a><a href="./#/slepe-tacke">Slepe tačke</a><a href="./#/izvori">Izvori</a><a href="./#/o-nama">O nama</a></nav></header>
+<article class="prose">
+<h1>Metodologija</h1>
+<p class="dek" style="font-size:21px">Kako prikupljamo vesti, grupišemo ih u priče i razvrstavamo medije, i kako možete da osporite našu odluku.</p>
+
+<h2 id="prikazujemo">Šta prikazujemo, a šta ne</h2>
+<p>Prikazujemo naslov, kratak uvod, vreme objave i link ka originalu. Ne prenosimo članke, ne ocenjujemo da li je neka vest tačna i ne govorimo koja strana je u pravu. Uz svaki naslov stoji medij koji ga je objavio; naslovi i tekstovi pripadaju njima.</p>
+
+<h2 id="kako-radimo">Kako radimo</h2>
+<ol>
+<li><b>Prikupljanje.</b> Više puta dnevno čitamo RSS izvore i naslovne strane {n_outlets} medija i čuvamo naslov, uvod, vreme objave i link. Sport, zabavu i lifestyle preskačemo.</li>
+<li><b>Grupisanje u priče.</b> Program poredi reči u naslovima i uvodima, na ćirilici i latinici, i spaja članke o istom događaju objavljene u razmaku do 30 sati. Prikazujemo samo priče koje je objavilo najmanje dva medija, a za stranicu priče tražimo najmanje tri. Naslov priče je onaj koji je najsličniji svim ostalima, bez obzira iz kog je tabora. U jednoj priči svaki medij se računa samo jednom, koliko god članaka da je objavio.</li>
+<li><b>Slepe tačke.</b> Priča je slepa tačka kada ju je objavilo najmanje tri medija, od toga bar dva sa jedne strane, a nijedan sa druge. Računa se samo ako su mediji te druge strane u to vreme bili praćeni i objavljivali druge vesti, da kvar u prikupljanju ne bi izgledao kao prećutkivanje.</li>
+<li><b>Redosled vesti.</b> Priča je viša što je više medija prati i što je svežija: njena težina se prepolovi za svakih osam sati bez novog članka.</li>
+<li><b>AI sažeci.</b> Za najveće priče AI model ({e(ai_model)}) piše kratak neutralan sažetak i opis toga kako je koja strana uokvirila vest. Model dobija samo naslove i uvode članaka, uz uputstvo da ne ocenjuje ko je u pravu i da ne dodaje činjenice. Sažeci su uvek označeni i mogu da sadrže greške.</li>
+<li><b>Vlasništvo.</b> Podatke o vlasnicima uzimamo iz javnih izvora (State Media Monitor, CRTA, BIRN, istraživanja medija) i uz svaki navodimo izvor. Poslednja provera: novembar 2026.</li>
+</ol>
+
+<h2 id="oznake">Kako razvrstavamo medije</h2>
+<p>Svaki medij ima početnu oznaku. Oznake se zasnivaju na javnim analizama (CRTA, BIRN Media Ownership Monitor, Raskrikavanje) i na podacima o vlasništvu. To su pretpostavke koje proveravamo, a ne presude.</p>
+<ul>
+<li><b>Režimski:</b> mediji koji su tokom 14 godina vladavine SNS-a dosledno zastupali tadašnju vlast. Do izbora 25. oktobra 2026. ovu grupu smo zvali „provladini“. Oznaka opisuje uređivačku prošlost medija, ne njihov odnos prema novoj vlasti, i redovno je preispitujemo.</li>
+<li><b>Kritički:</b> mediji koje javne analize opisuju kao nezavisne ili kritičke prema vlastima.</li>
+<li><b>Javni servis:</b> javni medijski servisi.</li>
+<li><b>Između kategorija:</b> mediji koji se ne uklapaju dosledno ni u jednu od dve grupe.</li>
+<li><b>Međunarodni:</b> strani mediji koji izveštavaju o Srbiji i regionu.</li>
+</ul>
+<p>Oznaka, vlasnik i izvor podatka za svaki medij vide se na stranici <a href="./#/izvori">Izvori</a>.</p>
+
+<h2 id="osporavanje">Kako osporiti oznaku ili podatak</h2>
+<p>Ako mislite da je oznaka, podatak o vlasništvu ili grupisanje vesti pogrešno, pišite na <a href="mailto:knelov@yahoo.com">knelov@yahoo.com</a> ili otvorite prijavu na <a href="https://github.com/SrdjanKn/obe-strane/issues" target="_blank" rel="noopener">GitHubu</a>. Navedite medij i, ako možete, izvor koji pokazuje drugačije. Svaku primedbu čitamo; ako dokaz stoji, menjamo oznaku ili podatak. Sve izmene spiska medija vide se u javnoj istoriji koda projekta.</p>
+
+<h2 id="ogranicenja">Ograničenja</h2>
+<ul>
+<li>Program grupiše vesti po rečima, pa ponekad spoji dve različite vesti ili razdvoji istu.</li>
+<li>AI sažeci mogu da sadrže greške: proverite ih u izvornim člancima.</li>
+<li>Neki mediji blokiraju automatsko čitanje. Te blokade ne zaobilazimo: takve medije pauziramo dok ne dobijemo RSS ili dozvolu redakcije.</li>
+<li>Manji mediji objavljuju malo vesti, pa se ređe pojavljuju u pričama.</li>
+</ul>
+
+<h2 id="projekat">O projektu</h2>
+<p>Projekat je nezavisan, neprofitan i u fazi prototipa. Kod je javan na <a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">GitHubu</a>, pa svako može da proveri kako radi. Tekst poslednji put izmenjen: {METHOD_UPDATED}</p>
+</article></div>'''
+    ld = ldjson({"@context": "https://schema.org", "@type": "WebPage", "@id": url, "url": url, "name": "Metodologija", "description": desc,
+                 "inLanguage": "sr-Latn", "isPartOf": {"@type": "WebSite", "name": "Obe strane", "url": site}})
+    return f'''<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metodologija: kako razvrstavamo medije i grupišemo vesti | Obe strane</title>
+<meta name="description" content="{e(desc)}">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Obe strane">
+<meta property="og:locale" content="sr_RS">
+<meta property="og:title" content="Metodologija | Obe strane">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{site}og/default.png">
+<meta name="twitter:card" content="summary_large_image">
+{head_shared()}
+<link rel="stylesheet" href="app.css?v={v["css"]}">
+{ld}
+</head>
+<body>
+<div id="app">{body}</div>
+</body>
+</html>
+'''
+
+
 # ---------------------------------------------------------------- front page, sitemap, robots
 
 def between(text, tag, new):
@@ -402,7 +484,8 @@ def stamp_index(site, recs, v):
 
 
 def sitemap(site, recs):
-    urls = [f"<url><loc>{site}</loc><lastmod>{datetime.now(timezone.utc):%Y-%m-%d}</lastmod></url>"]
+    today = f"{datetime.now(timezone.utc):%Y-%m-%d}"
+    urls = [f"<url><loc>{site}</loc><lastmod>{today}</lastmod></url>", f"<url><loc>{site}metodologija/</loc><lastmod>{today}</lastmod></url>"]
     urls += [f"<url><loc>{site}vest/{r['id']}/</loc><lastmod>{ls[:10]}</lastmod></url>" for r, _, ls in recs]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "\n".join(urls) + "\n</urlset>\n")
@@ -436,6 +519,9 @@ def build(con, data):
         (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host))
     (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host))
     stamp_index(site, recs, v)
+    (SITE / "metodologija").mkdir(exist_ok=True)
+    n_out = sum(1 for x in data["sources"] if not x.get("paused"))
+    (SITE / "metodologija" / "index.html").write_text(methodology_html(site, v, n_out, data.get("ai_model") or "Claude"), encoding="utf-8")
     (SITE / "sitemap.xml").write_text(sitemap(site, recs), encoding="utf-8")
     (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {site}sitemap.xml\n", encoding="utf-8")
     (SITE / "404.html").write_text(not_found(site, v), encoding="utf-8")
