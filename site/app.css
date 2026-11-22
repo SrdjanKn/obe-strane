@@ -39,7 +39,7 @@ img{display:block;max-width:100%}
 nav.sections{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 26px;padding:8px 0;border-top:1px solid var(--rule);border-bottom:3px solid var(--ink);font:600 14.5px var(--sans)}
 nav.sections a{padding:6px 0;border-bottom:2px solid transparent}
 nav.sections a.on{border-bottom-color:var(--ink)}
-nav.sections a.amber{color:var(--ink);background:var(--sig);padding:6px 10px;border-radius:3px;display:inline-flex;align-items:center;border-bottom:0}
+nav.sections a.amber{color:var(--ink);background:var(--sig);padding:6px 12px;border-radius:0;display:inline-flex;align-items:center;align-self:stretch;margin:-8px 0;border-bottom:0}
 nav.sections a.amber.on{box-shadow:inset 0 -2px 0 var(--ink)}
 nav.sections .sep{width:1px;background:var(--rule);margin:4px 0}
 .focus{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px;padding:10px 0 0;font:400 14px var(--sans);color:var(--ink2)}
@@ -334,6 +334,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   .util input{width:150px}
   .mast{padding:18px 0 10px} .mast a{gap:12px} .mast .tag{font-size:16px}
   nav.sections{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;white-space:nowrap;gap:20px;padding:10px 16px;margin:0 -16px}
+  nav.sections a.amber{margin:-10px 0}
   nav.sections .sep{display:none}
   .focus{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap}
   .lead{padding-top:0;grid-template-columns:minmax(0,1fr);grid-template-areas:"photo" "text" "quotes" "side" "more" "rail"}
@@ -440,7 +441,7 @@ footer .bottom a{color:#d0d0d4;text-decoration:underline;text-underline-offset:2
   nav.sections{padding:0 16px;gap:22px;align-items:center;scrollbar-width:none}
   nav.sections::-webkit-scrollbar,.focus::-webkit-scrollbar{display:none}
   nav.sections a{padding:12px 0;flex:none}
-  nav.sections a.amber{padding:10px 12px}
+  nav.sections a.amber{padding:10px 12px;margin:0}
   .focus{padding:0;gap:22px;scrollbar-width:none}
   .focus a,.focus b{padding:11px 0;flex:none}
   .subnav .wrap{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding-top:0;padding-bottom:0;gap:22px;scrollbar-width:none}
