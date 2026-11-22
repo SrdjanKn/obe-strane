@@ -182,7 +182,7 @@
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama</a><a href="metodologija/">Metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama</a><a href="metodologija/">Metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/sacuvano">Sačuvane vesti</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
     </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
   function balanceLine() {
     const b = balanceObj();
@@ -444,7 +444,7 @@
         ${s.summary ? `<p class="dek" style="color:var(--ink2);margin:0 0 22px">${esc(tidy(s.summary))}</p>` : ""}
         ${(s.topics || []).length ? `<div class="chips" style="margin:0 0 16px">${s.topics.map(t => `<a class="chip" href="#/tema/${t}">${esc(topicName(t))}</a>`).join("")}</div>` : ""}
         <div class="byline"><div class="meta"><b style="color:var(--ink)">Priču prati ${s.sources} medija</b> · prvi objavio ${esc(src(s.broke).name)} u ${clock(s.first)} · poslednji članak u ${clock(its[its.length - 1].published)}</div>
-          <button class="pill" id="share" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Podeli</span></button></div>
+          ${shareRow(s)}</div>
       </div>
       <section id="pokrivenost" class="col" style="margin-top:30px" aria-label="Pokrivenost"><div class="covbox">
         <div><div class="kicker" style="color:var(--ink2)">Ko je objavio</div><div class="sent">${sentence}</div>${bar(s, 14)}${cov(s)}</div>
@@ -1063,6 +1063,38 @@
       <p class="page-p">Koje medije čitate preko Obe strane u poslednjih 30 dana. Podaci se čuvaju samo u ovom pregledaču i nigde se ne šalju.</p>${body}</main>${footer()}`;
   }
 
+  // ---- share row on a story: official brand glyphs from Simple Icons (CC0), the rest drawn here
+  const GLYPH = {
+    facebook: "M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z",
+    x: "M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z",
+    reddit: "M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0Zm4.388 3.199c1.104 0 1.999.895 1.999 1.999 0 1.105-.895 2-1.999 2-.946 0-1.739-.657-1.947-1.539v.002c-1.147.162-2.032 1.15-2.032 2.341v.007c1.776.067 3.4.567 4.686 1.363.473-.363 1.064-.58 1.707-.58 1.547 0 2.802 1.254 2.802 2.802 0 1.117-.655 2.081-1.601 2.531-.088 3.256-3.637 5.876-7.997 5.876-4.361 0-7.905-2.617-7.998-5.87-.954-.447-1.614-1.415-1.614-2.538 0-1.548 1.255-2.802 2.803-2.802.645 0 1.239.218 1.712.585 1.275-.79 2.881-1.291 4.64-1.365v-.01c0-1.663 1.263-3.034 2.88-3.207.188-.911.993-1.595 1.959-1.595Zm-8.085 8.376c-.784 0-1.459.78-1.506 1.797-.047 1.016.64 1.429 1.426 1.429.786 0 1.371-.369 1.418-1.385.047-1.017-.553-1.841-1.338-1.841Zm7.406 0c-.786 0-1.385.824-1.338 1.841.047 1.017.634 1.385 1.418 1.385.785 0 1.473-.413 1.426-1.429-.046-1.017-.721-1.797-1.506-1.797Zm-3.703 4.013c-.974 0-1.907.048-2.77.135-.147.015-.241.168-.183.305.483 1.154 1.622 1.964 2.953 1.964 1.33 0 2.47-.81 2.953-1.964.057-.137-.037-.29-.184-.305-.863-.087-1.795-.135-2.769-.135Z",
+    viber: "M11.4 0C9.473.028 5.333.344 3.02 2.467 1.302 4.187.696 6.7.633 9.817.57 12.933.488 18.776 6.12 20.36h.003l-.004 2.416s-.037.977.61 1.177c.777.242 1.234-.5 1.98-1.302.407-.44.972-1.084 1.397-1.58 3.85.326 6.812-.416 7.15-.525.776-.252 5.176-.816 5.892-6.657.74-6.02-.36-9.83-2.34-11.546-.596-.55-3.006-2.3-8.375-2.323 0 0-.395-.025-1.037-.017zm.058 1.693c.545-.004.88.017.88.017 4.542.02 6.717 1.388 7.222 1.846 1.675 1.435 2.53 4.868 1.906 9.897v.002c-.604 4.878-4.174 5.184-4.832 5.395-.28.09-2.882.737-6.153.524 0 0-2.436 2.94-3.197 3.704-.12.12-.26.167-.352.144-.13-.033-.166-.188-.165-.414l.02-4.018c-4.762-1.32-4.485-6.292-4.43-8.895.054-2.604.543-4.738 1.996-6.173 1.96-1.773 5.474-2.018 7.11-2.03zm.38 2.602c-.167 0-.303.135-.304.302 0 .167.133.303.3.305 1.624.01 2.946.537 4.028 1.592 1.073 1.046 1.62 2.468 1.633 4.334.002.167.14.3.307.3.166-.002.3-.138.3-.304-.014-1.984-.618-3.596-1.816-4.764-1.19-1.16-2.692-1.753-4.447-1.765zm-3.96.695c-.19-.032-.4.005-.616.117l-.01.002c-.43.247-.816.562-1.146.932-.002.004-.006.004-.008.008-.267.323-.42.638-.46.948-.008.046-.01.093-.007.14 0 .136.022.27.065.4l.013.01c.135.48.473 1.276 1.205 2.604.42.768.903 1.5 1.446 2.186.27.344.56.673.87.984l.132.132c.31.308.64.6.984.87.686.543 1.418 1.027 2.186 1.447 1.328.733 2.126 1.07 2.604 1.206l.01.014c.13.042.265.064.402.063.046.002.092 0 .138-.008.31-.036.627-.19.948-.46.004 0 .003-.002.008-.005.37-.33.683-.72.93-1.148l.003-.01c.225-.432.15-.842-.18-1.12-.004 0-.698-.58-1.037-.83-.36-.255-.73-.492-1.113-.71-.51-.285-1.032-.106-1.248.174l-.447.564c-.23.283-.657.246-.657.246-3.12-.796-3.955-3.955-3.955-3.955s-.037-.426.248-.656l.563-.448c.277-.215.456-.737.17-1.248-.217-.383-.454-.756-.71-1.115-.25-.34-.826-1.033-.83-1.035-.137-.165-.31-.265-.502-.297zm4.49.88c-.158.002-.29.124-.3.282-.01.167.115.312.282.324 1.16.085 2.017.466 2.645 1.15.63.688.93 1.524.906 2.57-.002.168.13.306.3.31.166.003.305-.13.31-.297.025-1.175-.334-2.193-1.067-2.994-.74-.81-1.777-1.253-3.05-1.346h-.024zm.463 1.63c-.16.002-.29.127-.3.287-.008.167.12.31.288.32.523.028.875.175 1.113.422.24.245.388.62.416 1.164.01.167.15.295.318.287.167-.008.295-.15.287-.317-.03-.644-.215-1.178-.58-1.557-.367-.378-.893-.574-1.52-.607h-.018z",
+    whatsapp: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+  };
+  const sIcon = k => k === "linkedin" ? '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><text x="12" y="18" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="21" letter-spacing="-.5" fill="currentColor">in</text></svg>'
+    : k === "mail" ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>'
+    : `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="${GLYPH[k]}"/></svg>`;
+  const SAVED = "obe-strane-sacuvano";
+  const saved = () => { try { const a = JSON.parse(localStorage.getItem(SAVED) || "[]"); return Array.isArray(a) ? a : []; } catch (_) { return []; } };
+  const putSaved = a => { try { localStorage.setItem(SAVED, JSON.stringify(a.slice(0, 200))); } catch (_) {} };
+  function shareRow(s) {
+    const u = encodeURIComponent(new URL(`vest/${s.id}/`, document.baseURI).href), t = encodeURIComponent(lat(s.headline));
+    const nets = [["Facebook", "facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`], ["X", "x", `https://x.com/intent/post?url=${u}&text=${t}`],
+      ["LinkedIn", "linkedin", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`], ["Reddit", "reddit", `https://www.reddit.com/submit?url=${u}&title=${t}`],
+      ["Viber", "viber", `viber://forward?text=${t}%20${u}`], ["WhatsApp", "whatsapp", `https://wa.me/?text=${t}%20${u}`], ["E-pošta", "mail", `mailto:?subject=${t}&body=${u}`]];
+    const on = saved().some(x => x.id === s.id);
+    return `<div class="shr" role="group" aria-label="Podeli vest">${nets.map(([n, k, h]) => `<a class="shr-i" href="${h}" ${h.startsWith("http") ? 'target="_blank" rel="noopener noreferrer"' : ""} title="Podeli: ${n}" aria-label="Podeli: ${n}">${sIcon(k)}</a>`).join("")}<span class="shr-sep" aria-hidden="true"></span>
+      <button class="shr-t" id="copy" type="button" title="Kopiraj link" aria-label="Kopiraj link"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/></svg></button>
+      <button class="shr-t" id="save" type="button" aria-pressed="${on}" title="${on ? "Ukloni iz sačuvanih" : "Sačuvaj vest"}" aria-label="Sačuvaj vest"><svg viewBox="0 0 24 24" width="22" height="22" fill="${on ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></button>
+      <span class="shr-msg" id="shr-msg" role="status" aria-live="polite"></span></div>`;
+  }
+  function savedPage() {
+    const L = saved().sort((a, b) => b.at - a.at);
+    return `${header("saved")}<main class="wrap"><div class="prose"><h1 class="page-h">Sačuvane vesti</h1>
+      ${L.length ? `<ul class="saved-l">${L.map(x => `<li><a href="vest/${esc(x.id)}/">${esc(x.t)}</a><button type="button" class="saved-x" data-unsave="${esc(x.id)}" aria-label="Ukloni: ${esc(x.t)}">Ukloni</button></li>`).join("")}</ul>`
+        : `<p>Još nema sačuvanih vesti. Na stranici vesti pritisnite oznaku za čuvanje, pored dugmadi za deljenje.</p>`}
+      <p class="meta">Sačuvane vesti pamti samo ovaj pregledač. Stare vesti mogu da nestanu sa sajta posle desetak dana.</p></div></main>${footer()}`;
+  }
   // clean address of the page being read: stories have their own URL (vest/<id>/), everything else stays as is
   const shareUrl = () => { const m = location.hash.match(/^#\/vest\/([^/?]+)/) || (window.__ROUTE || "").match(/^vest\/([^/?]+)/); return m ? new URL(`vest/${m[1]}/`, document.baseURI).href : location.href; };
   // story links are real addresses (for search engines and sharing); inside the app a click opens the story without reloading
@@ -1080,7 +1112,7 @@
     const arg = decodeURIComponent(rest.join("/"));
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
       : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
-      : page === "o-nama" ? about() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
+      : page === "o-nama" ? about() : page === "sacuvano" ? savedPage() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
       : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : page === "za-medije" ? forPublishers() : page === "najrazlicitije" ? spinPage() : home();
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const tog = document.querySelector(".s-tog");
@@ -1094,10 +1126,20 @@
     if (nl) nl.addEventListener("submit", e => { e.preventDefault(); nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala na interesovanju! Prijava e-poštom još nije uključena, pa adresu nismo sačuvali. Do tada je brifing svako jutro ovde.</p>'; });
     const clr = document.getElementById("diet-clear");
     if (clr) clr.addEventListener("click", () => { try { localStorage.removeItem(DIET); } catch (_) {} render(); });
-    const sh = document.getElementById("share");
-    if (sh) sh.addEventListener("click", async () => {
-      try { if (navigator.share) await navigator.share({title: document.title, url: shareUrl()}); else { await navigator.clipboard.writeText(shareUrl()); sh.querySelector("span").textContent = "Link kopiran"; } } catch (_) {}
+    const cp = document.getElementById("copy"), msg = document.getElementById("shr-msg");
+    const say = m => { if (msg) { msg.textContent = m; clearTimeout(say.t); say.t = setTimeout(() => { msg.textContent = ""; }, 2200); } };
+    if (cp) cp.addEventListener("click", async () => {
+      try { if (navigator.clipboard) { await navigator.clipboard.writeText(shareUrl()); say("Link kopiran"); } else if (navigator.share) await navigator.share({title: document.title, url: shareUrl()}); } catch (_) {}
     });
+    const sv = document.getElementById("save");
+    if (sv) sv.addEventListener("click", () => {
+      const m = shareUrl().match(/vest\/([^/?]+)/), id = m && m[1], st0 = D.stories.find(x => x.id === id); if (!st0) return;
+      const a = saved(), has = a.some(x => x.id === id);
+      putSaved(has ? a.filter(x => x.id !== id) : [{id, t: lat(st0.headline), at: Date.now()}, ...a]);
+      sv.setAttribute("aria-pressed", String(!has)); sv.title = has ? "Sačuvaj vest" : "Ukloni iz sačuvanih"; sv.querySelector("svg").setAttribute("fill", has ? "none" : "currentColor");
+      say(has ? "Uklonjeno iz sačuvanih" : "Sačuvano");
+    });
+    document.querySelectorAll("[data-unsave]").forEach(b => b.addEventListener("click", () => { putSaved(saved().filter(x => x.id !== b.dataset.unsave)); render(); }));
     document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => { const t = document.getElementById(b.dataset.go); if (t) t.scrollIntoView({behavior: "smooth"}); }));
     const st = page === "vest" && D.stories.find(x => x.id === arg);
     if (nav && st) { const d = diet(); d.views.push({id: st.id, bs: !!st.blindspot, t: Date.now()}); saveDiet(d); }
