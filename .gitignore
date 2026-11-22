@@ -5,3 +5,8 @@ check.txt
 site/data.js
 __pycache__/
 .DS_Store
+site/vest/
+site/og/
+site/sitemap.xml
+site/robots.txt
+site/404.html

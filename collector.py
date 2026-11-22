@@ -1345,6 +1345,12 @@ def export_site(hours=36):
     (SITE_DIR / "data.js").write_text("window.NEWS_DATA = " + json.dumps(data, ensure_ascii=False) + ";\n",
                                       encoding="utf-8")
     print(f"Site data: {SITE_DIR / 'data.js'}  (open site/index.html)")
+    try:   # story pages, share images, sitemap (see seo.py); never block publishing the data itself
+        sys.path.insert(0, str(HERE))
+        import seo
+        seo.build(con, data)
+    except Exception as ex:
+        print(f"SEO step failed: {ex!r}")
 
 
 def bar(split, camps, total):

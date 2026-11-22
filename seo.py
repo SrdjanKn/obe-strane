@@ -1,0 +1,442 @@
+"""Search-engine groundwork for Obe strane.
+
+The app itself is one page that draws everything in the browser, which search engines and link previews
+cannot read. This module runs at the end of every collector run and writes, next to the app:
+
+  vest/<id>/index.html   one real page per story (title, description, share image, outlets and their headlines)
+  og/<id>.png            the share image for that story (also used by Viber, WhatsApp, X, Facebook ...)
+  sitemap.xml, robots.txt, 404.html
+  index.html             gets its canonical / share tags and a crawlable list of stories (between the markers)
+
+Stories that have dropped out of the 36 h window are kept as frozen pages for KEEP_DAYS, so links that were
+shared keep working and search engines do not meet dead ends.
+
+The address of the site is the only thing that changes when the domain moves: site.json ("url"), or the
+OBE_SITE_URL environment variable.
+"""
+import hashlib
+import html
+import io
+import json
+import os
+import re
+import shutil
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+HERE = Path(__file__).resolve().parent
+SITE = HERE / "site"
+ASSETS = HERE / "assets"
+KEEP_DAYS = 10          # how long a story page stays online after the story left the front page
+MIN_OUTLETS = 3         # a comparison needs at least three outlets to be worth a page
+TZ = ZoneInfo("Europe/Belgrade")
+
+LABEL = {"pro_government": "Režimski", "critical": "Kritički", "public": "Javni servis",
+         "mixed": "Između kategorija", "international": "Međunarodni"}
+COLOR = {"pro_government": "#d0021b", "critical": "#0057b8", "public": "#6a4fb3", "mixed": "#9ba1aa", "international": "#007a87"}
+FORMS = {"pro_government": ("režimski", "režimska", "režimskih"), "critical": ("kritički", "kritička", "kritičkih"),
+         "public": ("javni servis", "javna servisa", "javnih servisa"), "mixed": ("mešoviti", "mešovita", "mešovitih"),
+         "international": ("međunarodni", "međunarodna", "međunarodnih"), "medij": ("medij", "medija", "medija"),
+         "ostali": ("ostali", "ostala", "ostalih")}
+MONTHS = ["januara", "februara", "marta", "aprila", "maja", "juna", "jula", "avgusta", "septembra", "oktobra", "novembra", "decembra"]
+LATM = dict(zip("абвгдђежзијклљмнњопрстћуфхцчџш",
+                ["a", "b", "v", "g", "d", "đ", "e", "ž", "z", "i", "j", "k", "l", "lj", "m", "n", "nj", "o", "p", "r", "s", "t", "ć",
+                 "u", "f", "h", "c", "č", "dž", "š"]))
+
+
+# ---------------------------------------------------------------- small helpers
+
+def site_url():
+    u = os.environ.get("OBE_SITE_URL")
+    if not u:
+        u = json.loads((HERE / "site.json").read_text(encoding="utf-8"))["url"]
+    return u.rstrip("/") + "/"
+
+
+def e(s):
+    return html.escape(str(s or ""), quote=True)
+
+
+def latin(t):
+    """Cyrillic to Latin, the same way the app does it for headlines."""
+    if not re.search("[Ѐ-ӿ]", t or ""):
+        return t or ""
+    out = []
+    for i, ch in enumerate(t):
+        lo = ch.lower()
+        m = LATM.get(lo)
+        if m is None:
+            out.append(ch)
+        elif ch == lo:
+            out.append(m)
+        else:
+            nxt_up = i + 1 < len(t) and t[i + 1] != t[i + 1].lower()
+            prv_up = i > 0 and t[i - 1] != t[i - 1].lower()
+            out.append(m.upper() if nxt_up or prv_up else m[0].upper() + m[1:])
+    return "".join(out)
+
+
+def form(n, k):
+    f = FORMS[k]
+    d, h = n % 10, n % 100
+    return f[0] if n == 1 or (d == 1 and h != 11) else f[1] if 2 <= d <= 4 and not 12 <= h <= 14 else f[2]
+
+
+RELAB = {"": "režimski", "i": "režimski", "ih": "režimskih", "a": "režimska", "e": "režimske", "im": "režimskim",
+         "og": "režimskog", "om": "režimskom", "u": "režimsku"}
+
+
+def relabel(t):
+    """The AI texts say 'provladini'; the site says 'režimski' (same rule as the app)."""
+    return re.sub(r"\b([Pp])rovladin(i|ih|a|e|im|og|om|u)?\b",
+                  lambda m: ("R" if m.group(1) == "P" else "r") + RELAB[m.group(2) or ""][1:], t or "")
+
+
+def clip(t, n):
+    t = re.sub(r"\s+", " ", t or "").strip()
+    return t if len(t) <= n else t[:t.rfind(" ", 0, n - 1) if " " in t[:n - 1] else n - 1].rstrip(" ,;:–-") + "…"
+
+
+def when(iso):
+    d = datetime.fromisoformat(iso).astimezone(TZ)
+    return f"{d.day}. {MONTHS[d.month - 1]} {d.year}. u {d:%H:%M}"
+
+
+def stamp(name):
+    """Short fingerprint of a site file, so a changed app.css / app.js is fetched again."""
+    p = SITE / name
+    return hashlib.md5(p.read_bytes()).hexdigest()[:8] if p.exists() else "0"
+
+
+# ---------------------------------------------------------------- what we keep about a story
+
+def coverage(rec):
+    """(režimski, kritički, ostali, all) counts and the one-sentence reading of the split (the app's own wording)."""
+    sp, n = rec["split"], rec["n"]
+    p, c = sp.get("pro_government", 0), sp.get("critical", 0)
+    o = n - p - c
+    rest = " i ".join(f"{sp[k]} {form(sp[k], k)}" for k in ("public", "mixed", "international") if sp.get(k))
+    if p and c:
+        lead = "Vest je ravnomerno pokrivena" if abs(p - c) <= 1 else "Vest više prate režimski mediji" if p > c else "Vest više prate kritički mediji"
+    else:
+        lead = "Vest prati samo jedna strana"
+    sentence = f"{lead}: {p} {form(p, 'pro_government')} i {c} {form(c, 'critical')} {form(c or p, 'medij')}" + (f", uz {rest}" if rest else "") + "."
+    return p, c, o, n, sentence
+
+
+def snapshot(s, names):
+    ai = s.get("ai") or {}
+    items = [{"s": i["source"], "name": names.get(i["source"], {}).get("name", i["source"]),
+              "camp": names.get(i["source"], {}).get("camp", "mixed"), "t": i["title"], "u": i["url"], "p": i["published"]}
+             for i in s["items"]]
+    first = min(items, key=lambda i: i["p"]) if items else None
+    return {"id": s["id"], "headline": latin(s["headline"]), "section": s.get("section") or "Vesti",
+            "summary": clip(s.get("summary", ""), 220), "razlika": relabel(ai.get("razlika", "")),
+            "split": dict(s["split"]), "n": s["sources"], "blind": s.get("blindspot") or "",
+            "first": s["first"], "last": s["last"], "broke": first["name"] if first else "", "broke_at": first["p"] if first else s["first"],
+            "items": items}
+
+
+def keep(con, data):
+    """Remember today's stories, forget the old ones. Returns [(record, live)], newest first."""
+    con.execute("CREATE TABLE IF NOT EXISTS story_pages(id TEXT PRIMARY KEY, first_seen TEXT, last_seen TEXT, body TEXT)")
+    names = {x["id"]: x for x in data["sources"]}
+    now = datetime.now(timezone.utc).isoformat()
+    live = set()
+    for s in data["stories"]:
+        if s["sources"] < MIN_OUTLETS:
+            continue
+        live.add(s["id"])
+        con.execute("INSERT INTO story_pages VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET last_seen=excluded.last_seen, body=excluded.body",
+                    (s["id"], now, now, json.dumps(snapshot(s, names), ensure_ascii=False)))
+    cut = (datetime.now(timezone.utc) - timedelta(days=KEEP_DAYS)).isoformat()
+    con.execute("DELETE FROM story_pages WHERE last_seen < ?", (cut,))
+    con.commit()
+    rows = con.execute("SELECT id, last_seen, body FROM story_pages ORDER BY last_seen DESC").fetchall()
+    return [(json.loads(b), i in live, ls) for i, ls, b in rows]
+
+
+# ---------------------------------------------------------------- share image (1200 x 630)
+
+def _font(name, size):
+    from PIL import ImageFont
+    return ImageFont.truetype(str(ASSETS / "fonts" / f"SourceSans3-{name}.ttf"), size)
+
+
+def _wrap(draw, text, font, maxw):
+    lines, cur = [], ""
+    for w in text.split():
+        t = (cur + " " + w).strip()
+        if draw.textlength(t, font=font) <= maxw or not cur:
+            cur = t
+        else:
+            lines.append(cur)
+            cur = w
+    return lines + ([cur] if cur else [])
+
+
+def card(headline, split=None, n=0, blind="", sub="", host="", counts=True):
+    """The picture that shows when a story link is shared: headline and the režimski | ostali | kritički bar."""
+    from PIL import Image, ImageDraw
+    W, H, X = 1200, 630, 64
+    img = Image.new("RGB", (W, H), "#141a22")
+    d = ImageDraw.Draw(img)
+    logo = Image.open(ASSETS / "logo-card.png").convert("RGBA")
+    logo = logo.resize((round(logo.width * 46 / logo.height), 46), Image.LANCZOS)
+    img.paste(logo, (X, 48), logo)
+    top = 138
+    if blind:
+        f = _font("Bold", 26)
+        t = "Slepa tačka"
+        d.rounded_rectangle((X, top, X + d.textlength(t, font=f) + 32, top + 44), radius=6, fill="#f5b800")
+        d.text((X + 16, top + 6), t, font=f, fill="#121212")
+        who = "režimski" if blind == "pro_government" else "kritički"
+        d.text((X + d.textlength(t, font=f) + 52, top + 7), f"nijedan {who} medij nije objavio ovu vest", font=_font("Regular", 26), fill="#cfd6df")
+        top += 68
+    bottom = 440 if split else 520
+    room = bottom - top
+    for size in range(78, 36, -2):
+        f = _font("Bold", size)
+        lines = _wrap(d, headline, f, W - 2 * X)
+        if len(lines) * size * 1.13 <= room and len(lines) <= 5:
+            break
+    else:
+        lines = lines[:max(1, int(room // (size * 1.13)))]
+        lines[-1] = clip(lines[-1] + "…", 60)
+    y = top
+    for ln in lines:
+        d.text((X, y), ln, font=f, fill="#ffffff")
+        y += size * 1.13
+    if split:
+        p, c = split.get("pro_government", 0), split.get("critical", 0)
+        o = max(0, n - p - c)
+        segs = [(p, COLOR["pro_government"]), (o, COLOR["mixed"]), (c, COLOR["critical"])]
+        segs = [s for s in segs if s[0]]
+        gap, bw, by = 4, W - 2 * X, 468
+        usable = bw - gap * (len(segs) - 1)
+        x = X
+        for i, (k, col) in enumerate(segs):
+            w = round(usable * k / max(1, n)) if i < len(segs) - 1 else X + bw - x
+            d.rounded_rectangle((x, by, x + w - 1, by + 30), radius=5, fill=col)
+            x += w + gap
+        f = _font("Regular", 30)
+        x, ty = X, by + 52
+        for k, col, label in () if not counts else ((p, COLOR["pro_government"], form(p, "pro_government")), (o, COLOR["mixed"], form(o, "ostali")),
+                              (c, COLOR["critical"], form(c, "critical"))):
+            if not k:
+                continue
+            d.ellipse((x, ty + 11, x + 18, ty + 29), fill=col)
+            t = f"{k} {label}"
+            d.text((x + 28, ty), t, font=f, fill="#ffffff")
+            x += 28 + d.textlength(t, font=f) + 36
+        t = f"{n} {form(n, 'medij')}" if counts else ""
+        d.text((W - X - d.textlength(t, font=_font("Bold", 30)), ty), t, font=_font("Bold", 30), fill="#cfd6df")
+    if sub:
+        f = _font("Regular", 32)
+        yy = top + len(lines) * size * 1.13 + 18
+        for ln in _wrap(d, sub, f, W - 2 * X)[:3]:
+            d.text((X, yy), ln, font=f, fill="#cfd6df")
+            yy += 42
+    if host:
+        f = _font("Regular", 22)
+        d.text((W - X - d.textlength(host, font=f), H - 44), host, font=f, fill="#7d8896")
+    buf = io.BytesIO()
+    img.quantize(colors=96, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(buf, "PNG", optimize=True)
+    return buf.getvalue()
+
+
+# ---------------------------------------------------------------- pages
+
+def head_shared():
+    """Icon and font links, copied from the app's index.html so every page looks the same."""
+    t = (SITE / "index.html").read_text(encoding="utf-8")
+    return "\n".join(re.findall(r'^<link (?:rel="icon"|rel="preconnect"|href="https://fonts)[^\n]*$', t, re.M))
+
+
+def ldjson(obj):
+    return '<script type="application/ld+json">' + json.dumps(obj, ensure_ascii=False).replace("</", "<\\/") + "</script>"
+
+
+def describe(rec):
+    p, c, o, n, _ = coverage(rec)
+    tail = rec["razlika"] or rec["summary"]
+    base = f"{n} medija o istoj vesti: {p} {form(p, 'pro_government')} i {c} {form(c, 'critical')}."
+    return clip(f"{base} {tail}".strip(), 158)
+
+
+def page_title(rec):
+    return clip(rec["headline"], 62 - len(" | Obe strane")) + " | Obe strane"
+
+
+def story_html(rec, live, site, v):
+    url = f"{site}vest/{rec['id']}/"
+    img = f"{site}og/{rec['id']}.png"
+    desc = describe(rec)
+    p, c, o, n, sentence = coverage(rec)
+    cols = {}
+    for it in sorted(rec["items"], key=lambda i: i["p"]):
+        cols.setdefault("pro_government" if it["camp"] == "pro_government" else "critical" if it["camp"] == "critical" else "other", []).append(it)
+
+    def col(key, title, color):
+        items = cols.get(key, [])
+        if not items:
+            who = {"pro_government": "režimski", "critical": "kritički"}.get(key)
+            return (f'<section class="st-col" style="--c:{color}"><h2>{title} · 0</h2><p class="st-none">Nijedan {who} medij nije objavio ovu vest.</p></section>' if who else "")
+        lis = "".join(f'<li><a href="{e(i["u"])}" target="_blank" rel="noopener nofollow">{e(i["t"])}</a>'
+                      f'<small>{e(i["name"])} · {e(when(i["p"]))}</small></li>' for i in items)
+        return f'<section class="st-col" style="--c:{color}"><h2>{title} · {len(items)}</h2><ul>{lis}</ul></section>'
+
+    def seg(k, col_):
+        return f'<i style="flex:{k};background:{col_}"></i>' if k else ""
+
+    key = "".join(f'<span style="--c:{col_}">{k} {form(k, kk)}</span>' for k, col_, kk in
+                  ((p, COLOR["pro_government"], "pro_government"), (o, COLOR["mixed"], "ostali"), (c, COLOR["critical"], "critical")) if k)
+    blind = ""
+    if rec["blind"]:
+        who = "režimski" if rec["blind"] == "pro_government" else "kritički"
+        blind = f'<p class="st-blind"><b>Slepa tačka.</b> Nijedan {who} medij nije objavio ovu vest.</p>'
+    diff = f'<p class="st-diff"><b>Glavna razlika.</b> {e(rec["razlika"])}</p>' if rec["razlika"] else ""
+    note = ""
+    if not live:
+        note = (f'<p class="st-note">Ovo je sačuvan prikaz vesti iz {e(when(rec["last"]))}. Poslednje vesti i novi naslovi: '
+                f'<a href="./">Obe strane</a>.</p>')
+    body = f'''<div class="wrap st">
+<header class="st-top"><a href="./"><img src="logo.svg" alt="Obe strane" width="174" height="40"></a>
+<nav aria-label="Glavni meni"><a href="./">Naslovna</a><a href="./#/slepe-tacke">Slepe tačke</a><a href="./#/izvori">Izvori</a><a href="./#/o-nama">O nama</a></nav></header>
+<article>
+<p class="st-crumb"><a href="./">Naslovna</a> › {e(rec["section"])}</p>
+<h1>{e(rec["headline"])}</h1>
+<p class="st-meta">Prvi je objavio {e(rec["broke"])} · {e(when(rec["broke_at"]))} · ukupno {n} {form(n, "medij")}</p>
+<p class="st-lead">{e(sentence)}</p>
+<div class="st-bar" role="img" aria-label="{e(sentence)}">{seg(p, COLOR["pro_government"])}{seg(o, COLOR["mixed"])}{seg(c, COLOR["critical"])}</div>
+<p class="st-key">{key}</p>
+{blind}{diff}
+<h2 class="st-h">Kako su naslovili</h2>
+<div class="st-cols">{col("pro_government", "Režimski", COLOR["pro_government"])}{col("critical", "Kritički", COLOR["critical"])}{col("other", "Ostali", COLOR["mixed"])}</div>
+{note}
+</article>
+<div class="st-foot">Obe strane uporedo prikazuje kako različiti mediji prenose istu vest. Naslovi pripadaju izdanjima koja su ih objavila;
+ovde ih samo poredimo i vodimo ka originalu. <a href="./#/o-nama">Kako razvrstavamo medije</a></div>
+</div>'''
+    ld = ldjson({"@context": "https://schema.org", "@graph": [
+        {"@type": "WebPage", "@id": url, "url": url, "name": rec["headline"], "description": desc, "inLanguage": "sr-Latn",
+         "datePublished": rec["first"], "dateModified": rec["last"], "primaryImageOfPage": {"@type": "ImageObject", "url": img},
+         "isPartOf": {"@type": "WebSite", "name": "Obe strane", "url": site}},
+        {"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Naslovna", "item": site},
+            {"@type": "ListItem", "position": 2, "name": rec["headline"], "item": url}]}]})
+    app = f'''<div id="app">{body}</div>
+<script>window.__ROUTE = "vest/{rec["id"]}";</script>
+<script>document.write('<script src="data.js?t=' + Math.floor(Date.now() / 60000) + '"><\\/script>');</script>
+<script src="app.js?v={v["js"]}"></script>''' if live else f'<div id="app">{body}</div>'
+    return f'''<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<base href="../../">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{e(page_title(rec))}</title>
+<meta name="description" content="{e(desc)}">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Obe strane">
+<meta property="og:locale" content="sr_RS">
+<meta property="og:title" content="{e(rec["headline"])}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="article:published_time" content="{e(rec["first"])}">
+<meta property="article:modified_time" content="{e(rec["last"])}">
+<meta name="twitter:card" content="summary_large_image">
+{head_shared()}
+<link rel="stylesheet" href="app.css?v={v["css"]}">
+{ld}
+</head>
+<body>
+{app}
+</body>
+</html>
+'''
+
+
+
+
+# ---------------------------------------------------------------- front page, sitemap, robots
+
+def between(text, tag, new):
+    """Replace what sits between <!--tag--> and <!--/tag--> (so running this twice changes nothing)."""
+    return re.sub(rf"(<!--{tag}-->).*?(<!--/{tag}-->)", lambda m: m.group(1) + new + m.group(2), text, flags=re.S)
+
+
+def stamp_index(site, recs, v):
+    p = SITE / "index.html"
+    t = p.read_text(encoding="utf-8")
+    desc = "Ista vest, dve strane. Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti."
+    img = f"{site}og/default.png"
+    head = f'''
+<link rel="canonical" href="{site}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Obe strane">
+<meta property="og:locale" content="sr_RS">
+<meta property="og:title" content="Obe strane — ista vest, dve strane">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{site}">
+<meta property="og:image" content="{img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+{ldjson({"@context": "https://schema.org", "@type": "WebSite", "name": "Obe strane", "url": site, "inLanguage": "sr-Latn",
+         "description": desc})}
+'''
+    t = between(t, "seo", head)
+    lis = "".join(f'<li><a href="vest/{r["id"]}/">{e(r["headline"])}</a></li>' for r, live, _ in recs if live)[:60000]
+    nos = (f'<noscript><main style="max-width:760px;margin:0 auto;padding:24px;font-family:system-ui,sans-serif">'
+           f'<h1>Obe strane — ista vest, dve strane</h1><p>{e(desc)}</p><ul>{lis}</ul></main></noscript>')
+    t = between(t, "nos", nos)
+    t = re.sub(r"app\.css\?v=\w+", f"app.css?v={v['css']}", t)
+    t = re.sub(r"app\.js\?v=\w+", f"app.js?v={v['js']}", t)
+    p.write_text(t, encoding="utf-8")
+
+
+def sitemap(site, recs):
+    urls = [f"<url><loc>{site}</loc><lastmod>{datetime.now(timezone.utc):%Y-%m-%d}</lastmod></url>"]
+    urls += [f"<url><loc>{site}vest/{r['id']}/</loc><lastmod>{ls[:10]}</lastmod></url>" for r, _, ls in recs]
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            + "\n".join(urls) + "\n</urlset>\n")
+
+
+def not_found(site, v):
+    return f'''<!DOCTYPE html>
+<html lang="sr"><head><meta charset="utf-8"><base href="{site}"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><title>Stranica nije pronađena | Obe strane</title>
+{head_shared()}
+<link rel="stylesheet" href="app.css?v={v["css"]}"></head>
+<body><div class="wrap st"><header class="st-top"><a href="./"><img src="logo.svg" alt="Obe strane" width="174" height="40"></a></header>
+<h1>Ova stranica ne postoji</h1><p class="st-lead">Vest je možda stara, ili je adresa pogrešna. Najnovije vesti su na <a href="./">naslovnoj</a>.</p></div></body></html>
+'''
+
+
+# ---------------------------------------------------------------- entry point
+
+def build(con, data):
+    site = site_url()
+    v = {"css": stamp("app.css"), "js": stamp("app.js")}
+    recs = keep(con, data)
+    for sub in ("vest", "og"):
+        shutil.rmtree(SITE / sub, ignore_errors=True)
+        (SITE / sub).mkdir(parents=True)
+    host = re.sub(r"^https?://", "", site).rstrip("/")
+    for rec, live, _ in recs:
+        d = SITE / "vest" / rec["id"]
+        d.mkdir()
+        (d / "index.html").write_text(story_html(rec, live, site, v), encoding="utf-8")
+        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host))
+    (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host))
+    stamp_index(site, recs, v)
+    (SITE / "sitemap.xml").write_text(sitemap(site, recs), encoding="utf-8")
+    (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {site}sitemap.xml\n", encoding="utf-8")
+    (SITE / "404.html").write_text(not_found(site, v), encoding="utf-8")
+    print(f"SEO: {len(recs)} story pages ({sum(1 for _, l, _ in recs if l)} live), share images, sitemap, robots  [{site}]")
