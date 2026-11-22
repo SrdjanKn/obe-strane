@@ -157,17 +157,13 @@
     </div>
     ${ticker()}`;
   }
-  const tkPaused = () => { try { return localStorage.getItem("os_tk_paused") === "1"; } catch (_) { return false; } };
-  document.addEventListener("click", e => { const b = e.target.closest && e.target.closest(".tk-pause"); if (!b) return;
-    const on = !tkPaused(); try { localStorage.setItem("os_tk_paused", on ? "1" : "0"); } catch (_) {}
-    document.querySelectorAll(".tk").forEach(t => t.classList.toggle("paused", on)); b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", on ? "Pokreni traku sa vestima" : "Zaustavi traku sa vestima"); });
   function ticker() {
     const latest = D.stories.filter(st => st.sources >= 3).map(st => { const it = st.items.slice().sort((a, b) => b.published.localeCompare(a.published))[0]; return {st, it}; })
       .sort((a, b) => b.it.published.localeCompare(a.it.published)).slice(0, 28);
     if (latest.length < 4) return "";
     const ago = t => { const m = Math.max(1, Math.round((Date.now() - new Date(t)) / 6e4)); return m < 60 ? `${m} min` : `${Math.round(m / 60)} h`; };
     const items = latest.map(({st, it}) => `<a class="tk-i" href="${link(st)}"><span class="tk-dot" style="background:${VAR[camp(it.source)] || "var(--mix)"}"></span>${st.section ? `<b>${esc(st.section)}</b>` : ""}<span>${esc(lat(it.title))}</span><time>${esc(src(it.source).name)} · ${ago(it.published)}</time></a>`).join("");
-    return `<div class="tk${tkPaused() ? " paused" : ""}" aria-label="Najnovije vesti"><div class="wrap tk-in"><span class="tk-lab"><span class="tk-live" aria-hidden="true"></span>Najnovije<button type="button" class="tk-pause" aria-pressed="${tkPaused()}" aria-label="Zaustavi traku sa vestima"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="i-pa" d="M4 3h3v10H4zM9 3h3v10H9z"/><path class="i-pl" d="M5 3l8 5-8 5z"/></svg></button></span>
+    return `<div class="tk" aria-label="Najnovije vesti"><div class="wrap tk-in"><span class="tk-lab"><span class="tk-live" aria-hidden="true"></span>Najnovije</span>
       <div class="tk-win"><div class="tk-track" style="animation-duration:${latest.length * 7}s">${items}<span aria-hidden="true" class="tk-dup">${items}</span></div></div></div></div>`;
   }
   function focusBar() {

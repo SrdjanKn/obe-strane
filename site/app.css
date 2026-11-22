@@ -574,10 +574,7 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
 .tk-win{flex:1;min-width:0;overflow:hidden;display:flex;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent)}
 .tk-track{display:flex;align-items:stretch;width:max-content;animation:tks linear infinite}
 .tk-dup{display:flex;align-items:stretch}
-.tk-win:hover .tk-track,.tk-win:focus-within .tk-track,.tk.paused .tk-track{animation-play-state:paused}
-.tk-pause{display:inline-grid;place-items:center;width:26px;height:26px;margin-left:2px;border:1px solid var(--rule);border-radius:50%;background:#fff;color:var(--ink);cursor:pointer;padding:0}
-.tk-pause svg{fill:currentColor}.tk-pause .i-pl{display:none}.tk.paused .tk-pause .i-pa{display:none}.tk.paused .tk-pause .i-pl{display:block}.tk.paused .tk-live{animation:none}
-.tk-pause:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tk-win:hover .tk-track,.tk-win:focus-within .tk-track{animation-play-state:paused}
 .bar-x i{cursor:pointer;transition:filter .15s}.bar-x i:hover,.bar-x i.on{filter:brightness(1.12) saturate(1.1)}.bar-x i:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .bar-x{overflow:visible}
 .barpop{position:absolute;z-index:60;background:#fff;border:1px solid var(--sig-line);border-radius:10px;box-shadow:0 10px 30px rgba(20,28,40,.14);padding:12px 12px 6px;max-height:340px;overflow:auto}
