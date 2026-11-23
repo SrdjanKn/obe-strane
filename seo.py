@@ -340,6 +340,7 @@ ovde ih samo poredimo i vodimo ka originalu. <a href="metodologija/">Kako razvrs
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{e(page_title(rec))}</title>
 <meta name="description" content="{e(desc)}">
+{"" if live else '<meta name="robots" content="noindex, follow">'}
 <link rel="canonical" href="{url}">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Obe strane">
@@ -486,7 +487,7 @@ def stamp_index(site, recs, v):
 def sitemap(site, recs):
     today = f"{datetime.now(timezone.utc):%Y-%m-%d}"
     urls = [f"<url><loc>{site}</loc><lastmod>{today}</lastmod></url>", f"<url><loc>{site}metodologija/</loc><lastmod>{today}</lastmod></url>"]
-    urls += [f"<url><loc>{site}vest/{r['id']}/</loc><lastmod>{ls[:10]}</lastmod></url>" for r, _, ls in recs]
+    urls += [f"<url><loc>{site}vest/{r['id']}/</loc><lastmod>{ls[:10]}</lastmod></url>" for r, live, ls in recs if live]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "\n".join(urls) + "\n</urlset>\n")
 
