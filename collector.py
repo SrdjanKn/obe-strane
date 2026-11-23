@@ -168,6 +168,18 @@ def scrape_homepage(home, limit=150, stay_in_section=True):
 
 # ---------------------------------------------------------------- parsing
 
+def tidy_summary(text, limit=420):
+    """Shorten a publisher's excerpt to whole sentences (never mid-word). Falls back to a word boundary and an ellipsis."""
+    t = re.sub(r"\s+", " ", text or "").strip()
+    if len(t) <= limit:
+        return t
+    cut = t[:limit]
+    ends = [m.end() for m in re.finditer(r"[.!?…][\"”“'»]?(?=\s+[A-ZČĆŽŠĐ„\"“])", cut)]   # a full stop before a capital: not "23. novembra"
+    if ends and ends[-1] >= limit * 0.45:
+        return cut[:ends[-1]].strip()
+    return cut[:cut.rfind(" ")].rstrip(" ,;:–-") + "…"
+
+
 def strip_tags(s):
     s = re.sub(r"<[^>]+>", " ", s or "")
     return re.sub(r"\s+", " ", html.unescape(s)).strip()
@@ -763,7 +775,7 @@ def build_stories(hours=36, min_sources=2):
         hours_quiet = max((datetime.now(timezone.utc) - last).total_seconds() / 3600, 0)
         score = n * 0.5 ** (hours_quiet / 8)
         stories.append({"id": hashlib.sha1(firsts[0]["url"].encode()).hexdigest()[:10],
-                        "headline": lead["title"], "summary": summary[:400], "image": image,
+                        "headline": lead["title"], "summary": tidy_summary(summary, 420), "image": image,
                         "image_source": img_from["source"] if img_from else "", "score": score, "last": last,
                         "broke": firsts[0]["source"], "sources": n, "articles": len(items), "split": split,
                         "blindspot": blind, "items": sorted(by_source.values(), key=lambda a: a["camp"]),
@@ -927,7 +939,7 @@ def briefing(con, stories, n_articles):
         def entry(s):
             first = lambda k: next(({"source": a["source"], "title": a["title"], "url": a["url"]}
                                     for a in sorted(s["items"], key=lambda a: a["published"]) if a["camp"] == k), None)
-            return {"id": s["id"], "headline": s["headline"], "summary": s["summary"][:300], "image": s["image"], "image_source": s.get("image_source"),
+            return {"id": s["id"], "headline": s["headline"], "summary": tidy_summary(s["summary"], 300), "image": s["image"], "image_source": s.get("image_source"),
                     "section": section_of([a["url"] for a in s["items"]]), "sources": s["sources"],
                     "split": dict(s["split"]), "blindspot": blind_key(s), "ai": s.get("ai"),
                     "pg": first("pro_government"), "cr": first("critical")}
@@ -1336,7 +1348,7 @@ def export_site(hours=36):
                      "section": s["section"], "topics": s["topics"], "ai": s.get("ai"),
                      "broke": s["broke"], "first": iso(s["first"]), "sources": s["sources"],
                      "split": dict(s["split"]), "blindspot": blind_key(s),
-                     "items": [{"source": a["source"], "title": a["title"], "url": a["url"], "summary": a["summary"][:280],
+                     "items": [{"source": a["source"], "title": a["title"], "url": a["url"], "summary": tidy_summary(a["summary"], 280),
                                 "image": a["image"], "published": iso(a["published"])}
                                for a in sorted(s["items"], key=lambda a: a["published"])]}
                     for s in stories],
