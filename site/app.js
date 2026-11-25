@@ -25,11 +25,28 @@
     const v = best.n ? "-" + (1 + (parseInt(String(x.id).slice(-1), 16) || 0) % best.n) : "";
     return `img/lica/${best.k}${v}.webp?v=${ART_VER}`;
   };
+  // Slike tema: priča dobija sliku teme ako je naslov jasno pominje (redosled je prioritet). Pravosuđe samo u Politici i Društvu (u Hronici je sirena); SAD i NIS se prepoznaju samo velikim slovima.
+  const plain = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "dj");
+  const TOPIC_ART = [
+    ["nadstresnica", /nadstresnic|kanop/], ["litijum", /litijum|rio tinto|jadar/], ["kosovo", /kosov|pristin|kurti|kfor/],
+    ["kina", /\bkin[aeiu]\b|kinesk|peking/], ["sad", /tramp|trump|vasington|bela kuc|ameri[ck]/],
+    ["rusija-ukrajina", /ukrajin|rusij|rusk|moskv|kijev/], ["eu", /evropsk\w* unij|\beu\b|brisel|evropsk\w* komisij/],
+    ["energetika", /naftn|gazprom|\bstruj[aeiu]?\b|energet|\beps\b/], ["protesti", /protest|student|blokad|\bzbor|plenum/],
+    ["izbori", /izbori|izbora|izborn|izbore|glasanj|birac|kampanj|kandidat/], ["skupstina", /skupstin|parlament|poslanic/],
+    ["pravosudje", /tuzilast|tuzilac|sudij|presud|optuznic/]];
+  const topicArt = x => {
+    const h = plain(x.headline);
+    for (const [k, re] of TOPIC_ART) {
+      const hit = re.test(h) || (k === "sad" && /\bSAD\b/.test(x.headline)) || (k === "energetika" && /\bNIS\b/.test(x.headline));
+      if (hit && !(k === "pravosudje" && !/^(Politika|Društvo)$/.test(x.section))) return `img/teme/${k}.webp?v=${ART_VER}`;
+    }
+    return "";
+  };
   const ART_V = sec => `img/sekcije/${ART[sec] || "vesti"}.webp?v=${ART_VER}`;
   const prep = d => { fixAI(d);
     const seen = new Set(), key = u => String(u || "").replace(/-\d{2,4}x\d{2,4}(?=\.)/, "").split("?")[0];
     (d.stories || []).forEach(x => { x.headline = lat(x.headline); x.summary = lat(x.summary);
-      if (!OUTLET_PHOTOS) { x.photo_orig = x.image; const pa = personArt(x); x.image = pa || ART_V(x.section); x.person = !!pa; x.image_source = ""; x.art = true; return; }
+      if (!OUTLET_PHOTOS) { x.photo_orig = x.image; const pa = personArt(x), ta = pa ? "" : topicArt(x); x.image = pa || ta || ART_V(x.section); x.person = !!pa; x.topicArt = !!ta; x.image_source = ""; x.art = true; return; }
       if (x.image) { const k = key(x.image); if (seen.has(k)) { x.image = ""; x.image_source = ""; } else seen.add(k); } });
     ((d.briefing || {}).stories || []).forEach(x => { x.headline = lat(x.headline); });
     return d; };
@@ -44,7 +61,7 @@
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
-  const safe = u => /^https?:\/\//i.test(u || "") || /^img\/(?:sekcije|lica)\//.test(u || "") ? u : "#";
+  const safe = u => /^https?:\/\//i.test(u || "") || /^img\/(?:sekcije|lica|teme)\//.test(u || "") ? u : "#";
   const src = id => D.sources.find(s => s.id === id) || {name: id, camp: "mixed"};
   const camp = id => src(id).camp;
   const clock = iso => new Date(iso).toLocaleTimeString("sr-Latn-RS", {hour: "2-digit", minute: "2-digit"});
@@ -68,7 +85,7 @@
   function photo(s, ratio = "3/2", lead = false) {
     const tone = TONES[s.section] || TONES.Vesti;
     const img = s.image ? `<img src="${esc(safe(s.image))}" alt="" ${lead ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : "";
-    return `<div class="ph${s.image ? " has-img" : ""}${s.art ? (ratio === "1/1" ? " art art-sq" : " art") + (s.person ? " art-p" : "") : ""}" style="aspect-ratio:${ratio};${s.art ? "" : `background:${tone}`}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
+    return `<div class="ph${s.image ? " has-img" : ""}${s.art ? (ratio === "1/1" ? " art art-sq" : " art") + (s.person ? " art-p" : s.topicArt ? " art-t" : "") : ""}" style="aspect-ratio:${ratio};${s.art ? "" : `background:${tone}`}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
   }
   // Serbian number agreement: 1 režimski, 2-4 režimska, 5+ režimskih (11-14 -> many)
   const FORMS = {pro_government: ["režimski", "režimska", "režimskih"], critical: ["kritički", "kritička", "kritičkih"],

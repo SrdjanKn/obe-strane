@@ -41,6 +41,14 @@ Shown only when a story headline names the person; caption "Ilustracija: Obe str
 
 Open question: the source photographs behind these portraits (author, licence) are not recorded. Add them here.
 
+## Topic illustrations (site/img/teme/)
+
+Added 2026-11-25. Generated in ChatGPT by the site owner (original scenes). Shown when a story headline clearly names the topic.
+
+kina, sad, rusija-ukrajina, kosovo, litijum, nadstresnica, eu, energetika, pravosudje, izbori, protesti, skupstina (Parliament).
+
+Not in use yet: Expo 2027 (the image contains the event wordmark and its own colours; decide before using). Missing: Mediji.
+
 ## Outlet photos
 
 Switched off on 2026-11-25 (`OUTLET_PHOTOS = false` in site/app.js) until permissions are in place.
