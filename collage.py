@@ -24,7 +24,9 @@ W, H = 1200, 800
 # ---------------------------------------------------------------- helpers
 
 def font(bold, size):
-    return ImageFont.truetype(str(FONTS / f"SourceSans3-{'Bold' if bold else 'Regular'}.ttf"), size)
+    # BASIC layout: the RAQM engine spaces "ti" wrongly with these static font files ("kri tičkih")
+    return ImageFont.truetype(str(FONTS / f"SourceSans3-{'Bold' if bold else 'Regular'}.ttf"), size,
+                              layout_engine=ImageFont.Layout.BASIC)
 
 
 def paper(rng):
@@ -100,12 +102,13 @@ def cutout(img, mode):
     return m.filter(ImageFilter.GaussianBlur(0.8))
 
 
-def burst(d, cx, cy, rng, colors, n=11, rin=70, rout=(360, 620)):
-    """Spiky starburst of red and black blades behind the main subject."""
+def burst(d, cx, cy, rng, colors, n=9, rin=150, rout=(380, 640)):
+    """Big starburst of red and black shards behind the main subject, like a torn poster."""
     a0 = rng.uniform(0, math.pi)
+    d.ellipse((cx - rin * 1.25, cy - rin, cx + rin * 1.25, cy + rin), fill=colors[0])
     for i in range(n):
         a = a0 + i * 2 * math.pi / n + rng.uniform(-0.12, 0.12)
-        span = rng.uniform(0.22, 0.40)
+        span = rng.uniform(0.30, 0.52)
         ro = rng.uniform(*rout)
         p = [(cx + rin * math.cos(a - span), cy + rin * math.sin(a - span) * 0.8),
              (cx + ro * math.cos(a), cy + ro * math.sin(a) * 0.72),
@@ -116,10 +119,11 @@ def burst(d, cx, cy, rng, colors, n=11, rin=70, rout=(360, 620)):
 def scribble(d, x0, y0, length, rng, width=6):
     """A quick marker stroke, like an editor's underline."""
     pts = []
-    for k in range(3):
-        y = y0 + k * 12 + rng.uniform(-3, 3)
-        seg = [(x0 + t * length + rng.uniform(-4, 4), y + math.sin(t * 6 + k) * 3) for t in [i / 24 for i in range(25)]]
-        pts += seg if k % 2 == 0 else seg[::-1]
+    for i in range(140):
+        t = i / 139
+        x = x0 + t * length + 26 * math.cos(t * 22) * (1 - t * 0.6)
+        y = y0 + 14 * math.sin(t * 22) + t * 10 + rng.uniform(-1.5, 1.5)
+        pts.append((x, y))
     d.line(pts, fill=INK, width=width, joint="curve")
 
 
@@ -215,7 +219,11 @@ def compose(story, assets, calm=False):
     # hero object, cut out, big in the middle
     img, mode = assets["hero"]
     hero = fit(img, *(story.get("hero_box") or (640, 480)), cover=False)
-    mask = cutout(hero, mode)
+    if hero.mode == "RGBA":
+        mask = hero.getchannel("A")
+        flat = Image.new("RGB", hero.size, (255, 255, 255)); flat.paste(hero, mask=mask); hero = flat
+    else:
+        mask = cutout(hero, mode)
     look = print_look(hero, cell=6).convert("RGB")
     hx, hy = cx - hero.width // 2, cy - hero.height // 2 + 30
     shadow(canvas, mask, (hx, hy), off=(10, 12))
