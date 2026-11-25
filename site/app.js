@@ -9,9 +9,14 @@
     const lo = ch.toLowerCase(), m = LATM[lo]; if (m === undefined) return ch; if (ch === lo) return m;
     const nextUp = a[i + 1] && a[i + 1] !== a[i + 1].toLowerCase(), prevUp = a[i - 1] && a[i - 1] !== a[i - 1].toLowerCase();
     return nextUp || prevUp ? m.toUpperCase() : m[0].toUpperCase() + m.slice(1); }).join("");
+  // Fotografije medija su isključene dok ne dobijemo dozvole: svaka priča dobija ilustraciju svoje rubrike (img/sekcije).
+  const OUTLET_PHOTOS = false, ART_VER = 1;
+  const ART = {"Politika": "politika", "Društvo": "drustvo", "Hronika": "hronika", "Ekonomija": "ekonomija", "Svet": "svet", "Region": "region", "Kultura": "kultura"};
+  const ART_V = sec => `img/sekcije/${ART[sec] || "vesti"}.webp?v=${ART_VER}`;
   const prep = d => { fixAI(d);
     const seen = new Set(), key = u => String(u || "").replace(/-\d{2,4}x\d{2,4}(?=\.)/, "").split("?")[0];
     (d.stories || []).forEach(x => { x.headline = lat(x.headline); x.summary = lat(x.summary);
+      if (!OUTLET_PHOTOS) { x.photo_orig = x.image; x.image = ART_V(x.section); x.image_source = ""; x.art = true; return; }
       if (x.image) { const k = key(x.image); if (seen.has(k)) { x.image = ""; x.image_source = ""; } else seen.add(k); } });
     ((d.briefing || {}).stories || []).forEach(x => { x.headline = lat(x.headline); });
     return d; };
@@ -26,7 +31,7 @@
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
-  const safe = u => /^https?:\/\//i.test(u || "") ? u : "#";
+  const safe = u => /^https?:\/\//i.test(u || "") || /^img\/sekcije\//.test(u || "") ? u : "#";
   const src = id => D.sources.find(s => s.id === id) || {name: id, camp: "mixed"};
   const camp = id => src(id).camp;
   const clock = iso => new Date(iso).toLocaleTimeString("sr-Latn-RS", {hour: "2-digit", minute: "2-digit"});
@@ -50,7 +55,7 @@
   function photo(s, ratio = "3/2", lead = false) {
     const tone = TONES[s.section] || TONES.Vesti;
     const img = s.image ? `<img src="${esc(safe(s.image))}" alt="" ${lead ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : "";
-    return `<div class="ph${s.image ? " has-img" : ""}" style="aspect-ratio:${ratio};background:${tone}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
+    return `<div class="ph${s.image ? " has-img" : ""}${s.art ? (ratio === "1/1" ? " art art-sq" : " art") : ""}" style="aspect-ratio:${ratio};${s.art ? "" : `background:${tone}`}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
   }
   // Serbian number agreement: 1 režimski, 2-4 režimska, 5+ režimskih (11-14 -> many)
   const FORMS = {pro_government: ["režimski", "režimska", "režimskih"], critical: ["kritički", "kritička", "kritičkih"],
@@ -437,7 +442,7 @@
     <div class="subnav"><div class="wrap"><b style="color:var(--ink)">${esc(s.section)} ›</b>
 <button data-go="licem">Licem u lice</button><button data-go="poredjenje">Kako su naslovili</button><button data-go="hronologija">Hronologija</button><button data-go="pokrivenost">Pokrivenost</button><a href="#/izvori">Izvori</a></div></div>
     <article class="story">
-      ${s.image ? `<figure class="wide story-fig">${photo(s, "16/9", true)}${s.image_source ? `<figcaption class="meta">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
+      ${s.image ? `<figure class="wide story-fig">${photo(s, "16/9", true)}${s.art ? `<figcaption class="meta">Ilustracija: Obe strane</figcaption>` : s.image_source ? `<figcaption class="meta">Fotografija: ${esc(src(s.image_source).name)}</figcaption>` : ""}</figure>` : ""}
       <div class="col" style="padding-top:${s.image ? 22 : 40}px">
         ${kick(esc(s.section) + (s.blindspot ? " · " + EYE + "Slepa tačka" : ""), s.blindspot ? "amber" : "")}
         <h1 class="hl">${esc(s.headline)}</h1>
@@ -863,7 +868,7 @@
       <p class="page-p">Obe strane ne piše vesti. Povezujemo vaše tekstove sa tekstovima drugih medija o istom događaju i šaljemo čitaoce na vaš sajt. Ovde objašnjavamo šta tačno preuzimamo i kako da nas kontaktirate.</p>
       <section class="pp-grid">
         <div class="pp-card"><h2>Šta preuzimamo</h2><ul><li><b>Naslov</b> i <b>kratak uvod</b> (do 300 znakova) iz vašeg javnog RSS-a ili naslovne strane.</li><li><b>Link</b> na originalni tekst. Svaki naslov vodi na vaš sajt.</li><li><b>Naslovnu fotografiju</b> iz vašeg RSS-a ili oznake za deljenje (og:image), uz potpis „Fotografija: naziv medija“.</li><li>Ne preuzimamo ceo tekst i ne prikazujemo ga na našem sajtu.</li></ul></div>
-        <div class="pp-card"><h2>Kako koristimo fotografije</h2><ul><li>Fotografija se prikazuje samo uz priču u kojoj je i vaš tekst, sa vašim imenom.</li><li>Biramo samo oštre fotografije dovoljne veličine. Logotipi i grafike se odbacuju kad ih prepoznamo.</li><li>Fotografije se učitavaju sa vašeg servera; ne čuvamo kopije.</li></ul></div>
+        <div class="pp-card"><h2>Kako koristimo fotografije</h2><ul><li><b>Trenutno ne prikazujemo fotografije medija.</b> Uz priče koristimo sopstvene ilustracije. Ostatak ovog odeljka važi ako fotografije uključimo ponovo, uz dozvolu.</li><li>Fotografija se prikazuje samo uz priču u kojoj je i vaš tekst, sa vašim imenom.</li><li>Biramo samo oštre fotografije dovoljne veličine. Logotipi i grafike se odbacuju kad ih prepoznamo.</li><li>Fotografije se učitavaju sa vašeg servera; ne čuvamo kopije.</li></ul></div>
         <div class="pp-card"><h2>Uklanjanje ili izmena</h2><p>Ako ne želite da prikazujemo vaše fotografije ili tekstove, ili je oznaka vašeg medija pogrešna, pišite nam na ${contactLine()}. Fotografije uklanjamo u najkraćem roku, a oznake preispitujemo i odgovaramo sa obrazloženjem.</p></div>
         <div class="pp-card"><h2>Saradnja</h2><p>Rado ćemo koristiti fotografije uz vašu dozvolu, ispraviti RSS adresu ili dodati rubriku koju propuštamo. Mediji koje ne pratimo mogu da predlože uključivanje. Pišite na ${contactLine()}.</p></div>
       </section>
