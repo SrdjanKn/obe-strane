@@ -690,3 +690,4 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
 .ph.art{background:#f3ecdf}
 .ph.art::after{display:none}
 .ph.art-sq img{object-fit:contain}
+.ph.art-p img,.ph.art-p.art-sq img{object-fit:cover;object-position:50% 28%}

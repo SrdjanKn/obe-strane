@@ -12,11 +12,24 @@
   // Fotografije medija su isključene dok ne dobijemo dozvole: svaka priča dobija ilustraciju svoje rubrike (img/sekcije).
   const OUTLET_PHOTOS = false, ART_VER = 1;
   const ART = {"Politika": "politika", "Društvo": "drustvo", "Hronika": "hronika", "Ekonomija": "ekonomija", "Svet": "svet", "Region": "region", "Kultura": "kultura"};
+  // Ilustrovani portreti: priča dobija portret osobe koja je prva pomenuta u naslovu. Prezimena koja su česta zahtevaju i ime.
+  const PEOPLE = [
+    ["makron", /Makron/u], ["si", /\bSi\s+(?:Đinping|Džinping|Điping)\p{L}*/u], ["merc", /\bMerc(?:a|u|om)?(?![\p{L}])/u],
+    ["zelenski", /Zelensk/u], ["putin", /Putin/u], ["tramp", /Tramp(?![\p{L}]*\s*(?:tower))/u], ["dodik", /Dodik/u],
+    ["vucevic", /Vučević/u], ["bakic", /Jov\p{L}*\s+Baki[ćc]/u], ["jovanovic", /Miloš\p{L}*\s+Jovanovi[ćc]/u],
+    ["brnabic", /Brnabi[ćc]/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
+  const personArt = x => {
+    const h = x.headline || ""; let best = null;
+    for (const [k, re, n] of PEOPLE) { const m = re.exec(h); if (m && (!best || m.index < best.i)) best = {i: m.index, k, n}; }
+    if (!best) return "";
+    const v = best.n ? "-" + (1 + (parseInt(String(x.id).slice(-1), 16) || 0) % best.n) : "";
+    return `img/lica/${best.k}${v}.webp?v=${ART_VER}`;
+  };
   const ART_V = sec => `img/sekcije/${ART[sec] || "vesti"}.webp?v=${ART_VER}`;
   const prep = d => { fixAI(d);
     const seen = new Set(), key = u => String(u || "").replace(/-\d{2,4}x\d{2,4}(?=\.)/, "").split("?")[0];
     (d.stories || []).forEach(x => { x.headline = lat(x.headline); x.summary = lat(x.summary);
-      if (!OUTLET_PHOTOS) { x.photo_orig = x.image; x.image = ART_V(x.section); x.image_source = ""; x.art = true; return; }
+      if (!OUTLET_PHOTOS) { x.photo_orig = x.image; const pa = personArt(x); x.image = pa || ART_V(x.section); x.person = !!pa; x.image_source = ""; x.art = true; return; }
       if (x.image) { const k = key(x.image); if (seen.has(k)) { x.image = ""; x.image_source = ""; } else seen.add(k); } });
     ((d.briefing || {}).stories || []).forEach(x => { x.headline = lat(x.headline); });
     return d; };
@@ -31,7 +44,7 @@
   const EYE = '<svg class="eye" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c2 0 3.7.7 5.1 1.6M22 12s-3.6 7-10 7c-2 0-3.7-.7-5.1-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
-  const safe = u => /^https?:\/\//i.test(u || "") || /^img\/sekcije\//.test(u || "") ? u : "#";
+  const safe = u => /^https?:\/\//i.test(u || "") || /^img\/(?:sekcije|lica)\//.test(u || "") ? u : "#";
   const src = id => D.sources.find(s => s.id === id) || {name: id, camp: "mixed"};
   const camp = id => src(id).camp;
   const clock = iso => new Date(iso).toLocaleTimeString("sr-Latn-RS", {hour: "2-digit", minute: "2-digit"});
@@ -55,7 +68,7 @@
   function photo(s, ratio = "3/2", lead = false) {
     const tone = TONES[s.section] || TONES.Vesti;
     const img = s.image ? `<img src="${esc(safe(s.image))}" alt="" ${lead ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('has-img');this.remove()">` : "";
-    return `<div class="ph${s.image ? " has-img" : ""}${s.art ? (ratio === "1/1" ? " art art-sq" : " art") : ""}" style="aspect-ratio:${ratio};${s.art ? "" : `background:${tone}`}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
+    return `<div class="ph${s.image ? " has-img" : ""}${s.art ? (ratio === "1/1" ? " art art-sq" : " art") + (s.person ? " art-p" : "") : ""}" style="aspect-ratio:${ratio};${s.art ? "" : `background:${tone}`}">${img}<span>${esc(s.section || "Vesti")}</span></div>`;
   }
   // Serbian number agreement: 1 režimski, 2-4 režimska, 5+ režimskih (11-14 -> many)
   const FORMS = {pro_government: ["režimski", "režimska", "režimskih"], critical: ["kritički", "kritička", "kritičkih"],
