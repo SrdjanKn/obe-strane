@@ -182,7 +182,7 @@
       <div style="flex:1 1 260px;min-width:0"><div class="logo" style="color:#fff">${brand(38)}</div>
       <p style="margin:14px 0 0;font:400 14px/1.55 var(--sans);color:#b8b8bd">Prikazujemo kako mediji u Srbiji izveštavaju o istim događajima. Ne pišemo vesti; povezujemo ih sa izvorima.</p></div>
       <div class="links"><b>Rubrike</b>${secsWithNews().slice(0, 5).map(n => `<a href="#/rubrika/${encodeURIComponent(n)}">${n}</a>`).join("")}</div>
-      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama</a><a href="metodologija/">Metodologija</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/sacuvano">Sačuvane vesti</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
+      <div class="links"><b>O projektu</b><a href="#/o-nama">O nama</a><a href="metodologija/">Metodologija</a><a href="metodologija/#merenje">Merenje posećenosti</a><a href="#/izvori">Izvori i vlasništvo</a><a href="#/brifing">Jutarnji brifing</a><a href="#/proveri">Proveri link</a><a href="#/ton">Kako se menja ton</a><a href="#/reci">Reči koje biraju</a><a href="#/citati">Citati</a><a href="#/podkasti">Podkasti i emisije</a><a href="#/sacuvano">Sačuvane vesti</a><a href="#/najrazlicitije">Ista vest, različiti naslovi</a><a href="#/za-medije">Za medije</a><a href="#/moja-ishrana">Moja medijska ishrana</a><a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">Kod projekta</a></div>
     </div><div class="wrap bottom">${balanceLine()} · ${D.sources.filter(s => !s.paused).length} medija · poslednjih ${D.hours} h · ${D.articles} članaka. Oznake medija su početne procene zasnovane na javnim analizama (CRTA, BIRN, Raskrikavanje). Naslovi i linkovi pripadaju izvornim medijima.</div></footer>`;
   function balanceLine() {
     const b = balanceObj();
@@ -1195,7 +1195,7 @@
   }
   window.addEventListener("resize", () => { clearTimeout(window.__bt); window.__bt = setTimeout(balanceHome, 120); });
   if (document.fonts) document.fonts.ready.then(balanceHome);
-  window.addEventListener("hashchange", () => { window.__ROUTE = ""; render(true); if (!/^#\/o-nama\/./.test(location.hash)) window.scrollTo(0, 0); });
+  window.addEventListener("hashchange", () => { window.__ROUTE = ""; render(true); if (!/^#\/o-nama\/./.test(location.hash)) window.scrollTo(0, 0); if (window.obeTrack) window.obeTrack(); });
   setInterval(() => {
     const s = document.createElement("script");
     s.src = "data.js?t=" + Date.now();
@@ -1203,4 +1203,6 @@
     document.body.appendChild(s);
   }, 5 * 60 * 1000);
   render(true);
+  window.__spa = true;
+  if (window.obeTrack) window.obeTrack();
 })();

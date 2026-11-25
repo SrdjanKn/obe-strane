@@ -356,6 +356,7 @@ ovde ih samo poredimo i vodimo ka originalu. <a href="metodologija/">Kako razvrs
 <meta name="twitter:card" content="summary_large_image">
 {head_shared()}
 <link rel="stylesheet" href="app.css?v={v["css"]}">
+<script src="analytics.js?v={v["an"]}"></script>
 {ld}
 </head>
 <body>
@@ -367,7 +368,7 @@ ovde ih samo poredimo i vodimo ka originalu. <a href="metodologija/">Kako razvrs
 
 
 
-METHOD_UPDATED = "22. novembra 2026."
+METHOD_UPDATED = "25. novembra 2026."
 
 
 def methodology_html(site, v, n_outlets, ai_model):
@@ -414,6 +415,9 @@ def methodology_html(site, v, n_outlets, ai_model):
 <li>Manji mediji objavljuju malo vesti, pa se ređe pojavljuju u pričama.</li>
 </ul>
 
+<h2 id="merenje">Merenje posećenosti</h2>
+<p>Da bismo videli koje se vesti i rubrike čitaju, koristimo Google Analytics, ali tek ako to prihvatite u poruci pri dnu stranice. Beležimo koju stranicu ste otvorili, otprilike odakle dolazite (država i uređaj) i koliko dugo ostajete. Ne beležimo ime, e-adresu ni sadržaj pretrage, a reklame i praćenje radi oglašavanja su isključeni. Podatke obrađuje Google. Ako odbijete, ništa se ne šalje. Izbor možete da promenite bilo kada: <button type="button" data-consent-open style="font:inherit;padding:2px 10px;border:1px solid currentColor;border-radius:4px;background:none;color:inherit;cursor:pointer">Promeni izbor</button></p>
+
 <h2 id="projekat">O projektu</h2>
 <p>Projekat je nezavisan, neprofitan i u fazi prototipa. Kod je javan na <a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">GitHubu</a>, pa svako može da proveri kako radi. Tekst poslednji put izmenjen: {METHOD_UPDATED}</p>
 </article></div>'''
@@ -438,6 +442,7 @@ def methodology_html(site, v, n_outlets, ai_model):
 <meta name="twitter:card" content="summary_large_image">
 {head_shared()}
 <link rel="stylesheet" href="app.css?v={v["css"]}">
+<script src="analytics.js?v={v["an"]}"></script>
 {ld}
 </head>
 <body>
@@ -481,6 +486,7 @@ def stamp_index(site, recs, v):
     t = between(t, "nos", nos)
     t = re.sub(r"app\.css\?v=\w+", f"app.css?v={v['css']}", t)
     t = re.sub(r"app\.js\?v=\w+", f"app.js?v={v['js']}", t)
+    t = re.sub(r"analytics\.js\?v=\w+", f"analytics.js?v={v['an']}", t)
     p.write_text(t, encoding="utf-8")
 
 
@@ -497,7 +503,8 @@ def not_found(site, v):
 <html lang="sr"><head><meta charset="utf-8"><base href="{site}"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex"><title>Stranica nije pronađena | Obe strane</title>
 {head_shared()}
-<link rel="stylesheet" href="app.css?v={v["css"]}"></head>
+<link rel="stylesheet" href="app.css?v={v["css"]}">
+<script src="analytics.js?v={v["an"]}"></script></head>
 <body><div class="wrap st"><header class="st-top"><a href="./"><img src="logo.svg" alt="Obe strane" width="174" height="40"></a></header>
 <h1>Ova stranica ne postoji</h1><p class="st-lead">Vest je možda stara, ili je adresa pogrešna. Najnovije vesti su na <a href="./">naslovnoj</a>.</p></div></body></html>
 '''
@@ -507,7 +514,7 @@ def not_found(site, v):
 
 def build(con, data):
     site = site_url()
-    v = {"css": stamp("app.css"), "js": stamp("app.js")}
+    v = {"css": stamp("app.css"), "js": stamp("app.js"), "an": stamp("analytics.js")}
     recs = keep(con, data)
     for sub in ("vest", "og"):
         shutil.rmtree(SITE / sub, ignore_errors=True)
