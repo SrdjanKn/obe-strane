@@ -28,7 +28,7 @@
   // Slike tema: priča dobija sliku teme ako je naslov jasno pominje (redosled je prioritet). Pravosuđe samo u Politici i Društvu (u Hronici je sirena); SAD i NIS se prepoznaju samo velikim slovima.
   const plain = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "dj");
   const TOPIC_ART = [
-    ["rem", /\brem\b|\brem-|regulatorn\w* tel/], ["nadstresnica", /nadstresnic|kanop/], ["litijum", /litijum|rio tinto|jadar/], ["kosovo", /kosov|pristin|kurti|kfor/],
+    ["rem", /\brem(?:a|u|om|e|i)?\b|regulatorn\w* tel\w* za elektronsk|elektronsk\w* medij/], ["nadstresnica", /nadstresnic|kanop/], ["litijum", /litijum|rio tinto|jadar/], ["kosovo", /kosov|pristin|kurti|kfor/],
     ["kina", /\bkin[aeiu]\b|kinesk|peking/], ["sad", /tramp|trump|vasington|bela kuc|ameri[ck]/],
     ["rusija-ukrajina", /ukrajin|rusij|rusk|moskv|kijev/], ["eu", /evropsk\w* unij|\beu\b|brisel|evropsk\w* komisij/],
     ["energetika", /naftn|gazprom|\bstruj[aeiu]?\b|energet|\beps\b/], ["protesti", /protest|student|blokad|\bzbor|plenum/],
