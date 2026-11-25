@@ -21,14 +21,14 @@ for k, (pid, _) in SRC.items():
 
 from rembg import remove, new_session
 sess = new_session("isnet-general-use")
-for k in ("assembly", "cuffs", "typewriter"):
+for k in ("cuffs", "typewriter"):
     small = img[k].copy(); small.thumbnail((1400, 1400))
     img[k] = remove(small, session=sess)          # RGBA cutout; in production done once per library piece
 out = Path("samples"); out.mkdir(exist_ok=True)
 jobs = [
-    ({"id": "58184a3c9e", "section": "Politika", "hero_box": (760, 440),
+    ({"id": "58184a3c9e", "section": "Politika", "hero_box": (560, 380),
       "split": {"pro_government": 15, "critical": 10, "mixed": 3, "public": 2, "international": 2}},
-     {"hero": (img["assembly"], "light"), "left": img["mic"], "right": img["paper"], "paper": img["paper"]}, False),
+     {"hero": (img["assembly"], "scrap"), "left": img["mic"], "right": img["paper"], "paper": img["paper"]}, False),
     ({"id": "31776e8a95", "section": "Hronika",
       "split": {"pro_government": 15, "critical": 12, "mixed": 4, "public": 2, "international": 3}},
      {"hero": (img["cuffs"], "light"), "left": img["police"], "right": img["paper"], "paper": img["paper"]}, False),

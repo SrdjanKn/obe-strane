@@ -216,18 +216,29 @@ def compose(story, assets, calm=False):
         shadow(canvas, m, pos, -4)
         place(canvas, scrap, m, pos, rng.uniform(-6, 2))
 
-    # hero object, cut out, big in the middle
+    # hero: a building or wide scene goes in as a big torn print; an object is cut out
     img, mode = assets["hero"]
-    hero = fit(img, *(story.get("hero_box") or (640, 480)), cover=False)
-    if hero.mode == "RGBA":
-        mask = hero.getchannel("A")
-        flat = Image.new("RGB", hero.size, (255, 255, 255)); flat.paste(hero, mask=mask); hero = flat
+    if mode == "scrap":
+        bw_, bh_ = story.get("hero_box") or (640, 400)
+        look = print_look(cover_crop(img, bw_, bh_, fy=0.4), cell=6).convert("RGB")
+        m = torn_mask((bw_, bh_), rng, edges="trbl", depth=16)
+        pos = (cx - bw_ // 2, cy - bh_ // 2 + 40)
+        ang = rng.uniform(-3, 3)
+        shadow(canvas, m, pos, ang, off=(10, 12))
+        place(canvas, look, m, pos, ang)
     else:
-        mask = cutout(hero, mode)
-    look = print_look(hero, cell=6).convert("RGB")
-    hx, hy = cx - hero.width // 2, cy - hero.height // 2 + 30
-    shadow(canvas, mask, (hx, hy), off=(10, 12))
-    canvas.paste(look, (hx, hy), mask)
+        hero = fit(img, *(story.get("hero_box") or (640, 480)), cover=False)
+        if hero.mode == "RGBA":
+            mask = hero.getchannel("A")
+            flat = Image.new("RGB", hero.size, (255, 255, 255))
+            flat.paste(hero, mask=mask)
+            hero = flat
+        else:
+            mask = cutout(hero, mode)
+        look = print_look(hero, cell=6).convert("RGB")
+        hx, hy = cx - hero.width // 2, cy - hero.height // 2 + 30
+        shadow(canvas, mask, (hx, hy), off=(10, 12))
+        canvas.paste(look, (hx, hy), mask)
 
     if not calm:
         scribble(d, W - 520, H - 150, 330, rng)
