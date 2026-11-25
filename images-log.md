@@ -47,7 +47,9 @@ Added 2026-11-25. Generated in ChatGPT by the site owner (original scenes). Show
 
 kina, sad, rusija-ukrajina, kosovo, litijum, nadstresnica, eu, energetika, pravosudje, izbori, protesti, skupstina (Parliament).
 
-Not in use yet: Expo 2027 (the image contains the event wordmark and its own colours; decide before using). Missing: Mediji.
+Added later the same day: rem (contains the stylised "REM" acronym of the regulator), region (map of ex-Yugoslav states), mediji, and a replacement protesti (no banner text or handprint).
+
+Not in use yet: Expo 2027 (the image contains the event wordmark and its own colours; decide before using).
 
 ## Outlet photos
 

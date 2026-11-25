@@ -28,12 +28,13 @@
   // Slike tema: priča dobija sliku teme ako je naslov jasno pominje (redosled je prioritet). Pravosuđe samo u Politici i Društvu (u Hronici je sirena); SAD i NIS se prepoznaju samo velikim slovima.
   const plain = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "dj");
   const TOPIC_ART = [
-    ["nadstresnica", /nadstresnic|kanop/], ["litijum", /litijum|rio tinto|jadar/], ["kosovo", /kosov|pristin|kurti|kfor/],
+    ["rem", /\brem\b|\brem-|regulatorn\w* tel/], ["nadstresnica", /nadstresnic|kanop/], ["litijum", /litijum|rio tinto|jadar/], ["kosovo", /kosov|pristin|kurti|kfor/],
     ["kina", /\bkin[aeiu]\b|kinesk|peking/], ["sad", /tramp|trump|vasington|bela kuc|ameri[ck]/],
     ["rusija-ukrajina", /ukrajin|rusij|rusk|moskv|kijev/], ["eu", /evropsk\w* unij|\beu\b|brisel|evropsk\w* komisij/],
     ["energetika", /naftn|gazprom|\bstruj[aeiu]?\b|energet|\beps\b/], ["protesti", /protest|student|blokad|\bzbor|plenum/],
     ["izbori", /izbori|izbora|izborn|izbore|glasanj|birac|kampanj|kandidat/], ["skupstina", /skupstin|parlament|poslanic/],
-    ["pravosudje", /tuzilast|tuzilac|sudij|presud|optuznic/]];
+    ["pravosudje", /tuzilast|tuzilac|sudij|presud|optuznic/], ["mediji", /medij|novinar|televizij|tabloid|\bn1\b|nova s\b/],
+    ["region", /\bregion|zapadn\w* balkan|hrvatsk|bosn|crnogor|slovenij|makedon|sarajev|zagreb|podgoric|skoplj|republik\w* srpsk/]];
   const topicArt = x => {
     const h = plain(x.headline);
     for (const [k, re] of TOPIC_ART) {
