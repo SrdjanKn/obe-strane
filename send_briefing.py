@@ -30,6 +30,17 @@ def link(s, live_ids):
     return f"{SITE}vest/{s['id']}/" if s["id"] in live_ids and s["sources"] >= 3 else f"{SITE}#/brifing"
 
 
+FONT = "'Source Sans 3','Source Sans Pro',Helvetica,Arial,sans-serif"      # the site's own font; mail apps without web fonts fall back to Helvetica/Arial
+META = "Inter,Helvetica,Arial,sans-serif"
+
+
+def image_url(s):
+    """Same illustration the site shows for the story (portrait, topic or section art), as a JPEG made for e-mail."""
+    from seo import art_for
+    p = art_for({"headline": latin(s["headline"]), "section": s.get("section") or "Vesti", "id": s["id"]})
+    return f"{SITE}img/mail/{p.parent.name}-{p.stem}.jpg"
+
+
 def story_html(s, n, live_ids, blind=False):
     ai = s.get("ai") or {}
     head = latin(s["headline"])
@@ -45,10 +56,20 @@ def story_html(s, n, live_ids, blind=False):
     split = s.get("split", {})
     p, c, tot = split.get("pro_government", 0), split.get("critical", 0), s.get("sources", 0)
     cov = f'{tot} {form(tot, "medij")} · {p} {form(p, "pro_government")} · {c} {form(c, "critical")}'
-    return (f'<div style="margin:0 0 26px;padding-bottom:22px;border-bottom:1px solid #ddd">'
-            f'<div style="font-size:13px;color:#666">{n}. {e(s.get("section", ""))} · {cov}</div>'
-            f'<h2 style="margin:4px 0 8px;font-size:21px;line-height:1.25"><a href="{link(s, live_ids)}" style="color:#111;text-decoration:none">{e(head)}</a></h2>'
-            f'<p style="margin:0 0 8px;font-size:16px;line-height:1.5">{e(clip(lead, 300))}</p>{sides}</div>')
+    href = link(s, live_ids)
+    img = (f'<a href="{href}"><img src="{image_url(s)}" width="{"600" if n == 1 else "180"}" alt="" '
+           f'style="display:block;border:0;width:100%;max-width:{"600" if n == 1 else "180"}px;height:auto;border-radius:6px"></a>')
+    text = (f'<div style="font-family:{META};font-size:12px;color:#666;margin:0 0 4px">{n}. {e(s.get("section", ""))} · {cov}</div>'
+            f'<h2 style="margin:0 0 8px;font-family:{FONT};font-size:{"25" if n == 1 else "21"}px;line-height:1.22;font-weight:700">'
+            f'<a href="{href}" style="color:#121212;text-decoration:none">{e(head)}</a></h2>'
+            f'<p style="margin:0 0 8px;font-size:16px;line-height:1.5">{e(clip(lead, 300))}</p>{sides}')
+    if n == 1:                                              # lead story: big picture on top
+        inner = f'<div style="margin:0 0 14px">{img}</div>{text}'
+    else:                                                   # others: picture to the right (stacks under the text on narrow screens)
+        inner = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:0"><tr>'
+                 f'<td valign="top" style="padding-right:16px">{text}</td>'
+                 f'<td valign="top" width="180" style="width:180px">{img}</td></tr></table>')
+    return f'<div style="margin:0 0 28px;padding-bottom:24px;border-bottom:1px solid #ddd">{inner}</div>'
 
 
 def build(data):
@@ -61,12 +82,15 @@ def build(data):
     stories, blinds = b.get("stories", []), b.get("blindspots", [])
     body = "".join(story_html(s, i + 1, live_ids) for i, s in enumerate(stories))
     if blinds:
-        body += '<h2 style="margin:30px 0 14px;font-size:22px;color:#b36b00">Prećutano</h2><p style="margin:0 0 16px;font-size:14px;color:#666">Vesti koje je objavila samo jedna strana.</p>'
+        body += (f'<h2 style="margin:30px 0 6px;font-family:{FONT};font-size:24px;color:#b36b00">Prećutano</h2>'
+                 f'<p style="margin:0 0 16px;font-size:14px;color:#666">Vesti koje je objavila samo jedna strana.</p>')
         body += "".join(story_html(s, len(stories) + i + 1, live_ids, True) for i, s in enumerate(blinds))
-    html_ = (f'<div style="font-family:Georgia,serif;color:#111;max-width:640px"><p style="margin:0 0 4px;font-size:13px;color:#666">Jutarnji brifing · {e(date)}</p>'
-             f'<h1 style="margin:0 0 20px;font-size:30px;line-height:1.15">Obe strane u 5 minuta</h1>{body}'
-             f'<p style="font-size:14px;color:#555">Sažetke i opise uokviravanja piše AI model na osnovu naslova i uvoda članaka i mogu da sadrže greške. '
-             f'<a href="{SITE}metodologija/">Kako radimo</a>. Vesti tokom dana: <a href="{SITE}">obestrane.rs</a>.</p></div>')
+    html_ = (f'<style>@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Inter:wght@500&display=swap");</style>'
+             f'<div style="font-family:{FONT};color:#121212;max-width:600px;margin:0 auto">'
+             f'<p style="margin:0 0 2px;font-family:{META};font-size:13px;color:#666">Jutarnji brifing · {e(date)}</p>'
+             f'<h1 style="margin:0 0 22px;font-family:{FONT};font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.01em">Obe strane u 5 minuta</h1>{body}'
+             f'<p style="font-family:{META};font-size:12px;color:#777;line-height:1.5">Ilustracije: Obe strane. Sažetke i opise uokviravanja piše AI model na osnovu naslova i uvoda članaka i mogu da sadrže greške. '
+             f'<a href="{SITE}metodologija/" style="color:#777">Kako radimo</a>. Vesti tokom dana: <a href="{SITE}" style="color:#777">obestrane.rs</a>.</p></div>')
     top = latin(stories[0]["headline"]) if stories else "Vesti dana"
     return f"Obe strane, {date}: {clip(top, 70)}", html_, b["day"]
 
