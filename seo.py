@@ -205,6 +205,9 @@ def art_for(rec):
 
 # ---------------------------------------------------------------- share image (1200 x 630)
 
+CARD_VERSION = "2"        # bump when the card design changes so cached cards are redrawn
+
+
 @functools.lru_cache(maxsize=None)
 def _font(name, size):
     from PIL import ImageFont
@@ -581,16 +584,28 @@ def build(con, data):
     site = site_url()
     v = {"css": stamp("app.css"), "js": stamp("app.js"), "an": stamp("analytics.js")}
     recs = keep(con, data)
-    for sub in ("vest", "og"):
-        shutil.rmtree(SITE / sub, ignore_errors=True)
-        (SITE / sub).mkdir(parents=True)
+    shutil.rmtree(SITE / "vest", ignore_errors=True)
+    (SITE / "vest").mkdir(parents=True)
+    (SITE / "og").mkdir(parents=True, exist_ok=True)      # kept between runs (Actions cache): old stories never change, so their cards are reused
+    ver = SITE / "og" / ".card-version"
+    if not ver.exists() or ver.read_text() != CARD_VERSION:   # the card design changed: draw everything again
+        for f in (SITE / "og").glob("*.png"):
+            f.unlink()
+        ver.write_text(CARD_VERSION)
+    keep_ids = {rec["id"] for rec, _, _ in recs}
+    for f in (SITE / "og").glob("*.png"):
+        if f.stem != "default" and f.stem not in keep_ids:
+            f.unlink()
     host = re.sub(r"^https?://", "", site).rstrip("/")
     recent = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
     for rec, live, last_seen in recs:
         d = SITE / "vest" / rec["id"]
         d.mkdir()
         (d / "index.html").write_text(story_html(rec, live, site, v), encoding="utf-8")
-        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host, art=art_for(rec) if live or last_seen >= recent else None))   # artwork only for current stories: keeps the build fast
+        fresh = live or last_seen >= recent
+        if not fresh and (SITE / "og" / f"{rec['id']}.png").exists():
+            continue
+        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host, art=art_for(rec) if fresh else None))   # artwork only for current stories: keeps the build fast
     (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host, art=SITE / "img" / "sekcije" / "vesti.webp"))
     stamp_index(site, recs, v)
     (SITE / "metodologija").mkdir(exist_ok=True)

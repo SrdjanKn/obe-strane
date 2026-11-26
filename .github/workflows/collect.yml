@@ -47,6 +47,14 @@ jobs:
                  gh api "repos/$GITHUB_REPOSITORY/actions/runs/$r/artifacts" -q '.artifacts[] | select(.name=="newsdb-backup" and .expired==false) | .workflow_run.id' ; done | head -1)
           if [ -n "$id" ]; then gh run download "$id" -R "$GITHUB_REPOSITORY" -n newsdb-backup -D . && ls -la news.db; else echo "no backup found, starting empty"; fi
 
+      # Share images of old stories never change; keep them between runs so only new ones are drawn.
+      - name: Restore share images
+        uses: actions/cache/restore@v4
+        with:
+          path: site/og
+          key: og-v1-${{ github.run_id }}
+          restore-keys: og-v1-
+
       - name: Restore embedding model
         uses: actions/cache@v4
         with:
@@ -82,6 +90,14 @@ jobs:
           path: news.db
           retention-days: 7
           overwrite: true
+
+      # Saved only with the backup (about four times a day): a fresh multi-hundred-MB cache every 30 minutes would push the article database out of the cache.
+      - name: Save share images
+        if: steps.bk.outputs.go == 'yes' && always()
+        uses: actions/cache/save@v4
+        with:
+          path: site/og
+          key: og-v1-${{ github.run_id }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
