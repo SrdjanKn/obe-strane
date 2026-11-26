@@ -58,3 +58,8 @@ Switched off on 2026-11-25 (`OUTLET_PHOTOS = false` in site/app.js) until permis
 ## Speakers and podcasts
 
 Photos supplied by the site owner as rights-cleared. Record each one here when added.
+
+## Portrait update, 2026-11-26
+
+Replaced: vucic-1 (Aleksandar Vučić) and merc (Friedrich Merz). Added: sapic (Aleksandar Šapić), radoicic (Milan Radoičić), djukanovic (Vladimir Đukanović), radic (Aleksandar Radić).
+Still to record for each portrait: the source photo and its licence (see the open question above).
