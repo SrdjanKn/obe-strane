@@ -2,8 +2,8 @@ name: Send morning briefing
 
 on:
   schedule:
-    # 07:20 Belgrade in summer (05:20 UTC) and winter (06:20 UTC). The script only sends when it is 07:xx in Belgrade.
-    - cron: "20 5,6 * * *"
+    # Every 30 min from 07:00 to 09:59 UTC (08:00-10:59 Belgrade in winter, 09:00-11:59 in summer). The script sends once, when today's briefing is live.
+    - cron: "0,30 7-9 * * *"
   workflow_dispatch:
     inputs:
       force:

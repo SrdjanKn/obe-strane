@@ -5,8 +5,9 @@ Reads the live site data (the same briefing the site shows at #/brifing), builds
   BUTTONDOWN_API_KEY   Buttondown -> Settings -> API (GitHub secret). Without it the script only writes a preview.
   BRIEFING_STATUS      "draft" (default: Buttondown keeps it, nothing is sent) or "about_to_send" (sends to everyone)
   python3 send_briefing.py --file site/data.js --preview out.html     # local test, nothing is sent
-Runs only when it is 07:xx in Belgrade and the briefing is today's (so two cron times can cover summer and winter time);
---force skips both checks."""
+The site freezes the day's briefing at its first update after 07:00 and that update needs up to ~30 min to build and publish, so this
+runs every 30 min between 08:00 and 10:59 Belgrade time: it sends once, as soon as today's briefing is live, and skips when Buttondown
+already has today's e-mail (anything that is not a draft). --force skips the time and day checks."""
 import argparse, json, os, re, sys, urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -95,6 +96,18 @@ def build(data):
     return f"Obe strane, {date}: {clip(top, 70)}", html_, b["day"]
 
 
+def already_sent(key, subject):
+    """True when Buttondown already holds a non-draft e-mail with this subject (so a later cron run does not send it twice)."""
+    try:
+        req = urllib.request.Request("https://api.buttondown.com/v1/emails", headers={"Authorization": f"Token {key}", "User-Agent": "obe-strane-briefing"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            items = json.load(r).get("results", [])
+        return any(i.get("subject") == subject and i.get("status") != "draft" for i in items)
+    except Exception as ex:                                 # cannot tell: send anyway (a missed briefing is worse than a rare duplicate)
+        print(f"Could not check for an earlier send ({ex}); continuing.")
+        return False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--file", default=SITE + "data.js")
@@ -105,7 +118,7 @@ def main():
     subject, body, day = build(load(a.file))
     if not subject:
         print("No briefing in the data; nothing to send."); return 0
-    if not a.force and (now.hour != 7 or day != now.date().isoformat()):
+    if not a.force and (not 8 <= now.hour <= 10 or day != now.date().isoformat()):
         print(f"Skipping: Belgrade time {now:%Y-%m-%d %H:%M}, briefing day {day}."); return 0
     if a.preview:
         Path(a.preview).write_text(f"<!doctype html><meta charset=utf-8><title>{e(subject)}</title>{body}", encoding="utf-8")
@@ -114,6 +127,8 @@ def main():
     if not key:
         print("BUTTONDOWN_API_KEY is not set: not sent."); return 0
     status = os.environ.get("BRIEFING_STATUS", "draft")
+    if status != "draft" and already_sent(key, subject):
+        print(f"Already sent today: {subject}"); return 0
     req = urllib.request.Request("https://api.buttondown.com/v1/emails", method="POST",
                                  data=json.dumps({"subject": subject, "body": body, "status": status}).encode(),
                                  headers={"Authorization": f"Token {key}", "Content-Type": "application/json", "User-Agent": "obe-strane-briefing"})

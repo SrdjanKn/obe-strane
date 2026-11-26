@@ -234,7 +234,7 @@
       <h2>Obe strane u 5 minuta</h2>
       <p style="margin:0;color:var(--ink2)">Najvažnije vesti dana i kako ih je koja strana uokvirila, svako jutro u 7. <a href="#/brifing" style="text-decoration:underline">Pročitajte današnji brifing</a>.</p></div>
       <form id="nl"${BRIEFING_LIST ? ` action="https://buttondown.com/api/emails/embed-subscribe/${BRIEFING_LIST}" method="post" target="buttondown-popup"` : ""}><label>Vaša e-adresa<input type="email" name="email" required placeholder="ime@primer.rs" autocomplete="email"></label>${BRIEFING_LIST ? '<input type="hidden" value="1" name="embed">' : ""}<button type="submit">Prijavi se</button>
-      ${BRIEFING_LIST ? '<p class="meta" style="flex:1 1 100%;margin:0;color:var(--ink)">Jedan mejl dnevno, oko 7 ujutru. Odjava jednim klikom. Adresu čuva servis Buttondown i koristi se samo za brifing.</p>' : ""}</form>
+      ${BRIEFING_LIST ? '<p class="meta" style="flex:1 1 100%;margin:0;color:var(--ink)">Jedan mejl dnevno, ujutru. Odjava jednim klikom. Adresu čuva servis Buttondown i koristi se samo za brifing.</p>' : ""}</form>
     </section>`;
 
   // a blindspot shows the silence itself: one side full, the other an empty dashed outline (pro-government always left)
