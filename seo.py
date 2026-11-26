@@ -585,11 +585,12 @@ def build(con, data):
         shutil.rmtree(SITE / sub, ignore_errors=True)
         (SITE / sub).mkdir(parents=True)
     host = re.sub(r"^https?://", "", site).rstrip("/")
-    for rec, live, _ in recs:
+    recent = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
+    for rec, live, last_seen in recs:
         d = SITE / "vest" / rec["id"]
         d.mkdir()
         (d / "index.html").write_text(story_html(rec, live, site, v), encoding="utf-8")
-        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host, art=art_for(rec)))
+        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host, art=art_for(rec) if live or last_seen >= recent else None))   # artwork only for current stories: keeps the build fast
     (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host, art=SITE / "img" / "sekcije" / "vesti.webp"))
     stamp_index(site, recs, v)
     (SITE / "metodologija").mkdir(exist_ok=True)
