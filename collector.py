@@ -761,19 +761,25 @@ def build_stories(hours=36, min_sources=2):
             blind = "Not covered by pro-government outlets"
         elif n >= 3 and cr == 0 and pg >= 2 and watched("critical", first):
             blind = "Not covered by critical outlets"
+        # newest article per outlet: a long-running story keeps its old articles, but its headline and rank follow the fresh ones
+        newest = {}
+        for a in sorted(items, key=lambda x: x["published"]):
+            newest[a["source"]] = a
+        last = max(a["published"] for a in items)
+        fresh = [a for a in newest.values() if (last - a["published"]).total_seconds() <= 8 * 3600]
+        pool = fresh if len(fresh) >= 3 else list(by_source.values())
         # neutral headline: the one that shares the most words with all the others (no camp preference)
-        sets = {a["url"]: set(tokens(a["title"])) for a in by_source.values()}
-        lead = max(by_source.values(), key=lambda a: sum(
+        sets = {a["url"]: set(tokens(a["title"])) for a in pool}
+        lead = max(pool, key=lambda a: sum(
             len(sets[a["url"]] & o) / (len(sets[a["url"]] | o) or 1) for u, o in sets.items() if u != a["url"]))
         firsts = sorted(by_source.values(), key=lambda a: a["published"])
-        summary = max((a["summary"] for a in by_source.values() if a["summary"]), key=len, default="")
+        summary = max((a["summary"] for a in pool if a["summary"]), key=len, default="")
         img_from = lead if lead["image"] else next((a for a in firsts if a["image"]), None)
         image = img_from["image"] if img_from else ""
-        last = max(a["published"] for a in items)
-        # ranking: number of outlets, halved for every 8 hours since the story last got a new article,
-        # so a big story from the morning gives way to fresh news that is still spreading
-        hours_quiet = max((datetime.now(timezone.utc) - last).total_seconds() / 3600, 0)
-        score = n * 0.5 ** (hours_quiet / 8)
+        # ranking: every outlet counts once, halved for each 8 hours since that outlet's newest article on the story,
+        # so a big story from yesterday gives way to what is being reported now
+        now_utc = datetime.now(timezone.utc)
+        score = sum(0.5 ** (max((now_utc - a["published"]).total_seconds() / 3600, 0) / 8) for a in newest.values())
         stories.append({"id": hashlib.sha1(firsts[0]["url"].encode()).hexdigest()[:10],
                         "headline": lead["title"], "summary": tidy_summary(summary, 420), "image": image,
                         "image_source": img_from["source"] if img_from else "", "score": score, "last": last,
