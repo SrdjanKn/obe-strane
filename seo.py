@@ -308,7 +308,7 @@ def card(headline, split=None, n=0, blind="", sub="", host="", counts=True, art=
 def head_shared():
     """Icon and font links, copied from the app's index.html so every page looks the same."""
     t = (SITE / "index.html").read_text(encoding="utf-8")
-    return "\n".join(re.findall(r'^<link (?:rel="icon"|rel="preconnect"|href="https://fonts)[^\n]*$', t, re.M))
+    return "\n".join(re.findall(r'^<(?:link (?:rel="icon"|rel="manifest"|rel="apple-touch-icon"|rel="preconnect"|href="https://fonts)|meta name="theme-color")[^\n]*$', t, re.M))
 
 
 def ldjson(obj):
