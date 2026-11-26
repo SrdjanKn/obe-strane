@@ -1154,6 +1154,12 @@
       : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
       : page === "o-nama" ? about() : page === "sacuvano" ? savedPage() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
       : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : page === "za-medije" ? forPublishers() : page === "najrazlicitije" ? spinPage() : home();
+    // a story opened inside the app gets its real address (vest/<id>/), so a copied link shows that story's preview card
+    if (page === "vest" && location.hash && history.replaceState) { try {
+      const clean = shareUrl();
+      if (!document.querySelector("base")) { const b = document.createElement("base"); b.href = document.baseURI.split("#")[0]; document.head.prepend(b); }
+      history.replaceState(null, "", clean); window.__ROUTE = "vest/" + arg;
+    } catch (_) {} }
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const tog = document.querySelector(".s-tog");
     if (tog) tog.addEventListener("click", () => { const on = document.body.classList.toggle("ss"); tog.setAttribute("aria-expanded", on); if (on) { window.scrollTo(0, 0); document.getElementById("q").focus(); } });
@@ -1240,6 +1246,8 @@
   }
   window.addEventListener("resize", () => { clearTimeout(window.__bt); window.__bt = setTimeout(balanceHome, 120); });
   if (document.fonts) document.fonts.ready.then(balanceHome);
+  // back/forward between a story's clean address and other pages
+  window.addEventListener("popstate", () => { if (location.hash) return; const m = location.pathname.match(/\/vest\/([^/]+)\/?$/); window.__ROUTE = m ? "vest/" + m[1] : ""; render(true); window.scrollTo(0, 0); });
   window.addEventListener("hashchange", () => { window.__ROUTE = ""; render(true); if (!/^#\/o-nama\/./.test(location.hash)) window.scrollTo(0, 0); if (window.obeTrack) window.obeTrack(); });
   setInterval(() => {
     const s = document.createElement("script");
