@@ -157,6 +157,51 @@ def keep(con, data):
     return [(json.loads(b), i in live, ls) for i, ls, b in rows]
 
 
+
+# ---------------------------------------------------------------- story art (same rules as site/app.js)
+
+_L = r"[^\W\d_]"
+PEOPLE = [("makron", r"Makron"), ("si", r"\bSi\s+(?:Đinping|Džinping|Điping)" + _L + "*"), ("merc", r"\bMerc(?:a|u|om)?(?!" + _L + ")"),
+          ("zelenski", r"Zelensk"), ("putin", r"Putin"), ("tramp", r"Tramp"), ("dodik", r"Dodik"), ("vucevic", r"Vučević"),
+          ("bakic", r"Jov" + _L + r"*\s+Baki[ćc]"), ("jovanovic", r"Miloš" + _L + r"*\s+Jovanovi[ćc]"), ("brnabic", r"Brnabi[ćc]"),
+          ("vucicevic", r"Vučićević", 2), ("cupic", r"Čupić"), ("vucic", r"Vučić(?!ević)", 2)]
+TOPICS = [("rem", r"\brem(?:a|u|om|e|i)?\b|regulatorn\w* tel\w* za elektronsk|elektronsk\w* medij"),
+          ("nadstresnica", r"nadstresnic|kanop"), ("litijum", r"litijum|rio tinto|jadar"), ("kosovo", r"kosov|pristin|kurti|kfor"),
+          ("kina", r"\bkin[aeiu]\b|kinesk|peking"), ("sad", r"tramp|trump|vasington|bela kuc|ameri[ck]"),
+          ("rusija-ukrajina", r"ukrajin|rusij|rusk|moskv|kijev"), ("eu", r"evropsk\w* unij|\beu\b|brisel|evropsk\w* komisij"),
+          ("energetika", r"naftn|gazprom|\bstruj[aeiu]?\b|energet|\beps\b"), ("protesti", r"protest|student|blokad|\bzbor|plenum"),
+          ("izbori", r"izbori|izbora|izborn|izbore|glasanj|birac|kampanj|kandidat"), ("skupstina", r"skupstin|parlament|poslanic"),
+          ("pravosudje", r"tuzilast|tuzilac|sudij|presud|optuznic"), ("mediji", r"medij|novinar|televizij|tabloid|\bn1\b|nova s\b"),
+          ("region", r"\bregion|zapadn\w* balkan|hrvatsk|bosn|crnogor|slovenij|makedon|sarajev|zagreb|podgoric|skoplj|republik\w* srpsk")]
+SECTION_ART = {"Politika": "politika", "Društvo": "drustvo", "Hronika": "hronika", "Ekonomija": "ekonomija", "Svet": "svet",
+               "Region": "region", "Kultura": "kultura"}
+
+
+def _plain(s):
+    import unicodedata
+    s = unicodedata.normalize("NFD", (s or "").lower())
+    return "".join(c for c in s if not unicodedata.combining(c)).replace("đ", "dj")
+
+
+def art_for(rec):
+    """Path of the illustration the site shows for this story: person portrait, else topic art, else section art."""
+    h, img = rec["headline"], SITE / "img"
+    best = None
+    for k, pat, *n in PEOPLE:
+        m = re.search(pat, h)
+        if m and (best is None or m.start() < best[0]):
+            best = (m.start(), k, n[0] if n else 0)
+    if best:
+        v = f"-{1 + (int(str(rec['id'])[-1], 16) if str(rec['id'])[-1] in '0123456789abcdefABCDEF' else 0) % best[2]}" if best[2] else ""
+        return img / "lica" / f"{best[1]}{v}.webp"
+    p = _plain(h)
+    for k, pat in TOPICS:
+        hit = re.search(pat, p) or (k == "sad" and re.search(r"\bSAD\b", h)) or (k == "energetika" and re.search(r"\bNIS\b", h))
+        if hit and not (k == "pravosudje" and rec.get("section") not in ("Politika", "Društvo")):
+            return img / "teme" / f"{k}.webp"
+    return img / "sekcije" / f"{SECTION_ART.get(rec.get('section'), 'vesti')}.webp"
+
+
 # ---------------------------------------------------------------- share image (1200 x 630)
 
 def _font(name, size):
@@ -176,11 +221,20 @@ def _wrap(draw, text, font, maxw):
     return lines + ([cur] if cur else [])
 
 
-def card(headline, split=None, n=0, blind="", sub="", host="", counts=True):
+def card(headline, split=None, n=0, blind="", sub="", host="", counts=True, art=None):
     """The picture that shows when a story link is shared: headline and the režimski | ostali | kritički bar."""
     from PIL import Image, ImageDraw
     W, H, X = 1200, 630, 64
     img = Image.new("RGB", (W, H), "#141a22")
+    TW = W - 2 * X                          # width available for text
+    if art and Path(art).exists():          # illustration panel on the right, same art as on the site
+        PW = 380
+        a = Image.open(art).convert("RGB")
+        s = H / a.height
+        a = a.resize((round(a.width * s), H), Image.LANCZOS)
+        left = max(0, min(a.width - PW, round(a.width * 0.5 - PW / 2)))
+        img.paste(a.crop((left, 0, left + PW, H)), (W - PW, 0))
+        TW = W - PW - X - 40
     d = ImageDraw.Draw(img)
     logo = Image.open(ASSETS / "logo-card.png").convert("RGBA")
     logo = logo.resize((round(logo.width * 46 / logo.height), 46), Image.LANCZOS)
@@ -198,7 +252,7 @@ def card(headline, split=None, n=0, blind="", sub="", host="", counts=True):
     room = bottom - top
     for size in range(78, 36, -2):
         f = _font("Bold", size)
-        lines = _wrap(d, headline, f, W - 2 * X)
+        lines = _wrap(d, headline, f, TW)
         if len(lines) * size * 1.13 <= room and len(lines) <= 5:
             break
     else:
@@ -213,14 +267,14 @@ def card(headline, split=None, n=0, blind="", sub="", host="", counts=True):
         o = max(0, n - p - c)
         segs = [(p, COLOR["pro_government"]), (o, COLOR["mixed"]), (c, COLOR["critical"])]
         segs = [s for s in segs if s[0]]
-        gap, bw, by = 4, W - 2 * X, 468
+        gap, bw, by = 4, TW, 468
         usable = bw - gap * (len(segs) - 1)
         x = X
         for i, (k, col) in enumerate(segs):
             w = round(usable * k / max(1, n)) if i < len(segs) - 1 else X + bw - x
             d.rounded_rectangle((x, by, x + w - 1, by + 30), radius=5, fill=col)
             x += w + gap
-        f = _font("Regular", 30)
+        f = _font("Regular", 30 if TW > 800 else 25)
         x, ty = X, by + 52
         for k, col, label in () if not counts else ((p, COLOR["pro_government"], form(p, "pro_government")), (o, COLOR["mixed"], form(o, "ostali")),
                               (c, COLOR["critical"], form(c, "critical"))):
@@ -229,18 +283,21 @@ def card(headline, split=None, n=0, blind="", sub="", host="", counts=True):
             d.ellipse((x, ty + 11, x + 18, ty + 29), fill=col)
             t = f"{k} {label}"
             d.text((x + 28, ty), t, font=f, fill="#ffffff")
-            x += 28 + d.textlength(t, font=f) + 36
+            x += 28 + d.textlength(t, font=f) + (36 if TW > 800 else 22)
         t = f"{n} {form(n, 'medij')}" if counts else ""
-        d.text((W - X - d.textlength(t, font=_font("Bold", 30)), ty), t, font=_font("Bold", 30), fill="#cfd6df")
+        if TW > 800:
+            d.text((X + TW - d.textlength(t, font=_font("Bold", 30)), ty), t, font=_font("Bold", 30), fill="#cfd6df")
+        elif t:
+            d.text((X, ty + 40), t, font=_font("Bold", 25), fill="#cfd6df")
     if sub:
         f = _font("Regular", 32)
         yy = top + len(lines) * size * 1.13 + 18
-        for ln in _wrap(d, sub, f, W - 2 * X)[:3]:
+        for ln in _wrap(d, sub, f, TW)[:4]:
             d.text((X, yy), ln, font=f, fill="#cfd6df")
             yy += 42
     if host:
         f = _font("Regular", 22)
-        d.text((W - X - d.textlength(host, font=f), H - 44), host, font=f, fill="#7d8896")
+        d.text((X if TW < W - 2 * X else W - X - d.textlength(host, font=f), H - 44), host, font=f, fill="#7d8896")
     buf = io.BytesIO()
     img.quantize(colors=96, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(buf, "PNG", optimize=True)
     return buf.getvalue()
@@ -524,8 +581,8 @@ def build(con, data):
         d = SITE / "vest" / rec["id"]
         d.mkdir()
         (d / "index.html").write_text(story_html(rec, live, site, v), encoding="utf-8")
-        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host))
-    (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host))
+        (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host, art=art_for(rec)))
+    (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host, art=SITE / "img" / "sekcije" / "vesti.webp"))
     stamp_index(site, recs, v)
     (SITE / "metodologija").mkdir(exist_ok=True)
     n_out = sum(1 for x in data["sources"] if not x.get("paused"))
