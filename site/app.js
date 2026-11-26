@@ -227,7 +227,7 @@
     return `<a href="#/o-nama/balans">Naš balans</a>: prikazali smo ${share(b, "pro_government")}% režimskih, ${share(b, "critical")}% kritičkih i ${o}% ostalih objava`;
   }
   // Buttondown username (buttondown.com/<name>). While it is empty the box says "uskoro" and stores nothing.
-  const BRIEFING_LIST = "";
+  const BRIEFING_LIST = "srdjan";
   const newsletter = () => `<section class="news" aria-label="Bilten">
       <div style="flex:1 1 360px;min-width:0">${kick(EYE + (BRIEFING_LIST ? "Jutarnji brifing · e-poštom" : "Jutarnji brifing · e-poštom uskoro"), "amber")}
       <h2>Obe strane u 5 minuta</h2>

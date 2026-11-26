@@ -486,6 +486,9 @@ def methodology_html(site, v, n_outlets, ai_model):
 <h2 id="merenje">Merenje posećenosti</h2>
 <p>Da bismo videli koje se vesti i rubrike čitaju, koristimo Google Analytics, ali tek ako to prihvatite u poruci pri dnu stranice. Beležimo koju stranicu ste otvorili, otprilike odakle dolazite (država i uređaj) i koliko dugo ostajete. Ne beležimo ime, e-adresu ni sadržaj pretrage, a reklame i praćenje radi oglašavanja su isključeni. Podatke obrađuje Google. Ako odbijete, ništa se ne šalje. Izbor možete da promenite bilo kada: <button type="button" data-consent-open style="font:inherit;padding:2px 10px;border:1px solid currentColor;border-radius:4px;background:none;color:inherit;cursor:pointer">Promeni izbor</button></p>
 
+<h2 id="brifing-posta">Jutarnji brifing e-poštom</h2>
+<p>Ako se prijavite za brifing, vašu e-adresu čuva servis <a href="https://buttondown.com/" target="_blank" rel="noopener">Buttondown</a> i koristimo je samo da vam jednom dnevno pošaljemo brifing. Ne prodajemo je i ne delimo. Odjava je jednim klikom u dnu svake poruke, a adresu možete da obrišete i tako što nam pišete na <a href="mailto:info@obestrane.rs">info@obestrane.rs</a>.</p>
+
 <h2 id="projekat">O projektu</h2>
 <p>Projekat je nezavisan, neprofitan i u fazi prototipa. Kod je javan na <a href="https://github.com/SrdjanKn/obe-strane" target="_blank" rel="noopener">GitHubu</a>, pa svako može da proveri kako radi. Tekst poslednji put izmenjen: {METHOD_UPDATED}</p>
 </article></div>'''
