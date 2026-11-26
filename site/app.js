@@ -664,7 +664,7 @@
     <div class="prose">
       <p>Pratimo ${op} ${form(op, "pro_government")} i ${oc} ${form(oc, "critical")} ${form(oc, "medij")}. Kritičkih medija je više, ali su mnogi manji i objavljuju ređe, pa je broj objava dve strane ujednačeniji od broja medija. U jednoj priči svaki medij se računa samo jednom, koliko god članaka da je objavio.</p>
       <h2>Kontakt</h2>
-      <p>Primedbe na oznake, vlasništvo ili grupisanje vesti su dobrodošle: ${u("mailto:knelov@yahoo.com", "knelov@yahoo.com")} ili ${u("https://github.com/SrdjanKn/obe-strane/issues\" target=\"_blank\" rel=\"noopener", "GitHub")}. Kako osporiti oznaku, pročitajte u ${u("metodologija/#osporavanje", "metodologiji")}.</p>
+      <p>Primedbe na oznake, vlasništvo ili grupisanje vesti su dobrodošle: ${u("mailto:info@obestrane.rs", "info@obestrane.rs")} ili ${u("https://github.com/SrdjanKn/obe-strane/issues\" target=\"_blank\" rel=\"noopener", "GitHub")}. Kako osporiti oznaku, pročitajte u ${u("metodologija/#osporavanje", "metodologiji")}.</p>
     </div></main>${footer()}`;
   }
 
@@ -891,7 +891,7 @@
   }
 
   // ---- za medije
-  const CONTACT_EMAIL = "knelov@yahoo.com";   // public contact address (Za medije page)
+  const CONTACT_EMAIL = "info@obestrane.rs";   // public contact address (Za medije page)
   const contactLine = () => CONTACT_EMAIL ? `<a href="mailto:${CONTACT_EMAIL}" style="text-decoration:underline">${CONTACT_EMAIL}</a>` : `<b>(kontakt adresa uskoro)</b>`;
   function forPublishers() {
     const top = Object.entries(D.stories.reduce((m, st) => { if (st.image_source) m[st.image_source] = (m[st.image_source] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 12);

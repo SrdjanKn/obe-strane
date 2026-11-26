@@ -405,7 +405,7 @@ def methodology_html(site, v, n_outlets, ai_model):
 <p>Oznaka, vlasnik i izvor podatka za svaki medij vide se na stranici <a href="./#/izvori">Izvori</a>.</p>
 
 <h2 id="osporavanje">Kako osporiti oznaku ili podatak</h2>
-<p>Ako mislite da je oznaka, podatak o vlasništvu ili grupisanje vesti pogrešno, pišite na <a href="mailto:knelov@yahoo.com">knelov@yahoo.com</a> ili otvorite prijavu na <a href="https://github.com/SrdjanKn/obe-strane/issues" target="_blank" rel="noopener">GitHubu</a>. Navedite medij i, ako možete, izvor koji pokazuje drugačije. Svaku primedbu čitamo; ako dokaz stoji, menjamo oznaku ili podatak. Sve izmene spiska medija vide se u javnoj istoriji koda projekta.</p>
+<p>Ako mislite da je oznaka, podatak o vlasništvu ili grupisanje vesti pogrešno, pišite na <a href="mailto:info@obestrane.rs">info@obestrane.rs</a> ili otvorite prijavu na <a href="https://github.com/SrdjanKn/obe-strane/issues" target="_blank" rel="noopener">GitHubu</a>. Navedite medij i, ako možete, izvor koji pokazuje drugačije. Svaku primedbu čitamo; ako dokaz stoji, menjamo oznaku ili podatak. Sve izmene spiska medija vide se u javnoj istoriji koda projekta.</p>
 
 <h2 id="ogranicenja">Ograničenja</h2>
 <ul>
