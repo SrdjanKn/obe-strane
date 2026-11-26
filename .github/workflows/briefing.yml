@@ -1,0 +1,31 @@
+name: Send morning briefing
+
+on:
+  schedule:
+    # 07:20 Belgrade in summer (05:20 UTC) and winter (06:20 UTC). The script only sends when it is 07:xx in Belgrade.
+    - cron: "20 5,6 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Send now, ignoring the time and day checks"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pillow
+      - name: Send briefing
+        env:
+          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+          BRIEFING_STATUS: ${{ vars.BRIEFING_STATUS || 'draft' }}
+        run: python3 send_briefing.py ${{ inputs.force && '--force' || '' }}

@@ -226,11 +226,14 @@
     const o = 100 - share(b, "pro_government") - share(b, "critical");
     return `<a href="#/o-nama/balans">Naš balans</a>: prikazali smo ${share(b, "pro_government")}% režimskih, ${share(b, "critical")}% kritičkih i ${o}% ostalih objava`;
   }
+  // Buttondown username (buttondown.com/<name>). While it is empty the box says "uskoro" and stores nothing.
+  const BRIEFING_LIST = "";
   const newsletter = () => `<section class="news" aria-label="Bilten">
-      <div style="flex:1 1 360px;min-width:0">${kick(EYE + "Jutarnji brifing · e-poštom uskoro", "amber")}
+      <div style="flex:1 1 360px;min-width:0">${kick(EYE + (BRIEFING_LIST ? "Jutarnji brifing · e-poštom" : "Jutarnji brifing · e-poštom uskoro"), "amber")}
       <h2>Obe strane u 5 minuta</h2>
       <p style="margin:0;color:var(--ink2)">Najvažnije vesti dana i kako ih je koja strana uokvirila, svako jutro u 7. <a href="#/brifing" style="text-decoration:underline">Pročitajte današnji brifing</a>.</p></div>
-      <form id="nl"><label>Vaša e-adresa<input type="email" required placeholder="ime@primer.rs"></label><button type="submit">Prijavi se</button></form>
+      <form id="nl"${BRIEFING_LIST ? ` action="https://buttondown.com/api/emails/embed-subscribe/${BRIEFING_LIST}" method="post" target="buttondown-popup"` : ""}><label>Vaša e-adresa<input type="email" name="email" required placeholder="ime@primer.rs" autocomplete="email"></label>${BRIEFING_LIST ? '<input type="hidden" value="1" name="embed">' : ""}<button type="submit">Prijavi se</button>
+      ${BRIEFING_LIST ? '<p class="meta" style="flex:1 1 100%;margin:0;color:var(--ink)">Jedan mejl dnevno, oko 7 ujutru. Odjava jednim klikom. Adresu čuva servis Buttondown i koristi se samo za brifing.</p>' : ""}</form>
     </section>`;
 
   // a blindspot shows the silence itself: one side full, the other an empty dashed outline (pro-government always left)
@@ -1159,7 +1162,12 @@
     const io = document.getElementById("intro-ok");
     if (io) io.addEventListener("click", () => { try { localStorage.setItem(INTRO_KEY, "1"); } catch (_) {} const el = io.closest(".intro"); if (el) el.remove(); });
     const nl = document.getElementById("nl");
-    if (nl) nl.addEventListener("submit", e => { e.preventDefault(); nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala na interesovanju! Prijava e-poštom još nije uključena, pa adresu nismo sačuvali. Do tada je brifing svako jutro ovde.</p>'; });
+    if (nl && BRIEFING_LIST) nl.addEventListener("submit", () => {
+      window.open("https://buttondown.com/" + BRIEFING_LIST, "buttondown-popup", "scrollbars=yes,width=640,height=600");
+      if (window.gtag) window.gtag("event", "briefing_signup");
+      setTimeout(() => { nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala! Potvrdite prijavu u prozoru koji se otvorio ili u poruci koju smo vam poslali.</p>'; }, 400);
+    });
+    else if (nl) nl.addEventListener("submit", e => { e.preventDefault(); nl.innerHTML = '<p class="sans" style="margin:0;font-weight:600">Hvala na interesovanju! Prijava e-poštom još nije uključena, pa adresu nismo sačuvali. Do tada je brifing svako jutro ovde.</p>'; });
     const clr = document.getElementById("diet-clear");
     if (clr) clr.addEventListener("click", () => { try { localStorage.removeItem(DIET); } catch (_) {} render(); });
     const cp = document.getElementById("copy"), msg = document.getElementById("shr-msg");
