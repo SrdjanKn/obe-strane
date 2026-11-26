@@ -10,14 +10,15 @@
     const nextUp = a[i + 1] && a[i + 1] !== a[i + 1].toLowerCase(), prevUp = a[i - 1] && a[i - 1] !== a[i - 1].toLowerCase();
     return nextUp || prevUp ? m.toUpperCase() : m[0].toUpperCase() + m.slice(1); }).join("");
   // Fotografije medija su isključene dok ne dobijemo dozvole: svaka priča dobija ilustraciju svoje rubrike (img/sekcije).
-  const OUTLET_PHOTOS = false, ART_VER = 1;
+  const OUTLET_PHOTOS = false, ART_VER = 2;
   const ART = {"Politika": "politika", "Društvo": "drustvo", "Hronika": "hronika", "Ekonomija": "ekonomija", "Svet": "svet", "Region": "region", "Kultura": "kultura"};
-  // Ilustrovani portreti: priča dobija portret osobe koja je prva pomenuta u naslovu. Prezimena koja su česta zahtevaju i ime.
+  // Ilustrovani portreti: priča dobija portret osobe koja je prva pomenuta u naslovu. Prezimena koja su česta (Đukanović, Radić) zahtevaju i ime.
   const PEOPLE = [
     ["makron", /Makron/u], ["si", /\bSi\s+(?:Đinping|Džinping|Điping)\p{L}*/u], ["merc", /\bMerc(?:a|u|om)?(?![\p{L}])/u],
     ["zelenski", /Zelensk/u], ["putin", /Putin/u], ["tramp", /Tramp(?![\p{L}]*\s*(?:tower))/u], ["dodik", /Dodik/u],
     ["vucevic", /Vučević/u], ["bakic", /Jov\p{L}*\s+Baki[ćc]/u], ["jovanovic", /Miloš\p{L}*\s+Jovanovi[ćc]/u],
-    ["brnabic", /Brnabi[ćc]/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
+    ["brnabic", /Brnabi[ćc]/u], ["sapic", /Šapić/u], ["radoicic", /Radoi[čc]i[ćc]/u],
+    ["djukanovic", /Vladimir\p{L}*\s+Đukanovi[ćc]/u], ["radic", /Aleksandar\p{L}*\s+Radi[ćc]/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
   const personArt = x => {
     const h = x.headline || ""; let best = null;
     for (const [k, re, n] of PEOPLE) { const m = re.exec(h); if (m && (!best || m.index < best.i)) best = {i: m.index, k, n}; }
