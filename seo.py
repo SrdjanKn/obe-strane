@@ -14,6 +14,7 @@ shared keep working and search engines do not meet dead ends.
 The address of the site is the only thing that changes when the domain moves: site.json ("url"), or the
 OBE_SITE_URL environment variable.
 """
+import functools
 import hashlib
 import html
 import io
@@ -204,9 +205,20 @@ def art_for(rec):
 
 # ---------------------------------------------------------------- share image (1200 x 630)
 
+@functools.lru_cache(maxsize=None)
 def _font(name, size):
     from PIL import ImageFont
     return ImageFont.truetype(str(ASSETS / "fonts" / f"SourceSans3-{name}.ttf"), size)
+
+
+@functools.lru_cache(maxsize=64)
+def _panel(path, w, h):
+    """The right-hand illustration of a share card, cropped once per image (there are ~45 images and hundreds of cards)."""
+    from PIL import Image
+    a = Image.open(path).convert("RGB")
+    a = a.resize((round(a.width * h / a.height), h), Image.LANCZOS)
+    left = max(0, min(a.width - w, round(a.width * 0.5 - w / 2)))
+    return a.crop((left, 0, left + w, h))
 
 
 def _wrap(draw, text, font, maxw):
@@ -229,11 +241,7 @@ def card(headline, split=None, n=0, blind="", sub="", host="", counts=True, art=
     TW = W - 2 * X                          # width available for text
     if art and Path(art).exists():          # illustration panel on the right, same art as on the site
         PW = 380
-        a = Image.open(art).convert("RGB")
-        s = H / a.height
-        a = a.resize((round(a.width * s), H), Image.LANCZOS)
-        left = max(0, min(a.width - PW, round(a.width * 0.5 - PW / 2)))
-        img.paste(a.crop((left, 0, left + PW, H)), (W - PW, 0))
+        img.paste(_panel(str(art), PW, H), (W - PW, 0))
         TW = W - PW - X - 40
     d = ImageDraw.Draw(img)
     logo = Image.open(ASSETS / "logo-card.png").convert("RGBA")
