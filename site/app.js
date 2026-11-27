@@ -1148,6 +1148,9 @@
   });
   function render(nav) {
     if (!D) { app.innerHTML = `<div class="wrap empty">Podaci se još prikupljaju.</div>`; return; }
+    // leaving a story for another page: the address goes back to the site root, so a refresh opens that page, not the story
+    if (location.hash && /\/vest\/[^/]+\/?$/.test(location.pathname) && !/^#\/vest\//.test(location.hash) && history.replaceState) {
+      try { history.replaceState(null, "", document.baseURI.split("#")[0] + location.hash); } catch (_) {} }
     const [page, ...rest] = (location.hash.split("?")[0].replace(/^#\/?/, "") || window.__ROUTE || "").split("/");
     const arg = decodeURIComponent(rest.join("/"));
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
