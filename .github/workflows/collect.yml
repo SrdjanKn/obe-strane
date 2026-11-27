@@ -69,6 +69,13 @@ jobs:
           pip install --quiet pillow fastembed   # pillow: cover-photo check; fastembed: meaning-based story grouping
           python3 collector.py run
 
+      - name: Send morning briefing (once a day, 08:00-10:59 Belgrade; GitHub's own schedule skipped it)
+        continue-on-error: true
+        env:
+          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+          BRIEFING_STATUS: ${{ vars.BRIEFING_STATUS || 'draft' }}
+        run: python3 send_briefing.py
+
       - name: Save article database
         uses: actions/cache/save@v4
         if: always()
