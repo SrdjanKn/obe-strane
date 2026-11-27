@@ -485,6 +485,16 @@ def normalise(text):
     return "".join(ch for ch in t if not unicodedata.combining(ch))
 
 
+_JEK = re.compile(r"\w*(?:[bcčćdđfghklmnprsštvzž]ije(?!\b)|dje|bje|vje|mje|sje|tje|pje)\w*|\b(?:prije|poslije|nekoliko\s+mjeseci)\b", re.I)
+_JEK_OK = re.compile(r"obje[kt]|subje[kt]|izbje[gć]|nadlje|odlje|nedje", re.I)
+
+
+def jekavian(text):
+    """True if the text looks ijekavian (donijeti, predsjednički, vrijeme). The site is Serbian (ekavian), so headlines
+    and summaries from Bosnian, Croatian or Montenegrin wording are avoided when an ekavian one exists."""
+    return any(not _JEK_OK.search(m.group(0)) for m in _JEK.finditer(text or ""))
+
+
 def tokens(text):
     out = []
     for w in re.findall(r"[a-z0-9]+", normalise(text)):
@@ -770,10 +780,10 @@ def build_stories(hours=36, min_sources=2):
         pool = fresh if len(fresh) >= 3 else list(by_source.values())
         # neutral headline: the one that shares the most words with all the others (no camp preference)
         sets = {a["url"]: set(tokens(a["title"])) for a in pool}
-        lead = max(pool, key=lambda a: sum(
-            len(sets[a["url"]] & o) / (len(sets[a["url"]] | o) or 1) for u, o in sets.items() if u != a["url"]))
+        lead = max(pool, key=lambda a: (not jekavian(a["title"]), sum(
+            len(sets[a["url"]] & o) / (len(sets[a["url"]] | o) or 1) for u, o in sets.items() if u != a["url"])))
         firsts = sorted(by_source.values(), key=lambda a: a["published"])
-        summary = max((a["summary"] for a in pool if a["summary"]), key=len, default="")
+        summary = max((a["summary"] for a in pool if a["summary"]), key=lambda t: (not jekavian(t), len(t)), default="")
         img_from = lead if lead["image"] else next((a for a in firsts if a["image"]), None)
         image = img_from["image"] if img_from else ""
         # ranking: every outlet counts once, halved for each 8 hours since that outlet's newest article on the story,
