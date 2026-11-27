@@ -64,4 +64,4 @@ Photos supplied by the site owner as rights-cleared. Record each one here when a
 Replaced: vucic-1 (Aleksandar Vučić) and merc (Friedrich Merz). Added: sapic (Aleksandar Šapić), radoicic (Milan Radoičić), djukanovic (Vladimir Đukanović), radic (Aleksandar Radić).
 Still to record for each portrait: the source photo and its licence (see the open question above).
 
-Added 2026-11-27: saic (Radomir Šaić; name taken from the file name Radomir-Sai_i_.png, user-supplied generated art; source photo and licence not recorded).
+Added 2026-11-27: saicic (Radomir Saičić, name confirmed by the user; user-supplied generated art; source photo and licence not recorded).

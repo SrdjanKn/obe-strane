@@ -18,7 +18,7 @@
     ["zelenski", /Zelensk/u], ["putin", /Putin/u], ["tramp", /Tramp(?![\p{L}]*\s*(?:tower))/u], ["dodik", /Dodik/u],
     ["vucevic", /Vučević/u], ["bakic", /Jov\p{L}*\s+Baki[ćc]/u], ["jovanovic", /Miloš\p{L}*\s+Jovanovi[ćc]/u],
     ["brnabic", /Brnabi[ćc]/u], ["sapic", /Šapić/u], ["radoicic", /Radoi[čc]i[ćc]/u],
-    ["djukanovic", /Vladimir\p{L}*\s+Đukanovi[ćc]/u], ["radic", /Aleksandar\p{L}*\s+Radi[ćc]/u], ["saic", /Radomir\p{L}*\s+Ša[ií][ćc]|\bŠaić/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
+    ["djukanovic", /Vladimir\p{L}*\s+Đukanovi[ćc]/u], ["radic", /Aleksandar\p{L}*\s+Radi[ćc]/u], ["saicic", /Radomir\p{L}*\s+Sai[čc]i[ćc]|\bSaičić/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
   const personArt = x => {
     const h = x.headline || ""; let best = null;
     for (const [k, re, n] of PEOPLE) { const m = re.exec(h); if (m && (!best || m.index < best.i)) best = {i: m.index, k, n}; }

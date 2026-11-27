@@ -165,7 +165,7 @@ _L = r"[^\W\d_]"
 PEOPLE = [("makron", r"Makron"), ("si", r"\bSi\s+(?:Đinping|Džinping|Điping)" + _L + "*"), ("merc", r"\bMerc(?:a|u|om)?(?!" + _L + ")"),
           ("zelenski", r"Zelensk"), ("putin", r"Putin"), ("tramp", r"Tramp"), ("dodik", r"Dodik"), ("vucevic", r"Vučević"),
           ("bakic", r"Jov" + _L + r"*\s+Baki[ćc]"), ("jovanovic", r"Miloš" + _L + r"*\s+Jovanovi[ćc]"), ("brnabic", r"Brnabi[ćc]"), ("sapic", r"Šapić"), ("radoicic", r"Radoi[čc]i[ćc]"),
-          ("djukanovic", r"Vladimir" + _L + r"*\s+Đukanovi[ćc]"), ("radic", r"Aleksandar" + _L + r"*\s+Radi[ćc]"), ("saic", r"Radomir" + _L + r"*\s+Ša[ií][ćc]|\bŠaić"),
+          ("djukanovic", r"Vladimir" + _L + r"*\s+Đukanovi[ćc]"), ("radic", r"Aleksandar" + _L + r"*\s+Radi[ćc]"), ("saicic", r"Radomir" + _L + r"*\s+Sai[čc]i[ćc]|\bSaičić"),
           ("vucicevic", r"Vučićević", 2), ("cupic", r"Čupić"), ("vucic", r"Vučić(?!ević)", 2)]
 TOPICS = [("rem", r"\brem(?:a|u|om|e|i)?\b|regulatorn\w* tel\w* za elektronsk|elektronsk\w* medij"),
           ("nadstresnica", r"nadstresnic|kanop"), ("litijum", r"litijum|rio tinto|jadar"), ("kosovo", r"kosov|pristin|kurti|kfor"),
