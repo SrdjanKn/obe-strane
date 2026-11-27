@@ -23,7 +23,7 @@ DAYS = ["ponedeljak", "utorak", "sreda", "četvrtak", "petak", "subota", "nedelj
 
 def load(src):
     raw = Path(src).read_text(encoding="utf-8") if not src.startswith("http") else \
-        urllib.request.urlopen(urllib.request.Request(src, headers={"User-Agent": "obe-strane-briefing"}), timeout=30).read().decode("utf-8")
+        urllib.request.urlopen(urllib.request.Request(src, headers={"User-Agent": "obe-strane-briefing", "X-Buttondown-Live-Dangerously": "true"}), timeout=30).read().decode("utf-8")
     return json.loads(re.sub(r"^window\.NEWS_DATA\s*=\s*|;\s*$", "", raw.strip()))
 
 
@@ -99,7 +99,7 @@ def build(data):
 def already_sent(key, subject):
     """True when Buttondown already holds a non-draft e-mail with this subject (so a later cron run does not send it twice)."""
     try:
-        req = urllib.request.Request("https://api.buttondown.com/v1/emails", headers={"Authorization": f"Token {key}", "User-Agent": "obe-strane-briefing"})
+        req = urllib.request.Request("https://api.buttondown.com/v1/emails", headers={"Authorization": f"Token {key}", "User-Agent": "obe-strane-briefing", "X-Buttondown-Live-Dangerously": "true"})
         with urllib.request.urlopen(req, timeout=30) as r:
             items = json.load(r).get("results", [])
         return any(i.get("subject") == subject and i.get("status") != "draft" for i in items)
@@ -131,7 +131,7 @@ def main():
         print(f"Already sent today: {subject}"); return 0
     req = urllib.request.Request("https://api.buttondown.com/v1/emails", method="POST",
                                  data=json.dumps({"subject": subject, "body": body, "status": status}).encode(),
-                                 headers={"Authorization": f"Token {key}", "Content-Type": "application/json", "User-Agent": "obe-strane-briefing"})
+                                 headers={"Authorization": f"Token {key}", "Content-Type": "application/json", "User-Agent": "obe-strane-briefing", "X-Buttondown-Live-Dangerously": "true"})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
             print(f"Buttondown: HTTP {r.status}, status={status}, subject={subject}")
