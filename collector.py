@@ -955,7 +955,7 @@ def briefing(con, stories, n_articles):
         def entry(s):
             first = lambda k: next(({"source": a["source"], "title": a["title"], "url": a["url"]}
                                     for a in sorted(s["items"], key=lambda a: a["published"]) if a["camp"] == k), None)
-            return {"id": s["id"], "headline": s["headline"], "summary": tidy_summary(s["summary"], 300), "image": s["image"], "image_source": s.get("image_source"),
+            return {"id": s["id"], "headline": s["headline"], "summary": tidy_summary(s["summary"], 300), "image": "", "image_source": "",
                     "section": section_of([a["url"] for a in s["items"]]), "sources": s["sources"],
                     "split": dict(s["split"]), "blindspot": blind_key(s), "ai": s.get("ai"),
                     "pg": first("pro_government"), "cr": first("critical")}
@@ -1359,13 +1359,13 @@ def export_site(hours=36):
                      "a36": n36.get(s["id"], 0), "a7": n7.get(s["id"], 0),
                      "sections": [k for k, _ in secs[s["id"]].most_common(3)], "recent": recent.get(s["id"], [])}
                     for s in sources],
-        "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": s["image"],
-                     "image_source": s["image_source"], "last": iso(s["last"]), "score": round(s["score"], 2),
+        "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": "",   # outlets' photos are not published: the site shows its own illustrations
+                     "image_source": "", "last": iso(s["last"]), "score": round(s["score"], 2),
                      "section": s["section"], "topics": s["topics"], "ai": s.get("ai"),
                      "broke": s["broke"], "first": iso(s["first"]), "sources": s["sources"],
                      "split": dict(s["split"]), "blindspot": blind_key(s),
                      "items": [{"source": a["source"], "title": a["title"], "url": a["url"], "summary": tidy_summary(a["summary"], 280),
-                                "image": a["image"], "published": iso(a["published"])}
+                                "image": "", "published": iso(a["published"])}
                                for a in sorted(s["items"], key=lambda a: a["published"])]}
                     for s in stories],
     }
