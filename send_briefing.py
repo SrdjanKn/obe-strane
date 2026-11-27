@@ -132,8 +132,12 @@ def main():
     req = urllib.request.Request("https://api.buttondown.com/v1/emails", method="POST",
                                  data=json.dumps({"subject": subject, "body": body, "status": status}).encode(),
                                  headers={"Authorization": f"Token {key}", "Content-Type": "application/json", "User-Agent": "obe-strane-briefing"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        print(f"Buttondown: HTTP {r.status}, status={status}, subject={subject}")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            print(f"Buttondown: HTTP {r.status}, status={status}, subject={subject}")
+    except urllib.error.HTTPError as ex:
+        print(f"Buttondown refused the email: HTTP {ex.code} (status={status}): {ex.read().decode('utf-8', 'replace')[:800]}")
+        return 1
     return 0
 
 
