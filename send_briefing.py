@@ -23,7 +23,7 @@ DAYS = ["ponedeljak", "utorak", "sreda", "četvrtak", "petak", "subota", "nedelj
 
 def load(src):
     raw = Path(src).read_text(encoding="utf-8") if not src.startswith("http") else \
-        urllib.request.urlopen(urllib.request.Request(src, headers={"User-Agent": "obe-strane-briefing", "X-Buttondown-Live-Dangerously": "true"}), timeout=30).read().decode("utf-8")
+        urllib.request.urlopen(urllib.request.Request(src, headers={"User-Agent": "obe-strane-briefing"}), timeout=30).read().decode("utf-8")
     return json.loads(re.sub(r"^window\.NEWS_DATA\s*=\s*|;\s*$", "", raw.strip()))
 
 
@@ -58,19 +58,12 @@ def story_html(s, n, live_ids, blind=False):
     p, c, tot = split.get("pro_government", 0), split.get("critical", 0), s.get("sources", 0)
     cov = f'{tot} {form(tot, "medij")} · {p} {form(p, "pro_government")} · {c} {form(c, "critical")}'
     href = link(s, live_ids)
-    img = (f'<a href="{href}"><img src="{image_url(s)}" width="{"600" if n == 1 else "180"}" alt="" '
-           f'style="display:block;border:0;width:100%;max-width:{"600" if n == 1 else "180"}px;height:auto;border-radius:6px"></a>')
-    text = (f'<div style="font-family:{META};font-size:12px;color:#666;margin:0 0 4px">{n}. {e(s.get("section", ""))} · {cov}</div>'
-            f'<h2 style="margin:0 0 8px;font-family:{FONT};font-size:{"25" if n == 1 else "21"}px;line-height:1.22;font-weight:700">'
-            f'<a href="{href}" style="color:#121212;text-decoration:none">{e(head)}</a></h2>'
-            f'<p style="margin:0 0 8px;font-size:16px;line-height:1.5">{e(clip(lead, 300))}</p>{sides}')
-    if n == 1:                                              # lead story: big picture on top
-        inner = f'<div style="margin:0 0 14px">{img}</div>{text}'
-    else:                                                   # others: picture to the right (stacks under the text on narrow screens)
-        inner = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:0"><tr>'
-                 f'<td valign="top" style="padding-right:16px">{text}</td>'
-                 f'<td valign="top" width="180" style="width:180px">{img}</td></tr></table>')
-    return f'<div style="margin:0 0 28px;padding-bottom:24px;border-bottom:1px solid #ddd">{inner}</div>'
+    return (f'<div style="margin:0 0 28px;padding-bottom:24px;border-bottom:1px solid #ddd">'
+            f'<div style="font-family:{META};font-size:12px;color:#666;margin:0 0 6px">{n}. {e(s.get("section", ""))} · {cov}</div>'
+            f'<h2 style="margin:0 0 10px;font-family:{FONT};font-size:{"25" if n == 1 else "22"}px;line-height:1.22;font-weight:700;color:#121212">'
+            f'<span style="color:#121212;text-decoration:none">{e(head)}</span></h2>'
+            f'<p style="margin:0 0 10px;font-size:16px;line-height:1.5;color:#121212">{e(clip(lead, 300))}</p>{sides}'
+            f'<p style="margin:10px 0 0;font-family:{META};font-size:13px"><a href="{href}" style="color:#444;text-decoration:underline">Uporedi izvore</a></p></div>')
 
 
 def build(data):
@@ -90,7 +83,7 @@ def build(data):
              f'<div style="font-family:{FONT};color:#121212;max-width:600px;margin:0 auto">'
              f'<p style="margin:0 0 2px;font-family:{META};font-size:13px;color:#666">Jutarnji brifing · {e(date)}</p>'
              f'<h1 style="margin:0 0 22px;font-family:{FONT};font-size:34px;line-height:1.1;font-weight:700;letter-spacing:-.01em">Obe strane u 5 minuta</h1>{body}'
-             f'<p style="font-family:{META};font-size:12px;color:#777;line-height:1.5">Ilustracije: Obe strane. Sažetke i opise uokviravanja piše AI model na osnovu naslova i uvoda članaka i mogu da sadrže greške. '
+             f'<p style="font-family:{META};font-size:12px;color:#777;line-height:1.5">Sažetke i opise uokviravanja piše AI model na osnovu naslova i uvoda članaka i mogu da sadrže greške. '
              f'<a href="{SITE}metodologija/" style="color:#777">Kako radimo</a>. Vesti tokom dana: <a href="{SITE}" style="color:#777">obestrane.rs</a>.</p></div>')
     top = latin(stories[0]["headline"]) if stories else "Vesti dana"
     return f"Obe strane, {date}: {clip(top, 70)}", html_, b["day"]
