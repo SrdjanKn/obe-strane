@@ -778,24 +778,49 @@
     const sum = (cand, camp, i) => days.reduce((n, d) => n + ((((d.c[cand] || {})[camp]) || [0, 0])[i]), 0);
     const tot = (cand, i = 1) => camps.reduce((n, k) => n + sum(cand, k, i), 0);
     const grand = C.reduce((n, c) => n + tot(c.id), 0);
+    // candidates get ink tints and dash patterns, not party colours: the camp colours are reserved for outlet groups
+    const INK = ["#121212", "#5a5f66", "#9aa0a8", "#c7b9a0"], DASH = ["", "6 3", "2 3", "10 3 2 3"];
     const head = `${compactHeader()}<main class="wrap iz"><h1 class="page-h">Izbori 2026: ko o kome piše</h1>
-      <p class="page-p">Predsednički izbori su 27. decembra 2026. Ovde svakog dana brojimo koliko medija piše o kojem kandidatu i koje strane to rade. Bez anketa, bez prognoza i bez preporuka za koga glasati.</p>`;
+      <p class="page-p">Predsednički izbori su 27. decembra 2026. Svakog dana brojimo koliko medija piše o kojem kandidatu, koje strane to rade i šta kandidati kažu. Bez anketa, bez prognoza i bez preporuka za koga glasati.</p>`;
     if (!C.length || !days.length) return head + `<p class="meta" style="margin:24px 0 60px">Merenje je tek počelo. Prvi podaci se pojavljuju posle prve cele dnevne serije.</p></main>${footer()}`;
-    const bar = (cand, key) => { const t = tot(cand) || 1;
-      return `<div class="iz-bar" role="img" aria-label="Podela po grupama medija">${camps.map(k => { const n = sum(cand, k, 1); return n ? `<span style="flex:${n};background:${VAR[k]}" title="${esc(cl(k))}: ${n}"></span>` : ""; }).join("")}</div>`; };
-    const spark = cand => { const vals = days.map(d => camps.reduce((n, k) => n + (((d.c[cand] || {})[k] || [0, 0])[0]), 0)), mx = Math.max(1, ...vals), W = 300, H = 46, bw = W / vals.length;
-      return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Članci po danima">${vals.map((v, i) => `<rect x="${(i * bw + 1).toFixed(1)}" y="${(H - 12 - v / mx * (H - 14)).toFixed(1)}" width="${Math.max(1, bw - 2).toFixed(1)}" height="${(v / mx * (H - 14)).toFixed(1)}" fill="#121212" opacity=".75"/>`).join("")}
-        <text x="0" y="${H - 1}" font-size="10" fill="#5f5f66">${fmtD(days[0].d)}</text><text x="${W}" y="${H - 1}" text-anchor="end" font-size="10" fill="#5f5f66">${fmtD(days[days.length - 1].d)}</text></svg>`; };
-    const cards = C.map(c => { const n = tot(c.id), nt = tot(c.id, 0);
-      return `<article class="iz-card"><h3>${esc(c.name)}</h3><p class="meta">${esc(c.nominator || "")}</p>
-        <div class="iz-n"><b>${n}</b> ${n === 1 ? "članak" : "članaka"} <span class="meta">(${nt} u naslovu · ${grand ? Math.round(n / grand * 100) : 0}% svih pominjanja)</span></div>
-        ${bar(c.id)}<ul class="iz-leg">${camps.filter(k => sum(c.id, k, 1)).map(k => `<li><i style="background:${VAR[k]}"></i>${esc(cl(k))} <b>${sum(c.id, k, 1)}</b></li>`).join("")}</ul>${spark(c.id)}</article>`; }).join("");
+    // 1. race for attention: one bar, share of all mentions
+    const race = `<section class="iz-race" aria-label="Udeo pominjanja"><div class="sec-head"><h2>Trka za pažnju</h2><span class="meta">udeo u svim pominjanjima kandidata, od ${fmtD(days[0].d)}</span></div>
+      <div class="iz-rbar" role="img">${C.map((c, i) => { const n = tot(c.id); return n ? `<span style="flex:${n};background:${INK[i % 4]};color:${i % 4 < 2 ? "#fff" : "#121212"}" title="${esc(c.name)}: ${n}"><b>${grand ? Math.round(n / grand * 100) : 0}%</b> ${esc(c.short)}</span>` : ""; }).join("")}</div></section>`;
+    // 2. daily lines
+    const W = 640, H = 200, P = {l: 34, r: 90, t: 12, b: 24}, n = days.length;
+    const series = C.map(c => days.map(d => camps.reduce((a, k) => a + (((d.c[c.id] || {})[k] || [0, 0])[1]), 0)));
+    const mx = Math.max(5, ...series.flat()) * 1.1, x = i => P.l + (n === 1 ? (W - P.l - P.r) / 2 : i * (W - P.l - P.r) / (n - 1)), y = v => H - P.b - v / mx * (H - P.t - P.b);
+    const lines = series.map((v, ci) => `<polyline fill="none" stroke="${INK[ci % 4]}" stroke-width="2.4" stroke-dasharray="${DASH[ci % 4]}" stroke-linejoin="round" points="${v.map((a, i) => `${x(i).toFixed(1)},${y(a).toFixed(1)}`).join(" ")}"/><circle cx="${x(n - 1)}" cy="${y(v[n - 1])}" r="3.5" fill="${INK[ci % 4]}"/><text x="${x(n - 1) + 8}" y="${y(v[n - 1]) + 4}" font-size="11" fill="#121212">${esc(C[ci].short)}</text>`).join("");
+    const grid = [0, mx / 2, mx].map(v => `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e6ea"/><text x="${P.l - 5}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#5f5f66">${Math.round(v)}</text>`).join("");
+    const ticks = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map(i => `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === n - 1 ? "end" : "middle"}" font-size="10" fill="#5f5f66">${fmtD(days[i].d)}</text>`).join("");
+    const trend = `<section><div class="sec-head"><h2>Dan za danom</h2><span class="meta">članaka dnevno koji pominju kandidata</span></div><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Broj članaka po danima">${grid}${lines}${ticks}</svg></section>`;
+    // 3. candidate cards with the newest headline from each side
+    const recent = E.recent || [];
+    const side = (cand, camp) => recent.filter(r => r.c.includes(cand) && camp === (src(r.s).camp)).slice(0, 2)
+      .map(r => `<a class="iz-hl" ${out(r.u, r.s)}><span class="meta">${esc(src(r.s).name)}</span><div>${esc(r.t)}</div></a>`).join("") || `<p class="meta">Nema naslova u ovom periodu.</p>`;
+    const bar = cand => `<div class="iz-bar" role="img" aria-label="Podela po grupama medija">${camps.map(k => { const v = sum(cand, k, 1); return v ? `<span style="flex:${v};background:${VAR[k]}" title="${esc(cl(k))}: ${v}"></span>` : ""; }).join("")}</div>`;
+    const cards = C.map((c, ci) => { const v = tot(c.id), vt = tot(c.id, 0);
+      return `<article class="iz-card"><h3><i style="background:${INK[ci % 4]}"></i>${esc(c.name)}</h3><p class="meta">${esc(c.nominator || "")}</p>
+        <div class="iz-n"><b>${v}</b> ${v === 1 ? "članak" : "članaka"} <span class="meta">(${vt} u naslovu)</span></div>
+        ${bar(c.id)}<ul class="iz-leg">${camps.filter(k => sum(c.id, k, 1)).map(k => `<li><i style="background:${VAR[k]}"></i>${esc(cl(k))} <b>${sum(c.id, k, 1)}</b></li>`).join("")}</ul>
+        <div class="iz-two"><div><h4 style="color:var(--pg)">${esc(cl("pro_government"))}</h4>${side(c.id, "pro_government")}</div><div><h4 style="color:var(--cr)">${esc(cl("critical"))}</h4>${side(c.id, "critical")}</div></div></article>`; }).join("");
+    // 4. heatmap: who writes about whom
+    const O = E.outlets || {}, order = Object.keys(O).filter(s => src(s) && src(s).name).map(s => [s, C.reduce((a, c) => a + (O[s][c.id] || 0), 0)]).filter(r => r[1]).sort((a, b) => camps.indexOf(src(a[0]).camp) - camps.indexOf(src(b[0]).camp) || b[1] - a[1]).slice(0, 30);
+    const cellMax = Math.max(1, ...order.flatMap(([s]) => C.map(c => O[s][c.id] || 0)));
+    const heat = order.length ? `<section><div class="sec-head"><h2>Ko o kome piše</h2><span class="meta">članaka po mediju, od ${fmtD(days[0].d)}</span></div>
+      <div class="iz-heat" style="--cols:${C.length}"><div class="iz-hh"></div>${C.map(c => `<div class="iz-hh">${esc(c.short)}</div>`).join("")}
+      ${order.map(([s]) => `<div class="iz-hr"><i style="background:${VAR[src(s).camp]}"></i>${esc(src(s).name)}</div>${C.map(c => { const v = O[s][c.id] || 0; return `<div class="iz-hc" style="background:rgba(18,18,18,${v ? (0.08 + 0.72 * v / cellMax).toFixed(2) : 0});color:${v / cellMax > .45 ? "#fff" : "#121212"}">${v || ""}</div>`; }).join("")}`).join("")}</div></section>` : "";
+    // 5. quotes
+    const shortFold = C.map(c => [c.id, fold(toLat(c.short))]);
+    const qs = D.stories.flatMap(storyQuotes).filter(q => { const w = fold(toLat(q.who)); return shortFold.some(([, f]) => w.includes(f)); }).sort((a, b) => b.n - a.n).slice(0, 6);
+    const quotesSec = qs.length ? `<section><div class="sec-head"><h2>Šta kandidati kažu</h2><span class="meta">izjave koje je preneo najmanje jedan medij sa obe strane ili više njih</span></div><div class="q-grid">${qs.map(q => qCard(q, true)).join("")}</div></section>` : "";
+    // 6. blind spots
     const bsAll = (D.stories || []).filter(s => s.blindspot && (s.cand || []).length).sort((a, b) => b.sources - a.sources).slice(0, 8);
     const nm = id => (C.find(c => c.id === id) || {}).short || id;
-    const bs = bsAll.length ? `<div class="sec-head"><h2>Prećutano o kandidatima</h2><span class="meta">vesti o kandidatu koje je prenela samo jedna strana</span></div>
-      <div class="iz-bs">${bsAll.map(s => `<a href="${link(s)}"><span class="meta">${esc(s.cand.map(nm).join(", "))} · ${s.blindspot === "pro_government" ? "režimski mediji nisu preneli" : "kritički mediji nisu preneli"}</span><div class="hl">${esc(s.headline)}</div></a>`).join("")}</div>` : "";
-    return head + `<div class="sec-head"><h2>Pokrivenost kandidata</h2><span class="meta">od ${fmtD(days[0].d)}, svakog dana se dopunjuje</span></div><div class="iz-grid">${cards}</div>${bs}
-      <p class="meta iz-note">Brojimo članke iz medija koje pratimo koji pominju kandidata u naslovu ili uvodu, sa svim padežima i na oba pisma. Nije svako pominjanje vest o kandidatu, pa brojke pokazuju pažnju, a ne ton. Na listi su samo javno najavljeni kandidati; službenu listu objavljuje RIK. Grupe medija su iste kao na ostatku sajta, <a href="metodologija/">kako ih određujemo</a>.</p></main>${footer()}`;
+    const bs = bsAll.length ? `<section><div class="sec-head"><h2>Prećutano o kandidatima</h2><span class="meta">vesti o kandidatu koje je prenela samo jedna strana</span></div>
+      <div class="iz-bs">${bsAll.map(s => `<a href="${link(s)}"><span class="meta">${esc(s.cand.map(nm).join(", "))} · ${s.blindspot === "pro_government" ? "režimski mediji nisu preneli" : "kritički mediji nisu preneli"}</span><div class="hl">${esc(s.headline)}</div></a>`).join("")}</div></section>` : "";
+    return head + race + trend + `<div class="sec-head"><h2>Kako pišu dve strane</h2><span class="meta">najnoviji naslovi o svakom kandidatu</span></div><div class="iz-grid">${cards}</div>${heat}${quotesSec}${bs}
+      <p class="meta iz-note">Brojimo članke iz medija koje pratimo koji pominju kandidata u naslovu ili uvodu, sa svim padežima i na oba pisma. Nije svako pominjanje vest o kandidatu, pa brojke pokazuju pažnju, a ne ton. Prikazujemo samo naslove i izjave sa vezom ka medijima. Na listi su samo javno najavljeni kandidati; službenu listu objavljuje RIK. Grupe medija su iste kao na ostatku sajta, <a href="metodologija/">kako ih određujemo</a>.</p></main>${footer()}`;
   }
 
   // ---- reči koje biraju

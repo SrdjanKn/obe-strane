@@ -1230,12 +1230,27 @@ def election_trends(con, sources):
     for (day, cand, camp), (tn, an) in agg.items():
         con.execute("INSERT OR REPLACE INTO election VALUES(?,?,?,?,?)", (day, cand, camp, tn, an))
     con.commit()
+    # who writes about whom (outlet x candidate, since the call) and the newest headlines that name a candidate
+    called = cfg["election"].get("called", "2026-11-27")
+    outlets = defaultdict(lambda: defaultdict(int))
+    recent = []
+    for sid, title, summary, url, pub in con.execute("SELECT source_id, title, summary, url, published FROM articles ORDER BY published DESC"):
+        if sid not in camp_of or not pub or local(pub) < called:
+            continue
+        t = normalise(title)
+        hits = set(candidates_in(rules, t + " " + normalise(summary)))
+        for cand in hits:
+            outlets[sid][cand] += 1
+        named = [c for c in candidates_in(rules, t)]
+        if named and len(recent) < 400:
+            recent.append({"s": sid, "t": title, "u": url, "p": pub, "c": named})
     days = defaultdict(lambda: defaultdict(dict))
     for day, cand, camp, tn, an in con.execute("SELECT day, cand, camp, title_n, any_n FROM election ORDER BY day"):
         days[day][cand][camp] = [tn, an]
     return {"election": cfg["election"],
             "candidates": [{k: c.get(k, "") for k in ("id", "name", "short", "nominator", "status", "announced")} for c in cfg["candidates"]],
-            "days": [{"d": d, "c": days[d]} for d in sorted(days)]}
+            "days": [{"d": d, "c": days[d]} for d in sorted(days)],
+            "outlets": {k: dict(v) for k, v in outlets.items()}, "recent": recent}
 
 
 CYR_D = dict(zip("абвгдђежзијклљмнњопрстћуфхцчџш",
