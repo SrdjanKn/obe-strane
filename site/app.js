@@ -787,14 +787,17 @@
     const race = `<section class="iz-race" aria-label="Udeo pominjanja"><div class="sec-head"><h2>Trka za pažnju</h2><span class="meta">udeo u svim pominjanjima kandidata, od ${fmtD(days[0].d)}</span></div>
       <div class="iz-rbar" role="img">${C.map((c, i) => { const n = tot(c.id); return n ? `<span style="flex:${n};background:${INK[i % 4]};color:${i % 4 < 2 ? "#fff" : "#121212"}" title="${esc(c.name)}: ${n}"><b>${grand ? Math.round(n / grand * 100) : 0}%</b> ${esc(c.short)}</span>` : ""; }).join("")}</div>
       <p class="meta iz-cardlink">Kartica nedelje za deljenje: <a href="og/izbori-nedelja.png" target="_blank" rel="noopener">za Instagram i Threads</a> · <a href="og/izbori-nedelja-x.png" target="_blank" rel="noopener">za X i Facebook</a></p></section>`;
-    // 2. daily lines
-    const W = 640, H = 200, P = {l: 34, r: 90, t: 12, b: 24}, n = days.length;
+    // 2. one small column chart per candidate (own scale, so a single big spike does not flatten the others)
+    const n = days.length, W = 200, H = 64, bw = W / n;
     const series = C.map(c => days.map(d => camps.reduce((a, k) => a + (((d.c[c.id] || {})[k] || [0, 0])[1]), 0)));
-    const mx = Math.max(5, ...series.flat()) * 1.1, x = i => P.l + (n === 1 ? (W - P.l - P.r) / 2 : i * (W - P.l - P.r) / (n - 1)), y = v => H - P.b - v / mx * (H - P.t - P.b);
-    const lines = series.map((v, ci) => `<polyline fill="none" stroke="${INK[ci % 4]}" stroke-width="2.4" stroke-dasharray="${DASH[ci % 4]}" stroke-linejoin="round" points="${v.map((a, i) => `${x(i).toFixed(1)},${y(a).toFixed(1)}`).join(" ")}"/><circle cx="${x(n - 1)}" cy="${y(v[n - 1])}" r="3.5" fill="${INK[ci % 4]}"/><text x="${x(n - 1) + 8}" y="${y(v[n - 1]) + 4}" font-size="11" fill="#121212">${esc(C[ci].short)}</text>`).join("");
-    const grid = [0, mx / 2, mx].map(v => `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e6ea"/><text x="${P.l - 5}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#5f5f66">${Math.round(v)}</text>`).join("");
-    const ticks = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map(i => `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === n - 1 ? "end" : "middle"}" font-size="10" fill="#5f5f66">${fmtD(days[i].d)}</text>`).join("");
-    const trend = `<section><div class="sec-head"><h2>Dan za danom</h2><span class="meta">članaka dnevno koji pominju kandidata</span></div><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Broj članaka po danima">${grid}${lines}${ticks}</svg></section>`;
+    const minis = C.map((c, ci) => { const v = series[ci], m = Math.max(1, ...v), pk = v.indexOf(m), total = v.reduce((a, b) => a + b, 0);
+      const bars = v.map((a, i) => { const h = a ? Math.max(2, a / m * (H - 14)) : 0; return `<rect x="${(i * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" fill="${INK[ci % 4]}" opacity="${i === pk ? 1 : .55}"><title>${fmtD(days[i].d)}: ${a}</title></rect>`; }).join("");
+      return `<div class="iz-mini"><h3><i style="background:${INK[ci % 4]}"></i>${esc(c.short)}</h3>
+        <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(c.name)}: članaka po danima, najviše ${m} dana ${fmtD(days[pk].d)}"><line x1="0" x2="${W}" y1="${H - .5}" y2="${H - .5}" stroke="#c9ced4"/>${bars}</svg>
+        <p class="meta">najviše <b>${m}</b> (${fmtD(days[pk].d)}), ukupno ${total}</p></div>`; }).join("");
+    const trend = `<section><div class="sec-head"><h2>Dan za danom</h2><span class="meta">${fmtD(days[0].d)} – ${fmtD(days[n - 1].d)}</span></div>
+      <p class="meta iz-how">Svaki stubić je jedan dan. Visina je broj članaka koji taj dan pominju kandidata. Skala je posebna za svakog kandidata, pa se vidi kada je ko bio u vestima; za poređenje među kandidatima gledajte traku iznad.</p>
+      <div class="iz-minis">${minis}</div></section>`;
     // 3. candidate cards with the newest headline from each side
     const recent = E.recent || [];
     const side = (cand, camp) => recent.filter(r => r.c.includes(cand) && camp === (src(r.s).camp)).slice(0, 2)

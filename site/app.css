@@ -713,3 +713,6 @@ button.w-chip{cursor:pointer;transition:background .15s,color .15s}
 .iz-bs{display:grid;gap:14px;margin:0 0 30px}.iz-bs a{display:block;color:inherit;text-decoration:none;border-bottom:1px solid #e3e6ea;padding-bottom:12px}
 .iz section{margin-bottom:34px}
 .iz-note{max-width:70ch;margin:24px 0 60px}
+
+.iz-how{margin:0 0 12px;max-width:62ch}.iz-minis{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}.iz-mini h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:6px}.iz-mini h3 i{width:10px;height:10px;border-radius:50%}.iz-mini p{margin:4px 0 0}
+@media(max-width:700px){.iz-minis{grid-template-columns:repeat(2,1fr)}}
