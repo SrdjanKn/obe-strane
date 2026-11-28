@@ -685,7 +685,7 @@ def stamp_index(site, recs, v):
 
 def sitemap(site, recs):
     today = f"{datetime.now(timezone.utc):%Y-%m-%d}"
-    urls = [f"<url><loc>{site}</loc><lastmod>{today}</lastmod></url>", f"<url><loc>{site}metodologija/</loc><lastmod>{today}</lastmod></url>"]
+    urls = [f"<url><loc>{site}</loc><lastmod>{today}</lastmod></url>", f"<url><loc>{site}metodologija/</loc><lastmod>{today}</lastmod></url>", f"<url><loc>{site}izbori/</loc><lastmod>{today}</lastmod></url>"]
     urls += [f"<url><loc>{site}vest/{r['id']}/</loc><lastmod>{ls[:10]}</lastmod></url>" for r, live, ls in recs if live]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "\n".join(urls) + "\n</urlset>\n")
@@ -704,6 +704,44 @@ def not_found(site, v):
 
 
 # ---------------------------------------------------------------- entry point
+
+def izbori_html(site, v):
+    """Real address for the election page (/izbori/): own title and share card; the app draws the page from data.js."""
+    title = "Izbori 2026: ko o kome piše – Obe strane"
+    desc = "Predsednički izbori 27. decembra 2026. Svakog dana brojimo koliko mediji pišu o kojem kandidatu, koje strane to rade i šta kandidati kažu. Bez anketa, bez prognoza."
+    url, img = f"{site}izbori/", f"{site}og/izbori-nedelja-x.png"
+    return f'''<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{e(title)}</title>
+<meta name="description" content="{e(desc)}">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Obe strane">
+<meta property="og:locale" content="sr_RS">
+<meta property="og:title" content="{e(title)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+{head_shared()}
+<link rel="stylesheet" href="app.css?v={v["css"]}">
+<script src="analytics.js?v={v["an"]}"></script>
+</head>
+<body>
+<div id="app"><div class="wrap"><h1>Izbori 2026: ko o kome piše</h1><p>{e(desc)}</p><noscript><p>Za prikaz podataka potreban je JavaScript.</p></noscript></div></div>
+<script>window.__ROUTE = "izbori";</script>
+<script>document.write('<script src="data.js?t=' + Math.floor(Date.now() / 60000) + '"><\\/script>');</script>
+<script src="app.js?v={v["js"]}"></script>
+</body>
+</html>
+'''
+
 
 def build(con, data):
     site = site_url()
@@ -740,6 +778,8 @@ def build(con, data):
         except Exception as ex:
             print("  week card not drawn:", ex)
     stamp_index(site, recs, v)
+    (SITE / "izbori").mkdir(exist_ok=True)
+    (SITE / "izbori" / "index.html").write_text(izbori_html(site, v), encoding="utf-8")
     (SITE / "metodologija").mkdir(exist_ok=True)
     n_out = sum(1 for x in data["sources"] if not x.get("paused"))
     (SITE / "metodologija" / "index.html").write_text(methodology_html(site, v, n_out, data.get("ai_model") or "Claude"), encoding="utf-8")

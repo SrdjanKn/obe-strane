@@ -1193,7 +1193,7 @@
       <p class="meta">Sačuvane vesti pamti samo ovaj pregledač. Stare vesti mogu da nestanu sa sajta posle desetak dana.</p></div></main>${footer()}`;
   }
   // clean address of the page being read: stories have their own URL (vest/<id>/), everything else stays as is
-  const shareUrl = () => { const m = location.hash.match(/^#\/vest\/([^/?]+)/) || (window.__ROUTE || "").match(/^vest\/([^/?]+)/); return m ? new URL(`vest/${m[1]}/`, document.baseURI).href : location.href; };
+  const shareUrl = () => { if (/^#\/izbori(?:[/?]|$)/.test(location.hash) || window.__ROUTE === "izbori") return new URL("izbori/", document.baseURI).href; const m = location.hash.match(/^#\/vest\/([^/?]+)/) || (window.__ROUTE || "").match(/^vest\/([^/?]+)/); return m ? new URL(`vest/${m[1]}/`, document.baseURI).href : location.href; };
   // story links are real addresses (for search engines and sharing); inside the app a click opens the story without reloading
   document.addEventListener("click", e => {
     if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -1206,7 +1206,7 @@
   function render(nav) {
     if (!D) { app.innerHTML = `<div class="wrap empty">Podaci se još prikupljaju.</div>`; return; }
     // leaving a story for another page: the address goes back to the site root, so a refresh opens that page, not the story
-    if (location.hash && /\/vest\/[^/]+\/?$/.test(location.pathname) && !/^#\/vest\//.test(location.hash) && history.replaceState) {
+    if (location.hash && /\/(?:vest\/[^/]+|izbori)\/?$/.test(location.pathname) && !/^#\/(?:vest\/|izbori(?:[/?]|$))/.test(location.hash) && history.replaceState) {
       try { history.replaceState(null, "", document.baseURI.split("#")[0] + location.hash); } catch (_) {} }
     const [page, ...rest] = (location.hash.split("?")[0].replace(/^#\/?/, "") || window.__ROUTE || "").split("/");
     const arg = decodeURIComponent(rest.join("/"));
@@ -1215,10 +1215,10 @@
       : page === "o-nama" ? about() : page === "sacuvano" ? savedPage() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
       : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "izbori" ? izboriPage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : page === "za-medije" ? forPublishers() : page === "najrazlicitije" ? spinPage() : home();
     // a story opened inside the app gets its real address (vest/<id>/), so a copied link shows that story's preview card
-    if (page === "vest" && location.hash && history.replaceState) { try {
+    if ((page === "vest" || page === "izbori") && location.hash && history.replaceState) { try {
       const clean = shareUrl();
       if (!document.querySelector("base")) { const b = document.createElement("base"); b.href = document.baseURI.split("#")[0]; document.head.prepend(b); }
-      history.replaceState(null, "", clean); window.__ROUTE = "vest/" + arg;
+      history.replaceState(null, "", clean); window.__ROUTE = page === "izbori" ? "izbori" : "vest/" + arg;
     } catch (_) {} }
     if (page === "o-nama" && arg) setTimeout(() => { const t = document.getElementById(arg); if (t) t.scrollIntoView(); }, 0);
     const tog = document.querySelector(".s-tog");
@@ -1307,7 +1307,7 @@
   window.addEventListener("resize", () => { clearTimeout(window.__bt); window.__bt = setTimeout(balanceHome, 120); });
   if (document.fonts) document.fonts.ready.then(balanceHome);
   // back/forward between a story's clean address and other pages
-  window.addEventListener("popstate", () => { if (location.hash) return; const m = location.pathname.match(/\/vest\/([^/]+)\/?$/); window.__ROUTE = m ? "vest/" + m[1] : ""; render(true); window.scrollTo(0, 0); });
+  window.addEventListener("popstate", () => { if (location.hash) return; const m = location.pathname.match(/\/vest\/([^/]+)\/?$/); window.__ROUTE = m ? "vest/" + m[1] : /\/izbori\/?$/.test(location.pathname) ? "izbori" : ""; render(true); window.scrollTo(0, 0); });
   window.addEventListener("hashchange", () => { window.__ROUTE = ""; render(true); if (!/^#\/o-nama\/./.test(location.hash)) window.scrollTo(0, 0); if (window.obeTrack) window.obeTrack(); });
   setInterval(() => {
     const s = document.createElement("script");
