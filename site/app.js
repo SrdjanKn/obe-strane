@@ -767,6 +767,37 @@
       <p class="meta ton-note">Brojimo samo naslove, posle prebacivanja ćirilice u latinicu, sa svim padežima reči. Merenje traje od ${fmtD(days[0].d)} ${days[0].d.slice(0, 4)}. i svakog dana se dopunjuje. Reči ne kažu sve o tonu teksta, ali pokazuju kako se menja rečnik.</p></main>${footer()}`;
   }
 
+  // ---- izbori: ko o kome piše
+  function izboriPage() {
+    const E = D.election || {candidates: [], days: []}, C = E.candidates || [];
+    const called = (E.election || {}).called || "2026-11-27";
+    const days = (E.days || []).filter(d => d.d >= called);
+    const camps = ["pro_government", "public", "mixed", "critical", "international"];
+    const cl = k => ((D.camps || {})[k] || {}).label || k;
+    const fmtD = k => { const [, m, d] = k.split("-"); return `${+d}. ${+m}.`; };
+    const sum = (cand, camp, i) => days.reduce((n, d) => n + ((((d.c[cand] || {})[camp]) || [0, 0])[i]), 0);
+    const tot = (cand, i = 1) => camps.reduce((n, k) => n + sum(cand, k, i), 0);
+    const grand = C.reduce((n, c) => n + tot(c.id), 0);
+    const head = `${compactHeader()}<main class="wrap iz"><h1 class="page-h">Izbori 2026: ko o kome piše</h1>
+      <p class="page-p">Predsednički izbori su 27. decembra 2026. Ovde svakog dana brojimo koliko medija piše o kojem kandidatu i koje strane to rade. Bez anketa, bez prognoza i bez preporuka za koga glasati.</p>`;
+    if (!C.length || !days.length) return head + `<p class="meta" style="margin:24px 0 60px">Merenje je tek počelo. Prvi podaci se pojavljuju posle prve cele dnevne serije.</p></main>${footer()}`;
+    const bar = (cand, key) => { const t = tot(cand) || 1;
+      return `<div class="iz-bar" role="img" aria-label="Podela po grupama medija">${camps.map(k => { const n = sum(cand, k, 1); return n ? `<span style="flex:${n};background:${VAR[k]}" title="${esc(cl(k))}: ${n}"></span>` : ""; }).join("")}</div>`; };
+    const spark = cand => { const vals = days.map(d => camps.reduce((n, k) => n + (((d.c[cand] || {})[k] || [0, 0])[0]), 0)), mx = Math.max(1, ...vals), W = 300, H = 46, bw = W / vals.length;
+      return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Članci po danima">${vals.map((v, i) => `<rect x="${(i * bw + 1).toFixed(1)}" y="${(H - 12 - v / mx * (H - 14)).toFixed(1)}" width="${Math.max(1, bw - 2).toFixed(1)}" height="${(v / mx * (H - 14)).toFixed(1)}" fill="#121212" opacity=".75"/>`).join("")}
+        <text x="0" y="${H - 1}" font-size="10" fill="#5f5f66">${fmtD(days[0].d)}</text><text x="${W}" y="${H - 1}" text-anchor="end" font-size="10" fill="#5f5f66">${fmtD(days[days.length - 1].d)}</text></svg>`; };
+    const cards = C.map(c => { const n = tot(c.id), nt = tot(c.id, 0);
+      return `<article class="iz-card"><h3>${esc(c.name)}</h3><p class="meta">${esc(c.nominator || "")}</p>
+        <div class="iz-n"><b>${n}</b> ${n === 1 ? "članak" : "članaka"} <span class="meta">(${nt} u naslovu · ${grand ? Math.round(n / grand * 100) : 0}% svih pominjanja)</span></div>
+        ${bar(c.id)}<ul class="iz-leg">${camps.filter(k => sum(c.id, k, 1)).map(k => `<li><i style="background:${VAR[k]}"></i>${esc(cl(k))} <b>${sum(c.id, k, 1)}</b></li>`).join("")}</ul>${spark(c.id)}</article>`; }).join("");
+    const bsAll = (D.stories || []).filter(s => s.blindspot && (s.cand || []).length).sort((a, b) => b.sources - a.sources).slice(0, 8);
+    const nm = id => (C.find(c => c.id === id) || {}).short || id;
+    const bs = bsAll.length ? `<div class="sec-head"><h2>Prećutano o kandidatima</h2><span class="meta">vesti o kandidatu koje je prenela samo jedna strana</span></div>
+      <div class="iz-bs">${bsAll.map(s => `<a href="${link(s)}"><span class="meta">${esc(s.cand.map(nm).join(", "))} · ${s.blindspot === "pro_government" ? "režimski mediji nisu preneli" : "kritički mediji nisu preneli"}</span><div class="hl">${esc(s.headline)}</div></a>`).join("")}</div>` : "";
+    return head + `<div class="sec-head"><h2>Pokrivenost kandidata</h2><span class="meta">od ${fmtD(days[0].d)}, svakog dana se dopunjuje</span></div><div class="iz-grid">${cards}</div>${bs}
+      <p class="meta iz-note">Brojimo članke iz medija koje pratimo koji pominju kandidata u naslovu ili uvodu, sa svim padežima i na oba pisma. Nije svako pominjanje vest o kandidatu, pa brojke pokazuju pažnju, a ne ton. Na listi su samo javno najavljeni kandidati; službenu listu objavljuje RIK. Grupe medija su iste kao na ostatku sajta, <a href="metodologija/">kako ih određujemo</a>.</p></main>${footer()}`;
+  }
+
   // ---- reči koje biraju
   const CYRL = {"а":"a","б":"b","в":"v","г":"g","д":"d","ђ":"đ","е":"e","ж":"ž","з":"z","и":"i","ј":"j","к":"k","л":"l","љ":"lj","м":"m","н":"n","њ":"nj","о":"o","п":"p","р":"r","с":"s","т":"t","ћ":"ć","у":"u","ф":"f","х":"h","ц":"c","ч":"č","џ":"dž","ш":"š"};
   const STOPW = new Set(("ali ili koji koja koje kojeg kojem kojih ovo ova ovaj taj nije nisu nece hoce biti bio bila bilo bili bice samo sve svi svih vise manje kada gde kako zasto prema izmedju preko ispred tokom zbog radi protiv godine godina danas juce sutra ovde tamo video foto vesti srbija srbije srbiji srbiju evra dinara miliona milion milijardi hitno uzivo oglasio oglasila rekao rekla kaze izjavio izjavila naveo navela posle pred kroz nakon ovog ovde njegov njena njihov jedan jedna jedno dana dok sada ipak jos vec evo ovim znaci poznato reci beograd beogradu novi nova novu nove novog novom novim ponovo dve dva tri prvi prva prvo ima imaju sada sad zato posto takodje jer").split(" "));
@@ -1156,7 +1187,7 @@
     app.innerHTML = page === "vest" ? story(arg) : page === "rubrika" ? section(arg) : page === "slepe-tacke" ? blindspots(arg)
       : page === "izvori" ? sources() : page === "izvor" ? outletPage(arg) : page === "pretraga" ? search(arg)
       : page === "o-nama" ? about() : page === "sacuvano" ? savedPage() : page === "brifing" ? briefingPage() : page === "tema" ? topicPage(arg)
-      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : page === "za-medije" ? forPublishers() : page === "najrazlicitije" ? spinPage() : home();
+      : page === "moja-ishrana" ? dietPage() : page === "proveri" ? checkPage(arg) : page === "ton" ? tonePage() : page === "izbori" ? izboriPage() : page === "reci" ? wordsPage() : page === "citati" ? quotesPage(arg) : page === "podkasti" ? podcastsPage(arg) : page === "za-medije" ? forPublishers() : page === "najrazlicitije" ? spinPage() : home();
     // a story opened inside the app gets its real address (vest/<id>/), so a copied link shows that story's preview card
     if (page === "vest" && location.hash && history.replaceState) { try {
       const clean = shareUrl();

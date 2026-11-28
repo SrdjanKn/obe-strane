@@ -1181,6 +1181,17 @@ def candidates_in(rules, text):
     return hit
 
 
+_CAND_RULES = None
+
+
+def story_cands(s):
+    """Announced candidates named in a story's headline or in any outlet's title for it."""
+    global _CAND_RULES
+    if _CAND_RULES is None:
+        _CAND_RULES = _cand_rules()[1]
+    return candidates_in(_CAND_RULES, normalise(s["headline"] + " " + " ".join(a["title"] for a in s["items"])))
+
+
 def election_trends(con, sources):
     """Daily counts of articles that name each announced presidential candidate, per outlet group (camp):
     [in the headline, in the headline or summary]. Counts stay in the database after the articles are deleted
@@ -1430,7 +1441,7 @@ def export_site(hours=36):
                      "a36": n36.get(s["id"], 0), "a7": n7.get(s["id"], 0),
                      "sections": [k for k, _ in secs[s["id"]].most_common(3)], "recent": recent.get(s["id"], [])}
                     for s in sources],
-        "stories": [{"id": s["id"], "headline": s["headline"], "summary": s["summary"], "image": "",   # outlets' photos are not published: the site shows its own illustrations
+        "stories": [{"id": s["id"], "headline": s["headline"], "cand": story_cands(s), "summary": s["summary"], "image": "",   # outlets' photos are not published: the site shows its own illustrations
                      "image_source": "", "last": iso(s["last"]), "score": round(s["score"], 2),
                      "section": s["section"], "topics": s["topics"], "ai": s.get("ai"),
                      "broke": s["broke"], "first": iso(s["first"]), "sources": s["sources"],
