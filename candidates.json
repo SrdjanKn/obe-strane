@@ -1,0 +1,19 @@
+{
+  "election": {"name": "Predsednički izbori 2026", "date": "2026-12-27", "called": "2026-11-27"},
+  "note": "Only publicly announced candidates. Add a person here when they announce or when RIK confirms the list; the collector re-tags the last 14 days of articles on every run, so a late addition still gets its recent history. Patterns run on normalised text (lower case, no diacritics, Cyrillic transliterated), so they cover declensions and both scripts. 'name_only' patterns are accepted anywhere; 'needs_context' patterns count only when the headline/summary also matches 'context'.",
+  "candidates": [
+    {"id": "saicic", "name": "Radomir Saičić", "short": "Saičić", "nominator": "Studentska lista / Studentski pokret",
+     "status": "announced", "announced": "2026-11-27",
+     "name_only": ["\\bsaicic\\w*"], "needs_context": []},
+    {"id": "karic", "name": "Bogoljub Karić", "short": "Karić", "nominator": "Pokret snaga Srbije – BK",
+     "status": "announced", "announced": "2026-11-27",
+     "name_only": ["\\bbogoljub\\w*\\s+karic\\w*"],
+     "needs_context": ["\\bkaric\\w*"], "context": "predsedni|kandidat|izbor|trk|trci|trku|pokret\\w* snag|\\bbk\\b|bogoljub"},
+    {"id": "nestorovic", "name": "Branimir Nestorović", "short": "Nestorović", "nominator": "Mi – Snaga naroda",
+     "status": "announced", "announced": "2026-11-27",
+     "name_only": ["\\bnestorovic\\w*"], "needs_context": []},
+    {"id": "pavlovic", "name": "Branko Pavlović", "short": "Pavlović", "nominator": "samostalno (advokat, bivši poslanik)",
+     "status": "announced", "announced": "2026-11-27",
+     "name_only": ["\\bbranko\\w*\\s+pavlovic\\w*", "\\badvokat\\w*\\s+(branko\\w*\\s+)?pavlovic\\w*"], "needs_context": []}
+  ]
+}

@@ -1157,6 +1157,76 @@ def tone_trends(con, sources):
 
 
 
+CAND_PATH = HERE / "candidates.json"
+PUBLIC_IZBORI = PUBLIC_DATA
+
+
+def _cand_rules():
+    cfg = json.loads(CAND_PATH.read_text(encoding="utf-8"))
+    out = []
+    for c in cfg["candidates"]:
+        name = [re.compile(x) for x in c.get("name_only", [])]
+        ctx = [re.compile(x) for x in c.get("needs_context", [])]
+        cx = re.compile(c["context"]) if c.get("context") else None
+        out.append((c, name, ctx, cx))
+    return cfg, out
+
+
+def candidates_in(rules, text):
+    """Candidates a (normalised) text is about. Surname-only patterns need an election word nearby."""
+    hit = []
+    for c, name, ctx, cx in rules:
+        if any(r.search(text) for r in name) or (ctx and cx and any(r.search(text) for r in ctx) and cx.search(text)):
+            hit.append(c["id"])
+    return hit
+
+
+def election_trends(con, sources):
+    """Daily counts of articles that name each announced presidential candidate, per outlet group (camp):
+    [in the headline, in the headline or summary]. Counts stay in the database after the articles are deleted
+    (articles are kept 14 days); if the cache is lost the series is taken back from the published site."""
+    cfg, rules = _cand_rules()
+    con.execute("CREATE TABLE IF NOT EXISTS election(day TEXT, cand TEXT, camp TEXT, title_n INTEGER, any_n INTEGER, PRIMARY KEY(day, cand, camp))")
+    if not con.execute("SELECT 1 FROM election LIMIT 1").fetchone():
+        try:
+            raw = urllib.request.urlopen(urllib.request.Request(PUBLIC_IZBORI, headers={"User-Agent": UA}), timeout=20).read().decode("utf-8")
+            old = json.loads(raw[raw.index("{"):raw.rindex("}") + 1]).get("election") or {}
+            for d in old.get("days", []):
+                for cand, camps in d["c"].items():
+                    for camp, (tn, an) in camps.items():
+                        con.execute("INSERT OR REPLACE INTO election VALUES(?,?,?,?,?)", (d["d"], cand, camp, tn, an))
+        except Exception as e:
+            print("  election: no earlier series to restore:", e)
+    camp_of = {s["id"]: s["camp"] for s in sources}
+    local = lambda iso: (datetime.fromisoformat(iso) + timedelta(hours=1)).date().isoformat()   # Belgrade day
+    first_full = (datetime.now(timezone.utc) - timedelta(days=13)).date().isoformat()
+    agg = defaultdict(lambda: [0, 0])
+    for sid, title, summary, pub in con.execute("SELECT source_id, title, summary, published FROM articles"):
+        camp = camp_of.get(sid)
+        if not camp or not pub:
+            continue
+        day = local(pub)
+        if day < first_full:
+            continue
+        t = normalise(title)
+        full = t + " " + normalise(summary)
+        in_title = set(candidates_in(rules, t))
+        for cand in set(candidates_in(rules, full)) | in_title:
+            row = agg[(day, cand, camp)]
+            row[1] += 1
+            if cand in in_title:
+                row[0] += 1
+    for (day, cand, camp), (tn, an) in agg.items():
+        con.execute("INSERT OR REPLACE INTO election VALUES(?,?,?,?,?)", (day, cand, camp, tn, an))
+    con.commit()
+    days = defaultdict(lambda: defaultdict(dict))
+    for day, cand, camp, tn, an in con.execute("SELECT day, cand, camp, title_n, any_n FROM election ORDER BY day"):
+        days[day][cand][camp] = [tn, an]
+    return {"election": cfg["election"],
+            "candidates": [{k: c.get(k, "") for k in ("id", "name", "short", "nominator", "status", "announced")} for c in cfg["candidates"]],
+            "days": [{"d": d, "c": days[d]} for d in sorted(days)]}
+
+
 CYR_D = dict(zip("абвгдђежзијклљмнњопрстћуфхцчџш",
                  ["a", "b", "v", "g", "d", "đ", "e", "ž", "z", "i", "j", "k", "l", "lj", "m", "n", "nj", "o",
                   "p", "r", "s", "t", "ć", "u", "f", "h", "c", "č", "dž", "š"]))
@@ -1301,6 +1371,7 @@ def export_site(hours=36):
     ai_summaries(con, stories)
     brief, brief_days = briefing(con, stories, n_articles)
     tone = tone_trends(con, sources)
+    election = election_trends(con, sources)
     words = chosen_words(con, sources)
     pods = podcasts(stories)
     now = datetime.now(timezone.utc)
@@ -1350,7 +1421,7 @@ def export_site(hours=36):
         "camps": camps, "ai_model": AI_MODEL,
         "balance": {"shown": dict(shown), "collected": dict(collected), "outlets": dict(outlets)},
         "topics": [{"slug": slug, "name": name, "stories": topic_counts[slug]} for slug, name, _ in TOPICS if topic_counts[slug]],
-        "briefing": brief, "briefing_days": brief_days, "tone": tone, "words": words, "podcasts": pods, "speakers": (json.loads(Path(__file__).with_name("speakers.json").read_text(encoding="utf-8")).get("speakers", {}) if Path(__file__).with_name("speakers.json").exists() else {}),
+        "briefing": brief, "briefing_days": brief_days, "tone": tone, "election": election, "words": words, "podcasts": pods, "speakers": (json.loads(Path(__file__).with_name("speakers.json").read_text(encoding="utf-8")).get("speakers", {}) if Path(__file__).with_name("speakers.json").exists() else {}),
         "sources": [{"id": s["id"], "name": s["name"], "camp": s["camp"], "home": s["home"], "group": s.get("group", ""),
                      "note": s.get("note", ""), "owner": s.get("owner", ""), "owner_src": s.get("owner_src", ""),
                      "public_money": s.get("public_money", ""), "public_money_src": s.get("public_money_src", ""),
