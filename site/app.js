@@ -785,7 +785,8 @@
     if (!C.length || !days.length) return head + `<p class="meta" style="margin:24px 0 60px">Merenje je tek počelo. Prvi podaci se pojavljuju posle prve cele dnevne serije.</p></main>${footer()}`;
     // 1. race for attention: one bar, share of all mentions
     const race = `<section class="iz-race" aria-label="Udeo pominjanja"><div class="sec-head"><h2>Trka za pažnju</h2><span class="meta">udeo u svim pominjanjima kandidata, od ${fmtD(days[0].d)}</span></div>
-      <div class="iz-rbar" role="img">${C.map((c, i) => { const n = tot(c.id); return n ? `<span style="flex:${n};background:${INK[i % 4]};color:${i % 4 < 2 ? "#fff" : "#121212"}" title="${esc(c.name)}: ${n}"><b>${grand ? Math.round(n / grand * 100) : 0}%</b> ${esc(c.short)}</span>` : ""; }).join("")}</div></section>`;
+      <div class="iz-rbar" role="img">${C.map((c, i) => { const n = tot(c.id); return n ? `<span style="flex:${n};background:${INK[i % 4]};color:${i % 4 < 2 ? "#fff" : "#121212"}" title="${esc(c.name)}: ${n}"><b>${grand ? Math.round(n / grand * 100) : 0}%</b> ${esc(c.short)}</span>` : ""; }).join("")}</div>
+      <p class="meta iz-cardlink">Kartica nedelje za deljenje: <a href="og/izbori-nedelja.png" target="_blank" rel="noopener">za Instagram i Threads</a> · <a href="og/izbori-nedelja-x.png" target="_blank" rel="noopener">za X i Facebook</a></p></section>`;
     // 2. daily lines
     const W = 640, H = 200, P = {l: 34, r: 90, t: 12, b: 24}, n = days.length;
     const series = C.map(c => days.map(d => camps.reduce((a, k) => a + (((d.c[c.id] || {})[k] || [0, 0])[1]), 0)));

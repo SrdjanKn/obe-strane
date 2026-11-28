@@ -315,6 +315,106 @@ def card(headline, split=None, n=0, blind="", sub="", host="", counts=True, art=
     return buf.getvalue()
 
 
+# ---------------------------------------------------------------- weekly election card ("Nedelja u medijima")
+
+MON = ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "avg", "sep", "okt", "nov", "dec"]
+RACE_INK = ["#ffffff", "#c3cad4", "#8a95a5", "#56606f"]
+
+
+def _clanak(n):
+    return "članak" if n % 10 == 1 and n % 100 != 11 else "članka" if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14 else "članaka"
+
+
+def week_card(election, tall=True, host=""):
+    """Weekly share image: each announced candidate's share of mentions over the last 7 days, split by outlet group.
+    tall = 1080x1350 (Instagram, Threads); otherwise 1200x630 (X, Facebook link preview)."""
+    from PIL import Image, ImageDraw
+    cands = election.get("candidates") or []
+    days = (election.get("days") or [])[-7:]
+    if not cands or not days:
+        return None
+    camps = ("pro_government", "public", "mixed", "critical", "international")
+    rows = []
+    for c in cands:
+        by = {k: sum(((d["c"].get(c["id"]) or {}).get(k) or [0, 0])[1] for d in days) for k in camps}
+        rows.append((c["short"], c["name"], sum(by.values()), by))
+    grand = sum(r[2] for r in rows)
+    rows.sort(key=lambda r: -r[2])
+    d0, d1 = days[0]["d"], days[-1]["d"]
+    rng = lambda iso: f"{int(iso[8:10])}. {MON[int(iso[5:7]) - 1]}"
+    W, H = (1080, 1350) if tall else (1200, 630)
+    X = 64 if tall else 56
+    img = Image.new("RGB", (W, H), "#141a22")
+    d = ImageDraw.Draw(img)
+    logo = Image.open(ASSETS / "logo-card.png").convert("RGBA")
+    lh = 46 if tall else 38
+    logo = logo.resize((round(logo.width * lh / logo.height), lh), Image.LANCZOS)
+    img.paste(logo, (X, 52 if tall else 36), logo)
+    ty = 150 if tall else 90
+    d.text((X, ty), "Nedelja u medijima", font=_font("Bold", 84 if tall else 62), fill="#ffffff")
+    d.text((X, ty + (104 if tall else 74)), f"Ko o kome piše u predsedničkoj trci · {rng(d0)} – {rng(d1)}", font=_font("Regular", 33 if tall else 27), fill="#cfd6df")
+    bw = W - 2 * X
+    y = ty + (200 if tall else 130)
+    # share of all mentions
+    bh = 64 if tall else 44
+    x = X
+    gap = 3
+    live = [r for r in rows if r[2]]
+    usable = bw - gap * max(0, len(live) - 1)
+    for i, (short, _, n, _) in enumerate(live):
+        w = round(usable * n / max(1, grand)) if i < len(live) - 1 else X + bw - x
+        col = RACE_INK[i % 4]
+        d.rounded_rectangle((x, y, x + w - 1, y + bh), radius=6, fill=col)
+        t = f"{round(n / max(1, grand) * 100)}%"
+        f = _font("Bold", 30 if tall else 24)
+        if d.textlength(t, font=f) < w - 12:
+            d.text((x + (w - d.textlength(t, font=f)) / 2, y + (bh - 30) / 2 - 3), t, font=f, fill="#141a22" if i % 4 < 2 else "#ffffff")
+        x += w + gap
+    d.text((X, y + bh + 12), "udeo u svim pominjanjima kandidata", font=_font("Regular", 24 if tall else 20), fill="#8a95a5")
+    y += bh + (70 if tall else 50)
+    # one row per candidate
+    mx = max([r[2] for r in rows] + [1])
+    room = (H - 140 - y) if tall else (H - 60 - y)
+    rh = min(200 if tall else 78, room // max(1, len(rows)))
+    for ri, (short, name, n, by) in enumerate(rows):
+        fn_ = _font("Bold", 44 if tall else 30)
+        dot = 22 if tall else 14                      # same tint as this candidate's piece of the share bar above
+        if n:
+            d.ellipse((X, y + (16 if tall else 9), X + dot, y + (16 if tall else 9) + dot), fill=RACE_INK[ri % 4])
+        d.text((X + dot + 14, y), name, font=fn_, fill="#ffffff")
+        t = f"{n} {_clanak(n)}"
+        fr = _font("Regular", 34 if tall else 24)
+        d.text((X + bw - d.textlength(t, font=fr), y + (6 if tall else 3)), t, font=fr, fill="#cfd6df")
+        by_y = y + (64 if tall else 40)
+        full = round(bw * n / mx)
+        xx = X
+        parts = [(by[k], COLOR[k]) for k in camps if by[k]]
+        tot = sum(v for v, _ in parts) or 1
+        for j, (v, col) in enumerate(parts):
+            w = round(full * v / tot) if j < len(parts) - 1 else X + full - xx
+            d.rectangle((xx, by_y, xx + max(1, w) - 1, by_y + (28 if tall else 16)), fill=col)
+            xx += w
+        if tall:
+            f = _font("Regular", 26)
+            lab = "  ·  ".join(f"{by[k]} {FORMS[k][2] if k in ('pro_government', 'critical') else FORMS[k][2]}" for k in ("pro_government", "critical") if by[k])
+            rest = sum(by[k] for k in ("public", "mixed", "international"))
+            if rest:
+                lab += ("  ·  " if lab else "") + f"{rest} ostalih"
+            d.text((X, by_y + 40), lab, font=f, fill="#8a95a5")
+        y += rh
+    # legend + footer
+    fy = H - (96 if tall else 40)
+    if tall:
+        d.text((X, fy), "Broj članaka koji u naslovu ili uvodu pominju kandidata. Grupe medija kao na obestrane.rs.", font=_font("Regular", 24), fill="#8a95a5")
+        d.text((X, fy + 38), f"{host}/#/izbori", font=_font("Bold", 28), fill="#cfd6df")
+    else:
+        t = f"{host}/#/izbori"
+        d.text((W - X - d.textlength(t, font=_font("Bold", 24)), H - 52), t, font=_font("Bold", 24), fill="#cfd6df")
+    buf = io.BytesIO()
+    img.quantize(colors=96, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(buf, "PNG", optimize=True)
+    return buf.getvalue()
+
+
 # ---------------------------------------------------------------- pages
 
 def head_shared():
@@ -598,7 +698,7 @@ def build(con, data):
         ver.write_text(CARD_VERSION)
     keep_ids = {rec["id"] for rec, _, _ in recs}
     for f in (SITE / "og").glob("*.png"):
-        if f.stem != "default" and f.stem not in keep_ids:
+        if f.stem not in ("default", "izbori-nedelja", "izbori-nedelja-x") and f.stem not in keep_ids:
             f.unlink()
     host = re.sub(r"^https?://", "", site).rstrip("/")
     recent = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
@@ -611,6 +711,13 @@ def build(con, data):
             continue
         (SITE / "og" / f"{rec['id']}.png").write_bytes(card(rec["headline"], rec["split"], rec["n"], rec["blind"], host=host, art=art_for(rec) if fresh else None))   # artwork only for current stories: keeps the build fast
     (SITE / "og" / "default.png").write_bytes(card("Ista vest, dve strane", {"pro_government": 5, "critical": 5}, 12, counts=False, sub="Uporedite kako je prenose režimski i kritički mediji – i šta jedna strana prećuti.", host=host, art=SITE / "img" / "sekcije" / "vesti.webp"))
+    for name, tall in (("izbori-nedelja", True), ("izbori-nedelja-x", False)):   # weekly election card, redrawn on every build
+        try:
+            png = week_card(data.get("election") or {}, tall, host)
+            if png:
+                (SITE / "og" / f"{name}.png").write_bytes(png)
+        except Exception as ex:
+            print("  week card not drawn:", ex)
     stamp_index(site, recs, v)
     (SITE / "metodologija").mkdir(exist_ok=True)
     n_out = sum(1 for x in data["sources"] if not x.get("paused"))
