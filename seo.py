@@ -166,6 +166,7 @@ PEOPLE = [("makron", r"Makron"), ("si", r"\bSi\s+(?:Đinping|Džinping|Điping)"
           ("zelenski", r"Zelensk"), ("putin", r"Putin"), ("tramp", r"Tramp"), ("dodik", r"Dodik"), ("vucevic", r"Vučević"),
           ("bakic", r"Jov" + _L + r"*\s+Baki[ćc]"), ("jovanovic", r"Miloš" + _L + r"*\s+Jovanovi[ćc]"), ("brnabic", r"Brnabi[ćc]"), ("sapic", r"Šapić"), ("radoicic", r"Radoi[čc]i[ćc]"),
           ("djukanovic", r"Vladimir" + _L + r"*\s+Đukanovi[ćc]"), ("radic", r"Aleksandar" + _L + r"*\s+Radi[ćc]"), ("saicic", r"Radomir" + _L + r"*\s+Sai[čc]i[ćc]|\bSaičić"),
+          ("karic", r"Bogoljub" + _L + r"*\s+Kari[ćc]"), ("nestorovic", r"Nestorovi[ćc]"), ("pavlovic", r"Branko" + _L + r"*\s+Pavlovi[ćc]"),
           ("vucicevic", r"Vučićević", 2), ("cupic", r"Čupić"), ("vucic", r"Vučić(?!ević)", 2)]
 TOPICS = [("rem", r"\brem(?:a|u|om|e|i)?\b|regulatorn\w* tel\w* za elektronsk|elektronsk\w* medij"),
           ("nadstresnica", r"nadstresnic|kanop"), ("litijum", r"litijum|rio tinto|jadar"), ("kosovo", r"kosov|pristin|kurti|kfor"),
@@ -325,6 +326,20 @@ def _clanak(n):
     return "članak" if n % 10 == 1 and n % 100 != 11 else "članka" if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14 else "članaka"
 
 
+def _face(cid, w, h):
+    """Candidate portrait (site/img/lica/<id>.webp) cropped to w x h, or None if there is none."""
+    from PIL import Image
+    f = SITE / "img" / "lica" / f"{cid}.webp"
+    if not f.exists():
+        return None
+    im = Image.open(f).convert("RGB")
+    sc = max(w / im.width, h / im.height)
+    im = im.resize((round(im.width * sc), round(im.height * sc)), Image.LANCZOS)
+    left = (im.width - w) // 2
+    top = min(max(0, round(im.height * 0.42 - h / 2)), im.height - h)
+    return im.crop((left, top, left + w, top + h))
+
+
 def week_card(election, tall=True, host=""):
     """Weekly share image: each announced candidate's share of mentions over the last 7 days, split by outlet group.
     tall = 1080x1350 (Instagram, Threads); otherwise 1200x630 (X, Facebook link preview)."""
@@ -337,9 +352,10 @@ def week_card(election, tall=True, host=""):
     rows = []
     for c in cands:
         by = {k: sum(((d["c"].get(c["id"]) or {}).get(k) or [0, 0])[1] for d in days) for k in camps}
-        rows.append((c["short"], c["name"], sum(by.values()), by))
+        rows.append((c["short"], c["name"], sum(by.values()), by, c["id"]))
     grand = sum(r[2] for r in rows)
     rows.sort(key=lambda r: -r[2])
+    ids = [r[4] for r in rows]
     d0, d1 = days[0]["d"], days[-1]["d"]
     rng = lambda iso: f"{int(iso[8:10])}. {MON[int(iso[5:7]) - 1]}"
     W, H = (1080, 1350) if tall else (1200, 630)
@@ -361,7 +377,7 @@ def week_card(election, tall=True, host=""):
     gap = 3
     live = [r for r in rows if r[2]]
     usable = bw - gap * max(0, len(live) - 1)
-    for i, (short, _, n, _) in enumerate(live):
+    for i, (short, _, n, _, _c) in enumerate(live):
         w = round(usable * n / max(1, grand)) if i < len(live) - 1 else X + bw - x
         col = RACE_INK[i % 4]
         d.rounded_rectangle((x, y, x + w - 1, y + bh), radius=6, fill=col)
@@ -376,16 +392,21 @@ def week_card(election, tall=True, host=""):
     mx = max([r[2] for r in rows] + [1])
     room = (H - 140 - y) if tall else (H - 60 - y)
     rh = min(200 if tall else 78, room // max(1, len(rows)))
-    for ri, (short, name, n, by) in enumerate(rows):
+    for ri, (short, name, n, by, _cid) in enumerate(rows):
         fn_ = _font("Bold", 44 if tall else 30)
+        tw, th = (132, 88) if tall else (60, 40)
+        face = _face(ids[ri], tw, th)
+        if face:
+            img.paste(face, (X, y + (6 if tall else 2)))
+        off = (tw + 20) if face else 0
         dot = 22 if tall else 14                      # same tint as this candidate's piece of the share bar above
         if n:
-            d.ellipse((X, y + (16 if tall else 9), X + dot, y + (16 if tall else 9) + dot), fill=RACE_INK[ri % 4])
-        d.text((X + dot + 14, y), name, font=fn_, fill="#ffffff")
+            d.ellipse((X + off, y + (16 if tall else 9), X + off + dot, y + (16 if tall else 9) + dot), fill=RACE_INK[ri % 4])
+        d.text((X + off + dot + 14, y), name, font=fn_, fill="#ffffff")
         t = f"{n} {_clanak(n)}"
         fr = _font("Regular", 34 if tall else 24)
         d.text((X + bw - d.textlength(t, font=fr), y + (6 if tall else 3)), t, font=fr, fill="#cfd6df")
-        by_y = y + (64 if tall else 40)
+        by_y = y + ((100 if face else 64) if tall else (44 if face else 40))
         full = round(bw * n / mx)
         xx = X
         parts = [(by[k], COLOR[k]) for k in camps if by[k]]

@@ -18,7 +18,7 @@
     ["zelenski", /Zelensk/u], ["putin", /Putin/u], ["tramp", /Tramp(?![\p{L}]*\s*(?:tower))/u], ["dodik", /Dodik/u],
     ["vucevic", /Vučević/u], ["bakic", /Jov\p{L}*\s+Baki[ćc]/u], ["jovanovic", /Miloš\p{L}*\s+Jovanovi[ćc]/u],
     ["brnabic", /Brnabi[ćc]/u], ["sapic", /Šapić/u], ["radoicic", /Radoi[čc]i[ćc]/u],
-    ["djukanovic", /Vladimir\p{L}*\s+Đukanovi[ćc]/u], ["radic", /Aleksandar\p{L}*\s+Radi[ćc]/u], ["saicic", /Radomir\p{L}*\s+Sai[čc]i[ćc]|\bSaičić/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
+    ["djukanovic", /Vladimir\p{L}*\s+Đukanovi[ćc]/u], ["radic", /Aleksandar\p{L}*\s+Radi[ćc]/u], ["saicic", /Radomir\p{L}*\s+Sai[čc]i[ćc]|\bSaičić/u], ["karic", /Bogoljub\p{L}*\s+Kari[ćc]/u], ["nestorovic", /Nestorovi[ćc]/u], ["pavlovic", /Branko\p{L}*\s+Pavlovi[ćc]/u], ["vucicevic", /Vučićević/u, 2], ["cupic", /Čupić/u], ["vucic", /Vučić(?!ević)/u, 2]];
   const personArt = x => {
     const h = x.headline || ""; let best = null;
     for (const [k, re, n] of PEOPLE) { const m = re.exec(h); if (m && (!best || m.index < best.i)) best = {i: m.index, k, n}; }
@@ -801,7 +801,7 @@
       .map(r => `<a class="iz-hl" ${out(r.u, r.s)}><span class="meta">${esc(src(r.s).name)}</span><div>${esc(r.t)}</div></a>`).join("") || `<p class="meta">Nema naslova u ovom periodu.</p>`;
     const bar = cand => `<div class="iz-bar" role="img" aria-label="Podela po grupama medija">${camps.map(k => { const v = sum(cand, k, 1); return v ? `<span style="flex:${v};background:${VAR[k]}" title="${esc(cl(k))}: ${v}"></span>` : ""; }).join("")}</div>`;
     const cards = C.map((c, ci) => { const v = tot(c.id), vt = tot(c.id, 0);
-      return `<article class="iz-card"><h3><i style="background:${INK[ci % 4]}"></i>${esc(c.name)}</h3><p class="meta">${esc(c.nominator || "")}</p>
+      return `<article class="iz-card"><img class="iz-face" src="img/lica/${esc(c.id)}.webp?v=${ART_VER}" alt="" loading="lazy" width="1200" height="800"><h3><i style="background:${INK[ci % 4]}"></i>${esc(c.name)}</h3><p class="meta">${esc(c.nominator || "")}</p>
         <div class="iz-n"><b>${v}</b> ${v === 1 ? "članak" : "članaka"} <span class="meta">(${vt} u naslovu)</span></div>
         ${bar(c.id)}<ul class="iz-leg">${camps.filter(k => sum(c.id, k, 1)).map(k => `<li><i style="background:${VAR[k]}"></i>${esc(cl(k))} <b>${sum(c.id, k, 1)}</b></li>`).join("")}</ul>
         <div class="iz-two"><div><h4 style="color:var(--pg)">${esc(cl("pro_government"))}</h4>${side(c.id, "pro_government")}</div><div><h4 style="color:var(--cr)">${esc(cl("critical"))}</h4>${side(c.id, "critical")}</div></div></article>`; }).join("");

@@ -65,3 +65,5 @@ Replaced: vucic-1 (Aleksandar Vučić) and merc (Friedrich Merz). Added: sapic (
 Still to record for each portrait: the source photo and its licence (see the open question above).
 
 Added 2026-11-27: saicic (Radomir Saičić, name confirmed by the user; user-supplied generated art; source photo and licence not recorded).
+
+Added 2026-11-28: karic (Bogoljub Karić), nestorovic (Branimir Nestorović), pavlovic (Branko Pavlović); user-supplied generated art, names taken from the file names the user gave; source photo and licence not recorded.
