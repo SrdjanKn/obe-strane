@@ -120,7 +120,7 @@ def main():
     if not key:
         print("BUTTONDOWN_API_KEY is not set: not sent."); return 0
     status = os.environ.get("BRIEFING_STATUS", "draft")
-    if status != "draft" and already_sent(key, subject):
+    if status != "draft" and not a.force and already_sent(key, subject):
         print(f"Already sent today: {subject}"); return 0
     req = urllib.request.Request("https://api.buttondown.com/v1/emails", method="POST",
                                  data=json.dumps({"subject": subject, "body": body, "status": status}).encode(),
